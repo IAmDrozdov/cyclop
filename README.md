@@ -12,11 +12,10 @@ files, clipboard history and your next meetings.
 ![The Cyclop panel](docs/panel.png)
 
 **[Download the latest version](https://github.com/akalikbergenov/cyclop/releases/latest)** —
-macOS 15 or newer. The first launch needs one permission granted by hand,
-[here is how](#installation).
+macOS 15 or newer. Signed and notarised, so it opens on the first try.
 
 ```
-0.0 % CPU at rest  ·  ≈40 MB + 14 MB helper  ·  3.7 MB bundle  ·  one permission, and only on a button
+0.0 % CPU at rest  ·  ≈40 MB + 14 MB helper  ·  3.7 MB bundle  ·  nothing asked at launch
 ```
 
 The track in the screenshot is playing in a browser tab — Cyclop reads it from
@@ -127,23 +126,33 @@ that is the link to hand to people instead of a file.
 
 ## Permissions
 
-**None** — until you open the calendar. The app asks for no Automation, no
-Accessibility, no Screen Recording, and needs nothing configured in the browser.
-The pointer position is read through `NSEvent.mouseLocation`, the clipboard
-through the public `NSPasteboard`, Now Playing through a helper (see below).
+**Nothing at launch, and nothing until you press the button that needs it.**
+That is the promise, and it is narrower than "no permissions": Cyclop asks for
+two, each one only when a tab that cannot work without it is used.
 
-Calendar access is the only permission Cyclop ever requests. It is needed by the
-Calendar tab alone, and the system dialog appears neither at launch nor when the
-tab is opened, but on an explicit press of a button on a screen that explains
-why. Don't use the calendar and the app stays without permissions entirely.
+**Calendar**, for the Calendar tab. The system dialog appears neither at launch
+nor when the tab is opened, but on an explicit press of a button on a screen
+that explains why.
+
+**Accessibility**, for the keyboard lock in Utilities. This one is heavier than
+the first and deserves to be named plainly: it is the permission that lets an
+app see and swallow every key press in the system, and nothing less can stop
+keys from reaching macOS while you wipe them. Same terms — an explicit press
+after an explanation — and switching the tab off in Settings means it is never
+asked for.
+
+Use neither tab and the app stays without permissions entirely. Nothing is asked
+for at launch in any case, and nothing needs configuring in the browser. The
+pointer position is read through `NSEvent.mouseLocation`, the clipboard through
+the public `NSPasteboard`, Now Playing through a helper (see below).
 
 A file put on the shelf from Downloads, Documents or the Desktop is the one thing
 macOS asks about separately, and it asks when the shelf is opened, not at launch.
 Refusing breaks nothing: the card stays, just without a preview.
 
-Permissions would only be needed by the fallback path, if the main one ever stops
-working: Automation for Apple Music and Spotify, and Accessibility for the media
-keys.
+The fallback path, if the main one ever stops working, would need more:
+Automation for Apple Music and Spotify, and Accessibility for the media keys —
+the same Accessibility as above.
 
 ## How it works
 
