@@ -1,7 +1,7 @@
 import AppKit
 
 /// Everything about Cyclop that makes sense on somebody else's Mac, in one
-/// file next to `snippets.json` and `notes.json` (#67).
+/// file next to `snippets.json` (#67).
 ///
 /// Before this, the same handful of settings each kept their own place and
 /// their own copy of "and what if the key isn't there yet": `showOnAllDisplays`
@@ -152,7 +152,7 @@ final class ConfigStore: ObservableObject {
         } else if defaults.bool(forKey: "privacyMode") {
             // The legacy switch covered everything or nothing — see
             // `PrivacyMode.init` before this store existed.
-            file.privacy = ["clipboard", "snippets", "calendar", "notes"]
+            file.privacy = ["clipboard", "snippets", "calendar"]
         }
         if let speed = defaults.object(forKey: "teleprompter.speed") as? Double {
             file.teleprompter.speed = speed

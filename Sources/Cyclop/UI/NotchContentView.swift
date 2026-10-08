@@ -128,8 +128,6 @@ struct NotchContentView: View {
             EmptyView()
         case .currency:
             CurrencyRateDate(currencies: vm.currencies)
-        case .notes:
-            NotesCounter(notes: vm.notes)
         case .teleprompter:
             EmptyView()
         case .utilities:
@@ -199,8 +197,6 @@ struct NotchContentView: View {
             TranslatePane(translator: vm.translator, wantsKeyboard: $panel.wantsKeyboard)
         case .currency:
             CurrencyPane(currencies: vm.currencies, wantsKeyboard: $panel.wantsKeyboard)
-        case .notes:
-            NotesPane(notes: vm.notes, privacy: vm.privacy, wantsKeyboard: $panel.wantsKeyboard)
         case .teleprompter:
             TeleprompterPane(prompter: vm.teleprompter, wantsKeyboard: $panel.wantsKeyboard)
         case .utilities:
@@ -211,25 +207,9 @@ struct NotchContentView: View {
     }
 }
 
-/// Watches the note store itself rather than reading through the view model:
-/// notes are born and deleted inside the pane while this counter is on
-/// screen, and the view model deliberately does not forward keystroke-driven
-/// stores.
-private struct NotesCounter: View {
-    @ObservedObject var notes: NoteStore
-
-    var body: some View {
-        if !notes.notes.isEmpty {
-            Text("\(notes.notes.count)")
-                .font(.system(size: 10, weight: .medium).monospacedDigit())
-                .foregroundStyle(Theme.tertiary)
-        }
-    }
-}
-
-/// Same reason as `NotesCounter`: rate fetches must not redraw the whole panel
-/// on every keystroke in the amount fields, so the date badge observes the
-/// store on its own.
+/// Rate fetches must not redraw the whole panel on every keystroke in the
+/// amount fields, and the view model does not forward keystroke-driven
+/// stores, so the date badge observes the store on its own.
 private struct CurrencyRateDate: View {
     @ObservedObject var currencies: CurrencyStore
 
@@ -294,8 +274,8 @@ private struct Rail: View {
         }
         .frame(width: 30)
         // Centred in the height an ordinary tab has, then that block pinned to
-        // the top of whatever height this tab actually got. On the eight normal
-        // tabs the two are the same and nothing moves; on the teleprompter the
+        // the top of whatever height this tab actually got. On a normal
+        // tab the two are the same and nothing moves; on the teleprompter the
         // extra 192 pt goes to the script below, and the icons stay put.
         .frame(height: panel.geometry.standardContentHeight, alignment: .center)
         .frame(maxHeight: .infinity, alignment: .top)

@@ -122,30 +122,9 @@ stays in the Clipboard tab one click away, whereas restoring it on a timer would
 be guessing when the paste happens, and typing into another app's field directly
 would have required Accessibility.
 
-**Notes.** A second column of icons, on the right — and scratch notes open it:
-a phone number from a call, half a link, a thought for the next half hour. This
-is deliberately not note-taking — no folders, no formatting, no search. It is
-the editor window with the unsaved buffer, replaced: jot, return, delete, or
-carry it off through the clipboard.
-
-Hovering onto the tab lands with the caret ready, and when there are no notes an
-empty one is created on the spot: a welcome screen with a button would be slower
-than the window this tab replaces. Blank notes sweep themselves out when the tab
-is left — a trail of empty cards is exactly the clutter a scratchpad exists to
-avoid. The first line stands in for a title in the list: notes here are too
-short-lived to deserve naming as a separate step. Esc hands the keyboard back
-and never clears the text — this is the one text in the panel that cannot be
-re-derived from anywhere.
-
-Everything is written to `~/Library/Application Support/Cyclop/notes.json` a
-moment after the typing pauses, not on every keystroke; unlike the snippets file
-it is not meant to be edited by hand, and it is plain text. The right column is
-not decoration: the six icons on the left already fill the panel's height, and a
-seventh would not fit.
-
 **Hiding contents.** The "Hide Contents" menu bar item covers what the tabs
 show with a field of twinkling dots — for a screen-shared call, a stream, or a
-café. Enabled as a whole or per section — clipboard, snippets, calendar, notes —
+café. Enabled as a whole or per section — clipboard, snippets, calendar —
 and off by default. A hidden row is not drawn at all: this is no blur, there is
 nothing in the frame to recover, and the field covers the whole row rather than
 tracing the glyphs — a silhouette would give away the length. The eye on a row
@@ -180,11 +159,13 @@ Language & Region → Applications.
 **The keyboard.** The panel cannot become key by default: taking focus means
 dimming the title of whatever window the user is in and stopping the caret
 blinking in their text, which is far too rude for a window one merely hovered.
-The Translate tab turns `canBecomeKey` on for as long as it is open;
-`.nonactivatingPanel` allows keyboard input without activating the app, so the
-editor underneath stays active. The keyboard goes back on Esc, on a tab change,
-on a click into another app — which the panel catches as the loss of key status —
-and simply when the panel collapses.
+Every tab that types turns `canBecomeKey` on for as long as it is open, and so
+does the Teleprompter while its script is empty; `.nonactivatingPanel` allows
+keyboard input without activating the app, so the editor underneath stays
+active. The keyboard goes back on a tab change, on a click into another app —
+which the panel catches as the loss of key status — and simply when the panel
+collapses. Esc does not give it back: in Translate, Currency and Snippets it
+clears the field.
 
 The panel does not try to stay open on account of text typed into it: there is
 one rule for the whole app — open while the pointer is on it. What was typed

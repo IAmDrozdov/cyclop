@@ -55,7 +55,7 @@ The pause that turns hovering into choosing: on the notch before the panel opens
 _Avoid_: hover delay
 
 **Typing tab**:
-A tab that takes the keyboard on arrival without activating Cyclop: Translate, Currency, Snippets and Notes, and the Teleprompter while its script is empty. The keyboard goes back when the tab is left, the panel collapses or another app is clicked; Esc gives it back only in Notes, and in Translate, Currency and Snippets clears the field.
+A tab that takes the keyboard on arrival without activating Cyclop: Translate, Currency and Snippets, and the Teleprompter while its script is empty. The keyboard goes back when the tab is left, the panel collapses or another app is clicked; Esc gives it back in no tab; in Translate, Currency and Snippets it clears the field.
 _Avoid_: focus mode
 
 **Pin**:
@@ -143,10 +143,6 @@ _Avoid_: prompter
 **Script** «сценарий»:
 The teleprompter's text.
 
-**Notes** «Заметки»:
-Short-lived scratch text: a list beside a single editor. Blank notes disappear when the tab is left.
-_Avoid_: memos; «заметки» for release notes, which are «заметки к релизу»
-
 **Utilities** «Утилиты»:
 The tab for rarely needed modes; today it holds the keyboard lock.
 _Avoid_: Tools (as its name)
@@ -168,11 +164,11 @@ A menu bar option that covers what chosen sections show with a field of drifting
 _Avoid_: privacy mode, blur, spoiler
 
 **Section**:
-One tab's share of Hide Contents: clipboard, snippets, calendar or notes.
+One tab's share of Hide Contents: clipboard, snippets or calendar.
 _Avoid_: category
 
 **Reveal** (Show «Показать»):
-Uncovering one covered item (a row, a note, or the whole Calendar tab) until the last open panel collapses.
+Uncovering one covered item (a row, or the whole Calendar tab) until the last open panel collapses.
 _Avoid_: unhide
 
 **Config file** (Show Config File «Показать файл конфигурации»):

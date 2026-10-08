@@ -14,7 +14,7 @@ import SwiftUI
 struct SpoilerField: View {
     /// Dots per square point. Dense enough to read as a solid dusting at the
     /// sizes the panel uses, which are small. Turned down from the first cut
-    /// (0.55): measured on the full notes editor, the field cost 35 % CPU at
+    /// (0.55): measured over a whole covered editor, the field cost 35 % CPU at
     /// 30 fps — a fan-spinner on exactly the streams it exists for. At 0.4 and
     /// 20 fps the dust still reads as dust and the bill drops by two thirds.
     var density: Double = 0.4
@@ -41,8 +41,8 @@ struct SpoilerField: View {
     private func draw(in context: GraphicsContext, size: CGSize, time: TimeInterval) {
         guard size.width > 1, size.height > 1 else { return }
         // The ceiling is what a whole covered pane runs into, not a row: at this
-        // density a row asks for a few hundred dots and the notes tab for tens
-        // of thousands. Capped, a large area thins out into a starfield instead
+        // density a row asks for a few hundred dots and a whole covered editor
+        // for tens of thousands. Capped, a large area thins out into a starfield instead
         // of dust, so the ceiling is set by what still draws in a frame rather
         // than by what a row needs.
         let count = min(Int(size.width * size.height * density), 7000)

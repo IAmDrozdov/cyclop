@@ -63,12 +63,6 @@
 "Nothing here yet — add with +" = "Nothing here yet — add with +";
 "snippets.json is broken — click to open; nothing is overwritten" = "snippets.json is broken — click to open; nothing is overwritten";
 
-/* Notes */
-"Notes" = "Notes";
-"New Note" = "New Note";
-"Empty note" = "Empty note";
-"Jot something down…" = "Jot something down…";
-
 /* Translate */
 "Translation Languages…" = "Translation Languages…";
 "Retry" = "Retry";

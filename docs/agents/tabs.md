@@ -28,7 +28,7 @@ Elsewhere:
 
 ## What the compiler never sees
 
-- **Strings.** In both `Resources/*.lproj/Localizable.strings` a tab's title sits under `/* Tabs */` (`/* Вкладки */` in ru) and most tabs' keys in a block of their own: `/* Notes */` and `/* Заметки */`, Music's `/* Media */` and `/* Музыка */`; Calendar has a second block for its countdown. `./Scripts/check-strings.py` catches a missing key but not an orphaned one, so a removed tab's keys are deleted by hand.
+- **Strings.** In both `Resources/*.lproj/Localizable.strings` a tab's title sits under `/* Tabs */` (`/* Вкладки */` in ru) and most tabs' keys in a block of their own: Calendar's `/* Calendar */` and `/* Календарь */`, Music's `/* Media */` and `/* Музыка */`; Calendar has a second block for its countdown. `./Scripts/check-strings.py` catches a missing key but not an orphaned one, so a removed tab's keys are deleted by hand.
 - **Views outside the pane file** that only this tab uses: header badges at the bottom of `NotchContentView.swift`, and `UI/Skeleton.swift`, which only Music uses. An unused type still compiles.
 - **Saved settings.** `config.json` stores `hiddenTabs` and `privacy` by raw value, and loading drops values it does not know. After a removal that is harmless. A rename keeps the old raw value (`case history = "clipboard"`), or a hidden tab comes back and a covered section is shown uncovered. `ConfigStore.migrated()` also spells out the section names.
 - **The tab's own data.** A removed tab's file in `~/Library/Application Support/Cyclop/` (such as `notes.json`) stays on disk unread. The code leaves it alone; tell the owner it is there and let them decide what to do with it.
@@ -37,7 +37,7 @@ Elsewhere:
 - **Comments** that name the tab.
 - **Docs.**
   - `README.md` and `README.ru.md`: the tab table and the layout tree.
-  - `docs/architecture.md` and `.ru.md`: the tab's note. Both READMEs count the notes («eighteen notes»). The Notes note also carries the only rationale for the right rail, so move that before deleting it.
+  - `docs/architecture.md` and `.ru.md`: the tab's note. Both READMEs count the notes («seventeen notes»); update the count.
   - `SECURITY.md` (data, permissions, network), the promises in `CONTRIBUTING.md`, and `CONTEXT.md`.
   - The site: `docs/index.html`, `docs/ru/index.html`, `docs/llms.txt`.
   - The agent docs: `CLAUDE.md`, this file and `.claude/skills/run-cyclop/`.

@@ -52,7 +52,7 @@ struct TeleprompterPane: View {
             // caret below. It happens once — a script that exists is read, not
             // written, and this branch is never taken again.
             //
-            // The focus itself is asked for a pass later, the way the notes do:
+            // The focus itself is asked for a pass later:
             // this fires while the pane is still being put on screen, and a
             // focus requested from a field that is not yet in a key window is
             // dropped rather than queued. Arriving through the rail happened

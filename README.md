@@ -34,7 +34,6 @@ that works is below.
 | **Translate** | Type on the left, the translation appears on the right — by itself, offline, using macOS's own facilities. English goes to Russian, Russian to English; the direction comes from the script the text is written in. macOS does not preinstall language packs, so the first time you have to download one: System Settings → General → Language & Region → "Translation Languages…" |
 | **Currency** | An amount on one side, the other currency on the other; type into either. Rates are the one thing in Cyclop that comes over the network — a public table of daily rates, fetched once an hour, and only while the tab is on |
 | **Teleprompter** | A script that scrolls under the camera at a speed you set. The notch is the one place on the screen a teleprompter belongs: reading happens right beside the lens, so on the recording the eyes stay on the camera instead of travelling to a window below it. The panel holds itself open while the text is moving — reading a script means not touching the trackpad |
-| **Notes** | Scratch, on the right rail of icons: jot something down, come back, delete it or carry it off through the clipboard. Hovering lands with the caret ready; blank notes sweep themselves out |
 
 The panel opens when the pointer reaches the notch and collapses when it leaves.
 Tabs switch on hover as well — but only if the pointer has come to rest on the
@@ -158,7 +157,7 @@ the same Accessibility as above.
 
 Why the window is shaped the way it is, why the pointer is polled on a
 timer, why Now Playing lives inside `/usr/bin/perl`, what sitting idle
-costs — eighteen notes on decisions the code does not show:
+costs — seventeen notes on decisions the code does not show:
 **[docs/architecture.md](docs/architecture.md)**.
 
 ## Limitations
@@ -218,7 +217,6 @@ Sources/Cyclop
 │   ├── ConfigStore.swift      settings: reading and writing config.json
 │   ├── Support.swift          ~/Library/Application Support/Cyclop
 │   ├── DebouncedWrite.swift   writes to disk no more often than needed
-│   ├── NoteStore.swift        scratch notes: notes.json
 │   ├── Translator.swift       Translation.framework, direction by script
 │   ├── CurrencyStore.swift    rates over the network, the one tab that has any
 │   ├── TeleprompterStore.swift the script and where reading it has got to

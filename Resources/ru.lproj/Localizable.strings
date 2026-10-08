@@ -62,12 +62,6 @@
 "Nothing here yet — add with +" = "Пока пусто — добавь через +";
 "snippets.json is broken — click to open; nothing is overwritten" = "snippets.json не читается — нажми, чтобы открыть; поверх ничего не пишется";
 
-/* Заметки */
-"Notes" = "Заметки";
-"New Note" = "Новая заметка";
-"Empty note" = "Пустая заметка";
-"Jot something down…" = "Набросай что-нибудь…";
-
 /* Перевод */
 "Translation Languages…" = "Языки перевода…";
 "Retry" = "Повторить";

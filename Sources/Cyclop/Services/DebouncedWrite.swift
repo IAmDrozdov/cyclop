@@ -10,7 +10,7 @@ import Foundation
 ///
 /// The waiting write is kept as a closure rather than as data, which is what
 /// lets a store schedule "whatever I hold right now" without this type knowing
-/// anything about notes or scripts. Capture `self` weakly at the call site:
+/// anything about what is written. Capture `self` weakly at the call site:
 /// the closure outlives the moment it was made, and nothing here breaks a cycle
 /// for you.
 @MainActor

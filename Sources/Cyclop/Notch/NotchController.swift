@@ -81,8 +81,8 @@ final class NotchController {
     }
 
     /// What the menu bar switches. Handed out rather than wrapped: the menu
-    /// reads four sections and writes them one at a time, and a controller
-    /// method per section would be four methods that only forward.
+    /// reads the sections and writes them one at a time, and a controller
+    /// method per section would only forward.
     var privacy: PrivacyMode? { vm?.privacy }
 
     // MARK: - Displays

@@ -20,7 +20,7 @@ import Combine
 @MainActor
 final class PrivacyMode: ObservableObject {
     enum Section: String, CaseIterable, Identifiable {
-        case clipboard, snippets, calendar, notes
+        case clipboard, snippets, calendar
 
         var id: String { rawValue }
 
@@ -31,7 +31,6 @@ final class PrivacyMode: ObservableObject {
             case .clipboard: return localized("Clipboard")
             case .snippets: return localized("Snippets")
             case .calendar: return localized("Calendar")
-            case .notes: return localized("Notes")
             }
         }
     }
@@ -82,10 +81,6 @@ final class PrivacyMode: ObservableObject {
     /// True when this particular row has to be covered right now.
     func hides(_ section: Section, _ id: String) -> Bool {
         covers(section) && !revealed.contains(id)
-    }
-
-    func reveal(_ id: String) {
-        revealed.insert(id)
     }
 
     func toggle(_ id: String) {

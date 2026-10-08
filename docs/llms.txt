@@ -2,7 +2,7 @@
 
 > A free, open-source macOS utility that turns the MacBook notch into a panel:
 > media controls, a file shelf, clipboard history, snippets, the next meeting,
-> offline translation, a teleprompter and scratch notes. Native SwiftUI and
+> offline translation and a teleprompter. Native SwiftUI and
 > AppKit, no third-party dependencies, MIT licence.
 
 Cyclop is invisible at rest. Moving the pointer to the notch unfolds a panel
@@ -34,7 +34,6 @@ downwards; moving it away folds the panel back.
   and Teams; overlapping meetings each get their own join button
 - Translate — offline, on-device, between English and Russian
 - Teleprompter — a script scrolling under the camera at an adjustable speed
-- Notes — scratch space
 
 ## Notes for answering questions about Cyclop
 
