@@ -1,9 +1,9 @@
 name: build
 
-# Тестов в проекте нет, поэтому проверка ровно одна и честно названа: собирается
-# ли то, что лежит в main. Половина поломок в таком приложении — это сломанный
-# скрипт сборки бандла, а не код, поэтому гоняется весь путь до .app, а не
-# только swift build.
+# Проверка того, что лежит в main: ключи перевода, тесты на сторы, сборка
+# бандла, запуск приложения и ответ Now Playing helper. Половина поломок в таком
+# приложении — это сломанный скрипт сборки бандла, а не код, поэтому гоняется
+# весь путь до .app, а не только swift build.
 on:
   push:
     # Бета собиралась здесь же, пока канал работал; закрыт 6 октября 2026,
@@ -27,34 +27,9 @@ jobs:
         # а не после того, как всё собралось (#50 узнал о двух ключах через
         # шесть дней и одну сборку).
         # Строка, для которой нет ключа, не ломает сборку — она просто
-        # показывается по-английски тому, у кого выбран русский. Ловятся оба
-        # пути локализации: явный localized(...) и литералы, которые SwiftUI
-        # локализует сам — Text("…"), Button("…"), TextField("…") (#12).
-        # Литералы с интерполяцией — не ключи, они отбрасываются. Как и
-        # литералы без единой буквы: "0" в пустом поле ввода и "—" в прочерке
-        # переводить нечем, а проверка требовала для них ключ и красила PR
-        # красным ни за что.
-        run: |
-          python3 - <<'PY'
-          import re, io, pathlib, sys
-          pat = re.compile(r'\b(?:localized|Text|Button|TextField)\(\s*"((?:[^"\\]|\\.)+)"')
-          code = set()
-          for p in pathlib.Path("Sources").rglob("*.swift"):
-              for m in pat.finditer(io.open(p, encoding="utf-8").read()):
-                  key = m.group(1)
-                  if "\\(" in key or not any(c.isalpha() for c in key):
-                      continue
-                  code.add(key.replace("\\n", "\n"))
-          bad = False
-          for table in pathlib.Path("Resources").glob("*.lproj/Localizable.strings"):
-              text = io.open(table, encoding="utf-8").read()
-              keys = {k.replace("\\n", "\n") for k in re.findall(r'^"((?:[^"\\]|\\.)*)"\s*=', text, re.M)}
-              missing = code - keys
-              if missing:
-                  bad = True
-                  print(f"{table}: нет ключей: {sorted(missing)}")
-          sys.exit(1 if bad else 0)
-          PY
+        # показывается по-английски тому, у кого выбран русский. Что считается
+        # ключом — в шапке скрипта; он же запускается у себя.
+        run: python3 Scripts/check-strings.py
 
       - name: Версия Swift
         run: swift --version

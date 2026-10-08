@@ -13,3 +13,10 @@ build/
 *.key
 *.mobileprovision
 *.certSigningRequest
+
+# Локальный трекер задач агента (docs/agents/issue-tracker.md)
+.scratch/
+
+# Личные настройки Claude Code; общие лежат в .claude/settings.json
+.claude/settings.local.json
+CLAUDE.local.md

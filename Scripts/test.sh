@@ -35,6 +35,12 @@ if [ "${DEVELOPER%/}" = "/Library/Developer/CommandLineTools" ]; then
         -Xlinker -rpath -Xlinker "$FRAMEWORKS"
         -Xlinker -rpath -Xlinker "$LIBS"
     )
+    # CLT 27 кладёт плагин макроса `@Test` в подпапку `testing`, куда
+    # компилятор сам не смотрит: `plugin for module 'TestingMacros' not found`.
+    PLUGINS="$DEVELOPER/usr/lib/swift/host/plugins"
+    if [ ! -e "$PLUGINS/libTestingMacros.dylib" ] && [ -e "$PLUGINS/testing/libTestingMacros.dylib" ]; then
+        ARGS+=(-Xswiftc -plugin-path -Xswiftc "$PLUGINS/testing")
+    fi
 fi
 
 # `${ARGS[@]+...}` вместо простого `${ARGS[@]}`: под `set -u` в bash 3.2 —

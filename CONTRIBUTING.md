@@ -49,6 +49,7 @@ MediaRemote вместо AppleScript.
 ./Scripts/bundle.sh release   # весь путь до .app, а не только swift build
 ./Scripts/test-helper.sh      # Now Playing хелпер отвечает валидным JSON
 ./Scripts/test.sh             # тесты на сторы
+./Scripts/check-strings.py    # ключи перевода в обоих Localizable.strings
 ```
 
 Тесты есть, но только на сторы: разбор файла, дедупликация, порядок элементов.
@@ -64,8 +65,7 @@ MediaRemote вместо AppleScript.
 Если добавляешь текст на экране — заведи ключ в **обоих** файлах
 `Resources/*.lproj/Localizable.strings`. Строка без ключа сборку не ломает: она
 просто покажется по-английски тому, у кого выбран русский. CI это ловит
-последним шагом в `build.yml` — там же лежит скрипт проверки, если хочется
-прогнать у себя.
+первым шагом в `build.yml`, у себя — `./Scripts/check-strings.py`.
 
 ## Про CI на твоём PR
 

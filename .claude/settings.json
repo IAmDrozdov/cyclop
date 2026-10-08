@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./Scripts/bundle.sh *)",
+      "Bash(./Scripts/test.sh *)",
+      "Bash(./Scripts/check-strings.py *)",
+      "Bash(./Scripts/test-helper.sh *)",
+      "Bash(.claude/skills/run-cyclop/scripts/relaunch.sh *)",
+      "Bash(log show *)",
+      "Bash(log stream *)"
+    ],
+    "ask": [
+      "Bash(./Scripts/release.sh *)",
+      "Bash(./Scripts/notarize.sh *)",
+      "Bash(./Scripts/dmg.sh *)"
+    ]
+  }
+}
