@@ -212,7 +212,7 @@ Cyclop's code, and the answer differs between compilers. An inherited isolation
 is checked at run time when the closure is called, and the framework calls it
 from a queue of its own, so the check kills the process. A closure that passes
 on one Mac then crashes on a release build: 0.8.0 fell over on shelf previews
-and on the calendar access request this way (#108, #111). Written out,
+this way (#108; #111 was the same crash elsewhere). Written out,
 `@Sendable` makes the closure nonisolated under any compiler.
 
 The screenshot folder watcher is the exception, and only by construction. Its

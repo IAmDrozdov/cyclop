@@ -101,8 +101,8 @@ final class ScreenshotFolderWatcher {
         let source = DispatchSource.makeFileSystemObjectSource(
             fileDescriptor: fd, eventMask: .write, queue: .main
         )
-        // Очередь должна остаться главной: на другой процесс падает. Почему —
-        // docs/architecture.md, «Callbacks from system frameworks».
+        // Очередь должна остаться главной: на другой процесс падает на первом
+        // событии. Почему — docs/architecture.md, «Callbacks from system frameworks».
         source.setEventHandler { [weak self] in self?.scan(folder) }
         source.setCancelHandler { close(fd) }
         source.resume()

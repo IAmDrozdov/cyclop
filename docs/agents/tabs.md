@@ -10,7 +10,7 @@ In `Sources/Cyclop/Model/NotchViewModel.swift`:
 - `Tab.leftRail` / `Tab.rightRail`: the order on screen. A tab in neither rail never appears, not even in Settings → Show in Panel.
 - The store property and its line in `init`.
 - `startBackground(of:)` and `stopBackground(of:)`, which list every tab, no-op ones included.
-- `setPanelActive(_:)`, for a clock that ticks only while the panel is open.
+- `setPanelActive(_:)`, for what follows the panel opening: the flag the header's forwarding reads, and the shelf's first refresh from disk.
 - The `tab` property's `didSet`, for arriving at and leaving a tab.
 - `stop()`, for flushing on quit.
 - The default `tab = .shelf`, the head of the left rail.

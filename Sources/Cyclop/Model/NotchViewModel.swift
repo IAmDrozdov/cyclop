@@ -77,8 +77,8 @@ final class NotchViewModel: ObservableObject {
     /// if the people who never use it can take it off (#43). Off means two
     /// things, and the second is what makes the switch worth having: the icon
     /// leaves the rail, and the tab's background work stops with it — the
-    /// clipboard poll, the rate fetch. A hidden tab
-    /// costs nothing, or it is not hidden.
+    /// clipboard poll, the rate fetch. A hidden tab costs nothing, or it is not
+    /// hidden.
     ///
     /// Kept as the set of what is off rather than what is on, so a tab added
     /// in a later version shows up for everyone instead of arriving hidden.

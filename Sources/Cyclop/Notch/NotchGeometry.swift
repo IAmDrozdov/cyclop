@@ -62,9 +62,9 @@ struct NotchGeometry {
     /// to give the rail once the header — the notch itself — and the padding
     /// beneath are taken out of the fixed 208, and a rail whose icons at the
     /// full 24 pt plus the 4 pt gaps between them ask for more than that
-    /// shrinks every icon to fit. Rounded down rather than to the nearest point: a rail that asks for
-    /// more than it is given should visibly yield, not overflow by a
-    /// fraction that clips it.
+    /// shrinks every icon to fit. Rounded down rather than to the nearest
+    /// point: a rail that asks for more than it is given should visibly
+    /// yield, not overflow by a fraction that clips it.
     var railIconHeight: CGFloat {
         let icons = CGFloat(NotchViewModel.Tab.leftRail.count)
         let available = expandedSize.height - notchSize.height - Self.bodyBottomPadding
