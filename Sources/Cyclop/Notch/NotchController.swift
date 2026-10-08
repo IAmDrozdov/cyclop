@@ -157,10 +157,9 @@ final class NotchController {
         let active = panels.values.contains { $0.state.isActive }
         vm.isTyping = panels.values.contains { $0.state.wantsKeyboard }
         guard active != vm.isPanelActive else { return }
-        // Polling follows the last panel to close, not the first: a track that
-        // is still on screen on one display has to keep ticking while another
-        // folds away. Which stores follow is the model's to say — only the
-        // tabs that are on the rail have a clock to run.
+        // The shared flag follows the last panel to close, not the first: a
+        // panel still open on one display keeps the header's counters live
+        // while another folds away.
         vm.setPanelActive(active)
         guard !active else { return }
         // Whatever was uncovered by hand goes back under cover with the last

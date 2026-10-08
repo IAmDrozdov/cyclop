@@ -3,7 +3,6 @@
    a phrase can be reworded here without touching the code. */
 
 /* Tabs */
-"Music" = "Music";
 "Shelf" = "Shelf";
 "Clipboard" = "Clipboard";
 "Snippets" = "Snippets";
@@ -50,9 +49,6 @@
 "Open" = "Open";
 "Show in Finder" = "Show in Finder";
 "Remove from Shelf" = "Remove from Shelf";
-
-/* Media */
-"Nothing is playing" = "Nothing is playing";
 
 /* Snippets */
 "Add a snippet" = "Add a snippet";

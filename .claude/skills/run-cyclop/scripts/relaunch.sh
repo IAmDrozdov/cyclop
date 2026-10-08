@@ -49,11 +49,6 @@ sleep "$WAIT"
 
 if PID="$(pgrep -f "$BIN")"; then
     echo "==> Cyclop is running (pid $PID) after ${WAIT}s"
-    if pgrep -f "$APP/Contents/Resources/libcyclopmedia" >/dev/null; then
-        echo "==> Now Playing helper is running"
-    else
-        echo "==> Now Playing helper is not running: Music is switched off, or the helper failed (see the log)"
-    fi
     exit 0
 fi
 

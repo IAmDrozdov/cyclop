@@ -3,8 +3,8 @@
 *English · [Русский](README.ru.md)*
 
 The MacBook notch as a working tool. A native SwiftUI/AppKit app: invisible at
-rest, and on hover it unfolds downwards into a panel with a player, a shelf for
-files and clipboard history.
+rest, and on hover it unfolds downwards into a panel with a shelf for files,
+clipboard history and offline translation.
 
 [![build](https://github.com/akalikbergenov/cyclop/actions/workflows/build.yml/badge.svg)](https://github.com/akalikbergenov/cyclop/actions/workflows/build.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-%E2%98%95-FFDD00?style=flat-square&labelColor=000000)](https://buymeacoffee.com/akalikbergenov)
@@ -15,18 +15,13 @@ files and clipboard history.
 macOS 15 or newer. Signed and notarised, so it opens on the first try.
 
 ```
-0.0 % CPU at rest  ·  ≈40 MB + 14 MB helper  ·  3.7 MB bundle  ·  nothing asked at launch
+0.0 % CPU at rest  ·  ≈40 MB  ·  3.7 MB bundle  ·  nothing asked at launch
 ```
-
-The track in the screenshot is playing in a browser tab — Cyclop reads it from
-macOS itself, with no permissions and nothing to configure in the browser. How
-that works is below.
 
 ## What it does
 
 | Tab | What it does |
 |---|---|
-| **Music** | Artwork, track, artist, a scrubber that seeks, prev / play-pause / next. The source is **anything**: a player, a browser tab, any app macOS itself can see |
 | **Shelf** | Drag files into the notch and they stay there until needed; drag a card out and the file goes wherever it is dropped. A click selects a card, ⌘-click selects several, and then the whole group is dragged. A screenshot taken to the clipboard is saved as a file and lands here too — including one taken on an iPhone, if you copy it there |
 | **Clipboard** | The last 40 copies; a click puts an entry back on the clipboard |
 | **Snippets** | A hand-kept list of what you are tired of retyping: an address, a phone number, an email. Added with a button in the panel, removed with the cross on a card; a click puts the text on the clipboard. The same list lives in `~/Library/Application Support/Cyclop/snippets.json` and can be edited there instead |
@@ -44,7 +39,7 @@ relaunching Cyclop brings it back.
 
 Any tab can be switched off in **Settings → Show in Panel**. Off means two
 things: the icon leaves the rail, and the tab's background work stops with
-it — the clipboard poll, the Now Playing helper, the
+it — the clipboard poll and the
 rate fetch. The rail is for what gets a glance between other things; a mode
 used once a month may live there, but only as long as the people who never
 use it can take it off.
@@ -134,33 +129,21 @@ them. The system dialog comes from an explicit press of the button, after an
 explanation, and switching the tab off in Settings means it is never asked for.
 
 Never lock the keyboard and the app stays without permissions entirely. Nothing
-is asked for at launch in any case, and nothing needs configuring in the browser. The
-pointer position is read through `NSEvent.mouseLocation`, the clipboard through
-the public `NSPasteboard`, Now Playing through a helper (see below).
+is asked for at launch in any case. The pointer position is read through
+`NSEvent.mouseLocation`, the clipboard through the public `NSPasteboard`.
 
 A file put on the shelf from Downloads, Documents or the Desktop is the one thing
 macOS asks about separately, and it asks when the shelf is opened, not at launch.
 Refusing breaks nothing: the card stays, just without a preview.
 
-The fallback path, if the main one ever stops working, would need more:
-Automation for Apple Music and Spotify, and Accessibility for the media keys —
-the same Accessibility as above.
-
 ## How it works
 
 Why the window is shaped the way it is, why the pointer is polled on a
-timer, why Now Playing lives inside `/usr/bin/perl`, what sitting idle
-costs — eighteen notes on decisions the code does not show:
+timer, what sitting idle costs — sixteen notes on decisions the code does not show:
 **[docs/architecture.md](docs/architecture.md)**.
 
 ## Limitations
 
-- Now Playing rests on a private framework and on `/usr/bin/perl` remaining a
-  platform binary without library validation. Apple can close this in any update
-  — the Music and Spotify fallback takes over then. For the same reason the app
-  is unfit for the App Store.
-- Apple has deprecated the scripting runtimes (perl among them) and will remove
-  them from the system one day. The helper survives exactly until that moment.
 - The shelf references files rather than copying them: move the original and the
   card disappears on the next launch. The exception is clipboard screenshots,
   which are saved into `~/Pictures/Cyclop` and are never deleted automatically,
@@ -197,9 +180,6 @@ Sources/Cyclop
 │   ├── NotchViewModel.swift
 │   └── PrivacyMode.swift      hiding contents: sections and reveals
 ├── Services/
-│   ├── MediaController.swift  picks the Now Playing source
-│   ├── NowPlayingFeed.swift   runs the helper in perl, parses its stdout
-│   ├── PlayerBridge.swift     fallback: AppleScript + media keys
 │   ├── ShelfStore.swift
 │   ├── ClipboardStore.swift
 │   ├── ScreenshotVault.swift  clipboard screenshots onto disk
@@ -212,9 +192,6 @@ Sources/Cyclop
 │   ├── TeleprompterStore.swift the script and where reading it has got to
 │   └── ScreenshotFolderWatcher.swift  screenshots saved to disk, onto the shelf
 └── UI/                        NotchShape, tab panes, theme
-
-Sources/CyclopMediaHelper
-└── helper.m                   dylib for /usr/bin/perl: MediaRemote -> JSON
 ```
 
 ## Contributing

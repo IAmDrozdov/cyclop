@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyclop — приложение для чёлки MacBook, бесплатно и с открытым кодом</title>
-<meta name="description" content="Чёлка MacBook как рабочий инструмент: плеер, полка для файлов, буфер обмена, заготовки и офлайн-перевод. Нативно на SwiftUI, без зависимостей, при запуске ничего не просит. Бесплатно, MIT.">
+<meta name="description" content="Чёлка MacBook как рабочий инструмент: полка для файлов, буфер обмена, заготовки и офлайн-перевод. Нативно на SwiftUI, без зависимостей, при запуске ничего не просит. Бесплатно, MIT.">
 <link rel="canonical" href="https://akalikbergenov.github.io/cyclop/ru/">
 <link rel="alternate" hreflang="en" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="ru" href="https://akalikbergenov.github.io/cyclop/ru/">
@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Cyclop">
 <meta property="og:title" content="Cyclop — приложение для чёлки MacBook">
-<meta property="og:description" content="Чёлка MacBook как рабочий инструмент: плеер, полка, буфер обмена и офлайн-перевод. Нативно, 2,1 МБ, без зависимостей, при запуске ничего не просит.">
+<meta property="og:description" content="Чёлка MacBook как рабочий инструмент: полка, буфер обмена и офлайн-перевод. Нативно, 2,1 МБ, без зависимостей, при запуске ничего не просит.">
 <meta property="og:url" content="https://akalikbergenov.github.io/cyclop/ru/">
 <meta property="og:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 <meta property="og:image:width" content="1400">
@@ -22,7 +22,7 @@
 <meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Cyclop — приложение для чёлки MacBook">
-<meta name="twitter:description" content="Плеер, полка, буфер обмена и офлайн-перевод прямо в чёлке. Бесплатно, открытый код.">
+<meta name="twitter:description" content="Полка, буфер обмена и офлайн-перевод прямо в чёлке. Бесплатно, открытый код.">
 <meta name="twitter:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23111'/><rect x='26' y='18' width='48' height='16' rx='7' fill='%23fff'/><circle cx='50' cy='62' r='13' fill='%23fff'/></svg>">
@@ -47,11 +47,6 @@
       "@type": "Question",
       "name": "Cyclop бесплатный?",
       "acceptedAnswer": { "@type": "Answer", "text": "Да, бесплатный и с открытым кодом под лицензией MIT. Нет подписки, платной версии, рекламы и сбора данных." }
-    },
-    {
-      "@type": "Question",
-      "name": "Какие плееры поддерживаются?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Любой источник, который видит сама macOS: Apple Music, Spotify, а также видео во вкладке браузера, включая YouTube. В браузере ничего настраивать не нужно." }
     },
     {
       "@type": "Question",
@@ -129,7 +124,7 @@ footer a{color:var(--dim)}
 <header>
   <h1>Чёлка MacBook как рабочий инструмент</h1>
   <p class="tagline">Cyclop — бесплатное приложение для чёлки с открытым кодом. В покое его не видно;
-  при наведении оно раскрывается в панель с плеером, полкой для файлов, историей буфера обмена,
+  при наведении оно раскрывается в панель с полкой для файлов, историей буфера обмена,
   заготовками и офлайн-переводчиком.</p>
   <div class="cta">
     <a class="btn" href="https://github.com/akalikbergenov/cyclop/releases/latest">Скачать для macOS</a>
@@ -141,8 +136,6 @@ footer a{color:var(--dim)}
 <figure class="shot">
   <img src="../panel.png" width="1400" height="504" alt="Панель Cyclop, раскрытая под чёлкой MacBook: обложка, ползунок трека и рельс вкладок" loading="eager">
 </figure>
-<figcaption>Трек на снимке играет во вкладке браузера. Cyclop читает его из самой macOS —
-без разрешений и без настроек в браузере.</figcaption>
 
 <div class="facts">
   <div class="fact"><b>2,1 МБ</b><span>бандл</span></div>
@@ -159,9 +152,6 @@ footer a{color:var(--dim)}
   выключите её в настройках, и она ничего не стоит.</p>
 
   <div class="tabs">
-    <div class="tab"><h3>Музыка</h3><p>Обложка, трек, исполнитель и ползунок, который правда
-      перематывает. Источник — что угодно, что видит сама macOS: Apple Music, Spotify или ролик
-      во вкладке браузера. В браузере настраивать нечего.</p></div>
     <div class="tab"><h3>Полка</h3><p>Перетащите файлы в чёлку — они там подождут. Вытащите
       карточку — файл уедет туда, куда бросили. ⌘-клик выделяет несколько и тащит их группой.
       Снимок экрана, скопированный в буфер, тоже попадает сюда — в том числе сделанный на
@@ -190,13 +180,10 @@ footer a{color:var(--dim)}
     <tr><th>Одно разрешение, по кнопке</th><td>При запуске ничего не спрашивается. Универсальный
       доступ, для блокировки клавиатуры, — единственное разрешение, которое Cyclop просит сам, и
       системный диалог показывается по явному нажатию кнопки.</td></tr>
-    <tr><th>Любой источник звука</th><td>Now Playing читается из самой macOS, поэтому ролик во
-      вкладке работает так же, как плеер, — без расширений и коннекторов под каждое приложение.</td></tr>
     <tr><th>Перевод офлайн</th><td>Перевод считается на устройстве, средствами macOS. Без ключа,
       без аккаунта, ничего не уходит с машины.</td></tr>
     <tr><th>Ничего не собирается</th><td>Ни телеметрии, ни аналитики, ни отчётов о сбоях.
-      Единственный исходящий запрос во всём приложении — необязательный поиск обложки для трека
-      из Spotify.</td></tr>
+      Единственный исходящий запрос во всём приложении — ежедневная загрузка курсов валют.</td></tr>
     <tr><th>Правда маленькое</th><td>2,1 МБ на диске, около 40 МБ памяти, 0,0 % процессора, пока
       панель закрыта.</td></tr>
   </table>
@@ -233,17 +220,14 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
   <details><summary>Это бесплатно? Есть платная версия?</summary>
     <p>Бесплатно, под лицензией MIT, платной версии нет. Ни подписки, ни рекламы, ни аккаунтов,
     и ничего не собирается.</p></details>
-  <details><summary>Какими плеерами управляет?</summary>
-    <p>Любыми, которые видит сама macOS. Apple Music и Spotify работают, ролик во вкладке браузера
-    тоже, включая YouTube. В браузер ничего ставить не нужно.</p></details>
   <details><summary>Что-нибудь уходит в сеть?</summary>
-    <p>Ни телеметрии, ни аналитики. Единственный исходящий запрос — необязательный поиск обложки
-    для трека из Spotify. Буфер, файлы, заготовки и сценарии остаются на машине.</p></details>
+    <p>Ни телеметрии, ни аналитики. Единственный исходящий запрос — ежедневная загрузка курсов
+    валют. Буфер, файлы, заготовки и сценарии остаются на машине.</p></details>
   <details><summary>Почему macOS пишет, что приложение не проверено?</summary>
     <p>Потому что образ подписан ad-hoc, без Apple Developer ID, и не нотаризован. Достаточно
     разрешить один раз в Системных настройках. Исходники открыты, если удобнее собрать самому.</p></details>
   <details><summary>Сколько ест памяти и батареи?</summary>
-    <p>Около 40 МБ плюс хелпер на 14 МБ и 0,0 % процессора, пока панель закрыта. Фоновая работа
+    <p>Около 40 МБ и 0,0 % процессора, пока панель закрыта. Фоновая работа
     вкладки идёт, только пока вкладка стоит на панели иконок.</p></details>
   <details><summary>Какие версии macOS поддерживаются?</summary>
     <p>macOS 15 и новее, на Apple silicon и на Intel. Нижняя граница взялась от фреймворка перевода,

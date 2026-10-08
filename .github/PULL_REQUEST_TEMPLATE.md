@@ -8,7 +8,6 @@
 ## Проверено
 
 - [ ] `./Scripts/bundle.sh release` собирается
-- [ ] `./Scripts/test-helper.sh` отвечает валидным JSON
 - [ ] Новый текст на экране заведён в **обоих** `Resources/*.lproj/Localizable.strings`
 - [ ] Ветка взята от свежего `main`, а не от предыдущей ветки
 - [ ] PR про одно дело; большая фича обсуждена в issue до кода

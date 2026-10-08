@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyclop — free open-source notch app for MacBook</title>
-<meta name="description" content="Turn the MacBook notch into a panel: media controls, file shelf, clipboard history, snippets and offline translation. Native SwiftUI, zero dependencies, nothing asked at launch. Free, MIT.">
+<meta name="description" content="Turn the MacBook notch into a panel: file shelf, clipboard history, snippets and offline translation. Native SwiftUI, zero dependencies, nothing asked at launch. Free, MIT.">
 <link rel="canonical" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="en" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="ru" href="https://akalikbergenov.github.io/cyclop/ru/">
@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Cyclop">
 <meta property="og:title" content="Cyclop — free open-source notch app for MacBook">
-<meta property="og:description" content="The MacBook notch as a working tool: player, file shelf, clipboard, snippets and offline translation. Native, 2.1 MB, no dependencies, nothing asked at launch.">
+<meta property="og:description" content="The MacBook notch as a working tool: file shelf, clipboard, snippets and offline translation. Native, 2.1 MB, no dependencies, nothing asked at launch.">
 <meta property="og:url" content="https://akalikbergenov.github.io/cyclop/">
 <meta property="og:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 <meta property="og:image:width" content="1400">
@@ -38,7 +38,7 @@
       "applicationCategory": "UtilitiesApplication",
       "applicationSubCategory": "Menu bar utility",
       "operatingSystem": "macOS 15 or newer",
-      "description": "A macOS utility that turns the MacBook notch into a panel with media controls, a file shelf, clipboard history, snippets and offline translation. Native SwiftUI and AppKit, no third-party dependencies.",
+      "description": "A macOS utility that turns the MacBook notch into a panel with a file shelf, clipboard history, snippets and offline translation. Native SwiftUI and AppKit, no third-party dependencies.",
       "url": "https://akalikbergenov.github.io/cyclop/",
       "downloadUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
       "installUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
@@ -50,7 +50,6 @@
       "programmingLanguage": "Swift",
       "codeRepository": "https://github.com/akalikbergenov/cyclop",
       "featureList": [
-        "Now Playing controls for any source macOS can see, including browser tabs",
         "File shelf with drag and drop",
         "Clipboard history",
         "Snippets",
@@ -80,23 +79,18 @@
         },
         {
           "@type": "Question",
-          "name": "Which media players does Cyclop support?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Any source macOS itself can see, which includes Apple Music, Spotify, and audio or video playing in a browser tab such as YouTube. Nothing needs to be configured in the browser." }
-        },
-        {
-          "@type": "Question",
           "name": "Why does macOS say Cyclop cannot be verified on first launch?",
           "acceptedAnswer": { "@type": "Answer", "text": "The disk image is ad-hoc signed, without an Apple Developer ID, and is not notarised. It has to be allowed once through System Settings, Privacy and Security, after which it opens normally." }
         },
         {
           "@type": "Question",
           "name": "Does Cyclop send anything over the network?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No telemetry and no analytics. Everything stays on the machine. The only outgoing request is an optional lookup of album artwork for Spotify tracks." }
+          "acceptedAnswer": { "@type": "Answer", "text": "No telemetry and no analytics. Everything stays on the machine. The only outgoing request is Currency's daily download of exchange rates." }
         },
         {
           "@type": "Question",
           "name": "How much memory and CPU does Cyclop use?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Around 40 MB plus a 14 MB helper process, and 0.0 percent CPU at rest. The application bundle is 2.1 MB. Tabs run only while the panel is open." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Around 40 MB and 0.0 percent CPU at rest. The application bundle is 2.1 MB. A tab's background work runs while the tab is on a rail." }
         }
       ]
     }
@@ -183,7 +177,7 @@ footer a{color:var(--dim)}
 <header>
   <h1>The MacBook notch as a working tool</h1>
   <p class="tagline">Cyclop is a free, open-source notch app for macOS. Invisible at rest; on hover it
-  unfolds into a panel with a player, a file shelf, clipboard history, snippets
+  unfolds into a panel with a file shelf, clipboard history, snippets
   and an offline translator.</p>
   <div class="cta">
     <a class="btn" href="https://github.com/akalikbergenov/cyclop/releases/latest">Download for macOS</a>
@@ -195,8 +189,6 @@ footer a{color:var(--dim)}
 <figure class="shot">
   <img src="panel.png" width="1400" height="504" alt="The Cyclop panel open under the MacBook notch, showing album artwork, a track scrubber and the tab rail" loading="eager">
 </figure>
-<figcaption>The track in the screenshot is playing in a browser tab. Cyclop reads it from macOS itself,
-with no permissions and nothing configured in the browser.</figcaption>
 
 <div class="facts">
   <div class="fact"><b>2.1 MB</b><span>bundle</span></div>
@@ -213,9 +205,6 @@ with no permissions and nothing configured in the browser.</figcaption>
   Settings and it costs nothing.</p>
 
   <div class="tabs">
-    <div class="tab"><h3>Music</h3><p>Artwork, track, artist and a scrubber that actually seeks.
-      The source is anything macOS itself can see: Apple Music, Spotify, or a video in a browser
-      tab. Nothing to configure in the browser.</p></div>
     <div class="tab"><h3>Shelf</h3><p>Drag files into the notch and they wait there. Drag a card out
       and the file goes wherever it is dropped. ⌘-click selects several and drags them as a group.
       A screenshot copied to the clipboard is saved and lands here too — including one taken on an
@@ -246,12 +235,10 @@ with no permissions and nothing configured in the browser.</figcaption>
     <tr><th>One permission, on a button</th><td>Nothing is asked at launch. Accessibility, for the
       keyboard lock, is the one permission Cyclop asks for itself, and the system dialog appears on
       an explicit button press.</td></tr>
-    <tr><th>Any media source</th><td>Now Playing is read from macOS itself, so a video in a browser
-      tab works exactly like a music player — no browser extension, no per-app connector.</td></tr>
     <tr><th>Offline translation</th><td>Translation runs on the device through macOS's own
       framework. No API key, no account, nothing leaves the machine.</td></tr>
     <tr><th>Nothing collected</th><td>No telemetry, no analytics, no crash reporting. The single
-      outgoing request in the whole app is an optional artwork lookup for Spotify tracks.</td></tr>
+      outgoing request in the whole app is Currency's daily download of exchange rates.</td></tr>
     <tr><th>Actually small</th><td>2.1 MB on disk, around 40 MB of memory, 0.0 % CPU while the panel
       is closed.</td></tr>
   </table>
@@ -293,13 +280,9 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     <p>Free, MIT-licensed, and there is no paid tier. No subscription, no ads, no accounts, and
     nothing is collected.</p></details>
 
-  <details><summary>Which players does it control?</summary>
-    <p>Anything macOS itself can see. Apple Music and Spotify work, and so does audio or video in a
-    browser tab — YouTube included. Nothing has to be installed in the browser.</p></details>
-
   <details><summary>Does it send anything anywhere?</summary>
-    <p>No telemetry and no analytics of any kind. The only outgoing request in the whole app is an
-    optional lookup of album artwork for Spotify tracks, and everything else — clipboard, files,
+    <p>No telemetry and no analytics of any kind. The only outgoing request in the whole app is Currency's
+    daily download of exchange rates, and everything else — clipboard, files,
     snippets, scripts — stays on the machine.</p></details>
 
   <details><summary>Why does macOS say the app cannot be verified?</summary>
@@ -308,9 +291,8 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     ask again. The source is public if you would rather build it yourself.</p></details>
 
   <details><summary>What does it cost in memory and battery?</summary>
-    <p>About 40 MB plus a 14 MB helper process, and 0.0 % CPU while the panel is closed. A tab's
-    background work runs only while the tab is on a rail, and the position ticker behind the
-    player stops when the panel folds.</p></details>
+    <p>About 40 MB and 0.0 % CPU while the panel is closed. A tab's background work runs only while
+    the tab is on a rail.</p></details>
 
   <details><summary>Which macOS versions are supported?</summary>
     <p>macOS 15 and newer, on both Apple silicon and Intel. The floor comes from the translation
@@ -320,8 +302,8 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
 <section>
   <h2>Open source</h2>
   <p class="lede">Cyclop is built in the open under the MIT licence, and a good part of what is in it
-  came from people who turned up in the first week: measurements from Macs the author does not own,
-  a reverse-engineered fix for macOS 26 media control, and fixes to things nobody else had noticed.
+  came from people who turned up in the first week: measurements from Macs the author does not own
+  and fixes to things nobody else had noticed.
   Issues and pull requests are welcome.</p>
   <div class="cta">
     <a class="btn ghost" href="https://github.com/akalikbergenov/cyclop">Read the source</a>

@@ -67,7 +67,7 @@ A tab switched off in Settings: its icon leaves the rail and its background work
 _Avoid_: disabled tab; "hidden" alone, which clashes with Hide Contents
 
 **Background work**:
-What a tab keeps running while the panel is collapsed or on another tab, such as a poll, an observer or the helper. It runs only while the tab is on a rail, so hiding the tab stops it.
+What a tab keeps running while the panel is collapsed or on another tab, such as a poll or a timer. It runs only while the tab is on a rail, so hiding the tab stops it.
 _Avoid_: service, daemon
 
 **Menu bar icon** (Show Menu Bar Icon «Показывать иконку в меню-баре»):
@@ -75,26 +75,6 @@ The eye in the menu bar, holding Open Panel, Hide Contents and Quit.
 _Avoid_: tray icon, status bar menu
 
 ### Tabs
-
-**Music** «Музыка»:
-What macOS is playing right now, from any player or browser tab, with artwork, a scrubber and transport buttons.
-_Avoid_: Media, player tab, Now Playing tab
-
-**Now Playing**:
-The system-wide record of the current playback session that macOS keeps; the Music tab's source.
-_Avoid_: media session
-
-**Now Playing helper** «хелпер»:
-A separate process that reads Now Playing for the app, because macOS answers those queries only to its own trusted binaries.
-_Avoid_: perl helper, media helper
-
-**Scripting fallback** «запасной путь»:
-The Music tab's second route, used only when the helper is unavailable: it scripts Apple Music or Spotify directly, or sends plain media keys when neither is active. It needs the Automation permission, and Accessibility for the media keys.
-_Avoid_: legacy mode
-
-**Scrubber**:
-The Music pane's progress bar; dragging it seeks.
-_Avoid_: slider, timeline
 
 **Shelf** «Полка»:
 Files dropped on the notch, held as references (never copies); dragging a card out hands the file on and leaves the card. Clipboard screenshots and new files in the watched screenshots folder land here too.

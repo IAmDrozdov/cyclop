@@ -4,12 +4,11 @@ import Combine
 @MainActor
 final class NotchViewModel: ObservableObject {
     enum Tab: String, CaseIterable, Identifiable {
-        case media, shelf, clipboard, snippets, translate, currency, teleprompter, utilities, settings
+        case shelf, clipboard, snippets, translate, currency, teleprompter, utilities, settings
         var id: String { rawValue }
 
         var symbol: String {
             switch self {
-            case .media: return "music.note"
             case .shelf: return "tray.full.fill"
             case .clipboard: return "list.clipboard.fill"
             case .snippets: return "pin.fill"
@@ -23,7 +22,6 @@ final class NotchViewModel: ObservableObject {
 
         var title: String {
             switch self {
-            case .media: return localized("Music")
             case .shelf: return localized("Shelf")
             case .clipboard: return localized("Clipboard")
             case .snippets: return localized("Snippets")
@@ -61,7 +59,7 @@ final class NotchViewModel: ObservableObject {
         /// it is not something to hover past on the way to a tab people
         /// actually rest on. Icon height is a ceiling derived from the left
         /// rail's length alone, so a shorter or longer rail resizes itself.
-        static let leftRail: [Tab] = [.media, .shelf, .clipboard, .snippets, .translate]
+        static let leftRail: [Tab] = [.shelf, .clipboard, .snippets, .translate]
         static let rightRail: [Tab] = [.currency, .teleprompter, .utilities, .settings]
     }
 
@@ -79,8 +77,8 @@ final class NotchViewModel: ObservableObject {
     /// if the people who never use it can take it off (#43). Off means two
     /// things, and the second is what makes the switch worth having: the icon
     /// leaves the rail, and the tab's background work stops with it — the
-    /// clipboard poll, the Now Playing helper. A hidden
-    /// tab costs nothing, or it is not hidden.
+    /// clipboard poll, the rate fetch. A hidden tab
+    /// costs nothing, or it is not hidden.
     ///
     /// Kept as the set of what is off rather than what is on, so a tab added
     /// in a later version shows up for everyone instead of arriving hidden.
@@ -124,9 +122,6 @@ final class NotchViewModel: ObservableObject {
     /// icon has left the rail.
     private func startBackground(of target: Tab) {
         switch target {
-        case .media:
-            media.start()
-            if isPanelActive { media.setActive(true) }
         case .clipboard:
             clipboard.start()
         case .shelf:
@@ -142,7 +137,6 @@ final class NotchViewModel: ObservableObject {
 
     private func stopBackground(of target: Tab) {
         switch target {
-        case .media: media.stop()
         case .clipboard: clipboard.stop()
         case .shelf: screenshotFolder.stop()
         case .currency: currencies.stop()
@@ -153,16 +147,23 @@ final class NotchViewModel: ObservableObject {
         }
     }
 
-    /// Whether any screen shows more than the bare notch. The stores whose
-    /// clocks exist only for an open panel — the position ticker — follow
-    /// this, and only for the tabs that are on the rail.
+    /// Whether any screen shows more than the bare notch. Sets the flag the
+    /// header's change forwarding reads, and gives the shelf its first look at
+    /// the disk: the first panel to open after launch on the shelf is where a
+    /// permission prompt for a protected folder may come, never at launch.
     func setPanelActive(_ active: Bool) {
         guard active != isPanelActive else { return }
         isPanelActive = active
-        if isVisible(.media) { media.setActive(active) }
+        if active, tab == .shelf, !shelfRefreshed {
+            shelf.refreshFromDisk()
+            shelfRefreshed = true
+        }
     }
 
     private var started = false
+    /// Whether the shelf has been looked at on disk since launch, by arriving
+    /// at the tab or by the first panel to open on it.
+    private var shelfRefreshed = false
 
     /// Whether a click into the panel should hand it the keyboard. The tabs
     /// that type always do. The teleprompter does only while it has nothing to
@@ -175,7 +176,7 @@ final class NotchViewModel: ObservableObject {
         tab.needsKeyboard || (tab == .teleprompter && teleprompter.script.isEmpty)
     }
 
-    @Published var tab: Tab = .media {
+    @Published var tab: Tab = .shelf {
         didSet {
             // The snippets file is edited from outside the app, so it is read
             // on the way in rather than held from launch.
@@ -184,7 +185,10 @@ final class NotchViewModel: ObservableObject {
             // folders macOS guards, and looking at one raises a permission
             // prompt. It is asked here, with the shelf on screen, rather than
             // at launch with nothing to explain it.
-            if tab == .shelf { shelf.refreshFromDisk() }
+            if tab == .shelf {
+                shelf.refreshFromDisk()
+                shelfRefreshed = true
+            }
             // Rates update on a timer already; opening the tab asks once more
             // so a stale cache from the last few hours does not sit there.
             if tab == .currency { currencies.refreshIfNeeded() }
@@ -208,7 +212,6 @@ final class NotchViewModel: ObservableObject {
     /// script runs out, Escape, or a click anywhere outside the panel.
     var holdsOpen: Bool { tab == .teleprompter && teleprompter.isRunning }
 
-    let media: MediaController
     let shelf: ShelfStore
     let clipboard: ClipboardStore
     let screenshotFolder: ScreenshotFolderWatcher
@@ -226,7 +229,6 @@ final class NotchViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        self.media = MediaController()
         self.shelf = ShelfStore()
         self.clipboard = ClipboardStore()
         self.screenshotFolder = ScreenshotFolderWatcher()
@@ -235,27 +237,26 @@ final class NotchViewModel: ObservableObject {
         self.snippets = SnippetStore()
         self.teleprompter = TeleprompterStore()
 
-        // The panel header reads through to the stores — counters, the source
-        // name, the equalizer. Nested ObservableObjects do not propagate on
-        // their own, so those would only refresh when something else happened
-        // to redraw the view.
+        // The panel header reads through to the stores — the counters. Nested
+        // ObservableObjects do not propagate on their own, so those would only
+        // refresh when something else happened to redraw the view.
         //
         // Forwarded only while the panel is open. Collapsed, there is nothing
         // these redraws could change — the panel is a black shape — yet the
-        // stores keep their own schedule: a track change every few minutes, a
-        // copy whenever one happens, and each send re-evaluated the whole
-        // view for nobody. Opening repaints from the stores directly, because
-        // `isOpen` is itself @Published and its own send does that.
+        // stores keep their own schedule: a copy whenever one happens, and each
+        // send re-evaluated the whole view for nobody. Opening repaints from
+        // the stores directly, because `isOpen` is itself @Published and its
+        // own send does that.
         //
         // The stores with a text field in their pane — the translator, the
-        // currency converter and the snippets — are deliberately absent. They change on every keystroke, and redrawing the whole
-        // panel per letter costs more than a stale counter: it rebuilds the
-        // field, which drops the focus, so the first letter typed is also the
-        // last one that lands. Their panes observe them directly, and the
-        // header counter refreshes anyway, because the list is only ever
-        // re-read on the way into the tab.
+        // currency converter and the snippets — are deliberately absent. They
+        // change on every keystroke, and redrawing the whole panel per letter
+        // costs more than a stale counter: it rebuilds the field, which drops
+        // the focus, so the first letter typed is also the last one that
+        // lands. Their panes observe them directly, and the header counter
+        // refreshes anyway, because the list is only ever re-read on the way
+        // into the tab.
         for child in [
-            media.objectWillChange,
             shelf.objectWillChange,
             clipboard.objectWillChange,
         ] {

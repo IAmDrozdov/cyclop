@@ -101,15 +101,6 @@ struct NotchContentView: View {
     @ViewBuilder
     private var trailing: some View {
         switch vm.tab {
-        case .media:
-            HStack(spacing: 6) {
-                if vm.media.track != nil {
-                    EqualizerBars(isAnimating: vm.media.isPlaying)
-                }
-                Text(vm.media.sourceName ?? "")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(Theme.tertiary)
-            }
         case .shelf:
             counter(vm.shelf.items.count)
         case .clipboard:
@@ -177,8 +168,6 @@ struct NotchContentView: View {
     @ViewBuilder
     private var pane: some View {
         switch vm.tab {
-        case .media:
-            MediaPane(media: vm.media)
         case .shelf:
             ShelfPane(shelf: vm.shelf, isTargeted: panel.isDropTargeted)
         case .clipboard:

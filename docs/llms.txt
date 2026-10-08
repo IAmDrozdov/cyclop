@@ -1,9 +1,9 @@
 # Cyclop
 
 > A free, open-source macOS utility that turns the MacBook notch into a panel:
-> media controls, a file shelf, clipboard history, snippets,
-> offline translation and a teleprompter. Native SwiftUI and
-> AppKit, no third-party dependencies, MIT licence.
+> a file shelf, clipboard history, snippets, offline translation and a
+> teleprompter. Native SwiftUI and AppKit, no third-party dependencies, MIT
+> licence.
 
 Cyclop is invisible at rest. Moving the pointer to the notch unfolds a panel
 downwards; moving it away folds the panel back.
@@ -12,21 +12,19 @@ downwards; moving it away folds the panel back.
 
 - Platform: macOS 15 or newer, Apple silicon and Intel
 - Licence: MIT, free, no paid tier, no subscription, no accounts
-- Bundle size: 2.1 MB. Memory: about 40 MB plus a 14 MB helper. 0.0% CPU at rest
+- Bundle size: 2.1 MB. Memory: about 40 MB. 0.0% CPU at rest
 - Dependencies: none. Swift, SwiftUI and AppKit only
 - Permissions: nothing at launch. The one permission Cyclop asks for itself is
   Accessibility, for the keyboard lock, requested by an explicit button press. No
   Screen Recording. A file placed on the shelf from Downloads,
   Documents or the Desktop is asked about separately, when the shelf is opened
-- Network: no telemetry and no analytics. The only outgoing request is an
-  optional album-artwork lookup for Spotify tracks
+- Network: no telemetry and no analytics. The only outgoing request is
+  Currency's daily download of exchange rates
 - Source: https://github.com/akalikbergenov/cyclop
 - Author: Adil Kalikbergenov
 
 ## Tabs
 
-- Music — artwork, track, artist and a working scrubber. The source is anything
-  macOS itself can see, including audio and video in a browser tab
 - Shelf — drag files in, drag them out; group drag with command-click
 - Clipboard — the last 40 copies, one click puts an entry back
 - Snippets — a hand-kept list stored as plain JSON

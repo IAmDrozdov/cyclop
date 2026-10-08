@@ -8,7 +8,6 @@ enum Theme {
     static let paneAnimation = Animation.easeOut(duration: 0.18)
     static let paneIn = Animation.easeOut(duration: 0.20).delay(0.04)
     static let paneOut = Animation.easeIn(duration: 0.12)
-    static let artworkAnimation = Animation.easeOut(duration: 0.28)
 
     static let collapsedTopRadius: CGFloat = 6
     static let collapsedBottomRadius: CGFloat = 9
@@ -71,10 +70,4 @@ struct NotchToggleStyle: ToggleStyle {
         .buttonStyle(.plain)
         .animation(.easeOut(duration: 0.15), value: configuration.isOn)
     }
-}
-
-func formatTime(_ seconds: TimeInterval) -> String {
-    guard seconds.isFinite, seconds >= 0 else { return "--:--" }
-    let total = Int(seconds.rounded())
-    return String(format: "%d:%02d", total / 60, total % 60)
 }
