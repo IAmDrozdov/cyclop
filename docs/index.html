@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Cyclop">
 <meta property="og:title" content="Cyclop — free open-source notch app for MacBook">
-<meta property="og:description" content="The MacBook notch as a working tool: file shelf, clipboard, snippets and offline translation. Native, 2.1 MB, no dependencies, nothing asked at launch.">
+<meta property="og:description" content="The MacBook notch as a working tool: file shelf, clipboard, snippets and offline translation. Native, 3.1 MB, no dependencies, nothing asked at launch.">
 <meta property="og:url" content="https://akalikbergenov.github.io/cyclop/">
 <meta property="og:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 <meta property="og:image:width" content="1400">
@@ -43,7 +43,7 @@
       "downloadUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
       "installUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
       "softwareVersion": "0.8.3",
-      "fileSize": "3.7 MB",
+      "fileSize": "3.1 MB",
       "license": "https://opensource.org/licenses/MIT",
       "isAccessibleForFree": true,
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -90,7 +90,7 @@
         {
           "@type": "Question",
           "name": "How much memory and CPU does Cyclop use?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Around 40 MB and 0.0 percent CPU at rest. The application bundle is 2.1 MB. A tab's background work runs while the tab is on a rail." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Around 16 MB and 0.0 percent CPU at rest. The application bundle is 3.1 MB. A tab's background work runs while the tab is on a rail." }
         }
       ]
     }
@@ -191,9 +191,9 @@ footer a{color:var(--dim)}
 </figure>
 
 <div class="facts">
-  <div class="fact"><b>2.1 MB</b><span>bundle</span></div>
+  <div class="fact"><b>3.1 MB</b><span>bundle</span></div>
   <div class="fact"><b>0.0 %</b><span>CPU at rest</span></div>
-  <div class="fact"><b>≈40 MB</b><span>memory</span></div>
+  <div class="fact"><b>≈16 MB</b><span>memory</span></div>
   <div class="fact"><b>0</b><span>dependencies</span></div>
   <div class="fact"><b>1</b><span>permission*</span></div>
   <div class="fact"><b>MIT</b><span>licence</span></div>
@@ -231,7 +231,7 @@ footer a{color:var(--dim)}
   <div class="scroll">
   <table>
     <tr><th>Zero dependencies</th><td>Nothing but Swift, SwiftUI and AppKit. No package manager, no
-      vendored frameworks. The whole thing is 5 800 lines you can read in an afternoon.</td></tr>
+      vendored frameworks. The whole thing is about 7 000 lines you can read in an afternoon.</td></tr>
     <tr><th>One permission, on a button</th><td>Nothing is asked at launch. Accessibility, for the
       keyboard lock, is the one permission Cyclop asks for itself, and the system dialog appears on
       an explicit button press.</td></tr>
@@ -239,7 +239,7 @@ footer a{color:var(--dim)}
       framework. No API key, no account, nothing leaves the machine.</td></tr>
     <tr><th>Nothing collected</th><td>No telemetry, no analytics, no crash reporting. The single
       outgoing request in the whole app is Currency's daily download of exchange rates.</td></tr>
-    <tr><th>Actually small</th><td>2.1 MB on disk, around 40 MB of memory, 0.0 % CPU while the panel
+    <tr><th>Actually small</th><td>3.1 MB on disk, around 16 MB of memory, 0.0 % CPU while the panel
       is closed.</td></tr>
   </table>
   </div>
@@ -291,7 +291,7 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     ask again. The source is public if you would rather build it yourself.</p></details>
 
   <details><summary>What does it cost in memory and battery?</summary>
-    <p>About 40 MB and 0.0 % CPU while the panel is closed. A tab's background work runs only while
+    <p>About 16 MB and 0.0 % CPU while the panel is closed. A tab's background work runs only while
     the tab is on a rail.</p></details>
 
   <details><summary>Which macOS versions are supported?</summary>

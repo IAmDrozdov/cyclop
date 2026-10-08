@@ -15,7 +15,7 @@ clipboard history and offline translation.
 macOS 15 or newer. Signed and notarised, so it opens on the first try.
 
 ```
-0.0 % CPU at rest  ·  ≈40 MB  ·  3.7 MB bundle  ·  nothing asked at launch
+0.0 % CPU at rest  ·  ≈16 MB  ·  3.1 MB bundle  ·  nothing asked at launch
 ```
 
 ## What it does

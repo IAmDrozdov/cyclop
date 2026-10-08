@@ -12,7 +12,7 @@ downwards; moving it away folds the panel back.
 
 - Platform: macOS 15 or newer, Apple silicon and Intel
 - Licence: MIT, free, no paid tier, no subscription, no accounts
-- Bundle size: 2.1 MB. Memory: about 40 MB. 0.0% CPU at rest
+- Bundle size: 3.1 MB. Memory: about 16 MB. 0.0% CPU at rest
 - Dependencies: none. Swift, SwiftUI and AppKit only
 - Permissions: nothing at launch. The one permission Cyclop asks for itself is
   Accessibility, for the keyboard lock, requested by an explicit button press. No

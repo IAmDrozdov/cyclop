@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Cyclop">
 <meta property="og:title" content="Cyclop — приложение для чёлки MacBook">
-<meta property="og:description" content="Чёлка MacBook как рабочий инструмент: полка, буфер обмена и офлайн-перевод. Нативно, 2,1 МБ, без зависимостей, при запуске ничего не просит.">
+<meta property="og:description" content="Чёлка MacBook как рабочий инструмент: полка, буфер обмена и офлайн-перевод. Нативно, 3,1 МБ, без зависимостей, при запуске ничего не просит.">
 <meta property="og:url" content="https://akalikbergenov.github.io/cyclop/ru/">
 <meta property="og:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 <meta property="og:image:width" content="1400">
@@ -138,9 +138,9 @@ footer a{color:var(--dim)}
 </figure>
 
 <div class="facts">
-  <div class="fact"><b>2,1 МБ</b><span>бандл</span></div>
+  <div class="fact"><b>3,1 МБ</b><span>бандл</span></div>
   <div class="fact"><b>0,0 %</b><span>CPU в покое</span></div>
-  <div class="fact"><b>≈40 МБ</b><span>память</span></div>
+  <div class="fact"><b>≈16 МБ</b><span>память</span></div>
   <div class="fact"><b>0</b><span>зависимостей</span></div>
   <div class="fact"><b>1</b><span>разрешение*</span></div>
   <div class="fact"><b>MIT</b><span>лицензия</span></div>
@@ -176,7 +176,7 @@ footer a{color:var(--dim)}
   <div class="scroll">
   <table>
     <tr><th>Ноль зависимостей</th><td>Только Swift, SwiftUI и AppKit. Ни менеджера пакетов, ни
-      вложенных фреймворков. Всё приложение — 5800 строк, которые читаются за вечер.</td></tr>
+      вложенных фреймворков. Всё приложение — около 7000 строк, которые читаются за вечер.</td></tr>
     <tr><th>Одно разрешение, по кнопке</th><td>При запуске ничего не спрашивается. Универсальный
       доступ, для блокировки клавиатуры, — единственное разрешение, которое Cyclop просит сам, и
       системный диалог показывается по явному нажатию кнопки.</td></tr>
@@ -184,7 +184,7 @@ footer a{color:var(--dim)}
       без аккаунта, ничего не уходит с машины.</td></tr>
     <tr><th>Ничего не собирается</th><td>Ни телеметрии, ни аналитики, ни отчётов о сбоях.
       Единственный исходящий запрос во всём приложении — ежедневная загрузка курсов валют.</td></tr>
-    <tr><th>Правда маленькое</th><td>2,1 МБ на диске, около 40 МБ памяти, 0,0 % процессора, пока
+    <tr><th>Правда маленькое</th><td>3,1 МБ на диске, около 16 МБ памяти, 0,0 % процессора, пока
       панель закрыта.</td></tr>
   </table>
   </div>
@@ -227,7 +227,7 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     <p>Потому что образ подписан ad-hoc, без Apple Developer ID, и не нотаризован. Достаточно
     разрешить один раз в Системных настройках. Исходники открыты, если удобнее собрать самому.</p></details>
   <details><summary>Сколько ест памяти и батареи?</summary>
-    <p>Около 40 МБ и 0,0 % процессора, пока панель закрыта. Фоновая работа
+    <p>Около 16 МБ и 0,0 % процессора, пока панель закрыта. Фоновая работа
     вкладки идёт, только пока вкладка стоит на панели иконок.</p></details>
   <details><summary>Какие версии macOS поддерживаются?</summary>
     <p>macOS 15 и новее, на Apple silicon и на Intel. Нижняя граница взялась от фреймворка перевода,
