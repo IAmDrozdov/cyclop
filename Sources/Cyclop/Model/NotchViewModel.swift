@@ -4,7 +4,7 @@ import Combine
 @MainActor
 final class NotchViewModel: ObservableObject {
     enum Tab: String, CaseIterable, Identifiable {
-        case media, shelf, clipboard, snippets, calendar, translate, currency, teleprompter, utilities, settings
+        case media, shelf, clipboard, snippets, translate, currency, teleprompter, utilities, settings
         var id: String { rawValue }
 
         var symbol: String {
@@ -13,7 +13,6 @@ final class NotchViewModel: ObservableObject {
             case .shelf: return "tray.full.fill"
             case .clipboard: return "list.clipboard.fill"
             case .snippets: return "pin.fill"
-            case .calendar: return "calendar"
             case .translate: return "translate"
             case .currency: return "dollarsign.circle"
             case .teleprompter: return "text.viewfinder"
@@ -28,7 +27,6 @@ final class NotchViewModel: ObservableObject {
             case .shelf: return localized("Shelf")
             case .clipboard: return localized("Clipboard")
             case .snippets: return localized("Snippets")
-            case .calendar: return localized("Calendar")
             case .translate: return localized("Translate")
             case .currency: return localized("Currency")
             case .teleprompter: return localized("Teleprompter")
@@ -63,7 +61,7 @@ final class NotchViewModel: ObservableObject {
         /// it is not something to hover past on the way to a tab people
         /// actually rest on. Icon height is a ceiling derived from the left
         /// rail's length alone, so a shorter or longer rail resizes itself.
-        static let leftRail: [Tab] = [.media, .shelf, .clipboard, .snippets, .calendar, .translate]
+        static let leftRail: [Tab] = [.media, .shelf, .clipboard, .snippets, .translate]
         static let rightRail: [Tab] = [.currency, .teleprompter, .utilities, .settings]
     }
 
@@ -81,7 +79,7 @@ final class NotchViewModel: ObservableObject {
     /// if the people who never use it can take it off (#43). Off means two
     /// things, and the second is what makes the switch worth having: the icon
     /// leaves the rail, and the tab's background work stops with it — the
-    /// clipboard poll, the calendar watch, the Now Playing helper. A hidden
+    /// clipboard poll, the Now Playing helper. A hidden
     /// tab costs nothing, or it is not hidden.
     ///
     /// Kept as the set of what is off rather than what is on, so a tab added
@@ -131,11 +129,6 @@ final class NotchViewModel: ObservableObject {
             if isPanelActive { media.setActive(true) }
         case .clipboard:
             clipboard.start()
-        case .calendar:
-            // Only picks up where it left off if access was granted earlier;
-            // it never prompts on its own.
-            calendar.start()
-            if isPanelActive { calendar.setActive(true) }
         case .shelf:
             // Off until the user grants a folder through `requestAccess`;
             // this only re-arms a watch already approved on a previous launch.
@@ -151,7 +144,6 @@ final class NotchViewModel: ObservableObject {
         switch target {
         case .media: media.stop()
         case .clipboard: clipboard.stop()
-        case .calendar: calendar.stop()
         case .shelf: screenshotFolder.stop()
         case .currency: currencies.stop()
         // Taking the tab off the rail with the screen still covered would
@@ -162,13 +154,12 @@ final class NotchViewModel: ObservableObject {
     }
 
     /// Whether any screen shows more than the bare notch. The stores whose
-    /// clocks exist only for an open panel — the position ticker, the meeting
-    /// countdown — follow this, and only for the tabs that are on the rail.
+    /// clocks exist only for an open panel — the position ticker — follow
+    /// this, and only for the tabs that are on the rail.
     func setPanelActive(_ active: Bool) {
         guard active != isPanelActive else { return }
         isPanelActive = active
         if isVisible(.media) { media.setActive(active) }
-        if isVisible(.calendar) { calendar.setActive(active) }
     }
 
     private var started = false
@@ -186,11 +177,6 @@ final class NotchViewModel: ObservableObject {
 
     @Published var tab: Tab = .media {
         didSet {
-            // Opening the tab only re-checks the status. The permission prompt
-            // is the user's own press on the button inside the pane: this is
-            // the one permission Cyclop asks for at all, and it deserves an
-            // explanation before the system dialog, not after.
-            if tab == .calendar { calendar.refreshAccess() }
             // The snippets file is edited from outside the app, so it is read
             // on the way in rather than held from launch.
             if tab == .snippets { snippets.reload() }
@@ -226,7 +212,6 @@ final class NotchViewModel: ObservableObject {
     let shelf: ShelfStore
     let clipboard: ClipboardStore
     let screenshotFolder: ScreenshotFolderWatcher
-    let calendar: CalendarStore
     let translator: Translator
     let currencies: CurrencyStore
     let snippets: SnippetStore
@@ -245,7 +230,6 @@ final class NotchViewModel: ObservableObject {
         self.shelf = ShelfStore()
         self.clipboard = ClipboardStore()
         self.screenshotFolder = ScreenshotFolderWatcher()
-        self.calendar = CalendarStore()
         self.translator = Translator()
         self.currencies = CurrencyStore()
         self.snippets = SnippetStore()
@@ -274,7 +258,6 @@ final class NotchViewModel: ObservableObject {
             media.objectWillChange,
             shelf.objectWillChange,
             clipboard.objectWillChange,
-            calendar.objectWillChange,
         ] {
             child
                 .sink { [weak self] _ in

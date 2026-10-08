@@ -11,8 +11,7 @@ import AppKit
 /// four; every new setting was the fifth spelling of the same question.
 ///
 /// **What comes here.** What has meaning on another Mac. Shelf paths (content,
-/// not configuration) and calendar overrides (tied to calendar identifiers on
-/// this particular Mac) stay in `UserDefaults` — see #67 for the rule.
+/// not configuration) stay in `UserDefaults` — see #67 for the rule.
 ///
 /// **Migration.** No file yet → built once from the old `UserDefaults` keys
 /// and written. The old keys are then left alone: rolling back to a build
@@ -152,7 +151,7 @@ final class ConfigStore: ObservableObject {
         } else if defaults.bool(forKey: "privacyMode") {
             // The legacy switch covered everything or nothing — see
             // `PrivacyMode.init` before this store existed.
-            file.privacy = ["clipboard", "snippets", "calendar"]
+            file.privacy = ["clipboard", "snippets"]
         }
         if let speed = defaults.object(forKey: "teleprompter.speed") as? Double {
             file.teleprompter.speed = speed

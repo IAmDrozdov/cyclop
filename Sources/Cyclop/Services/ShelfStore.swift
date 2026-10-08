@@ -41,8 +41,8 @@ final class ShelfStore: ObservableObject {
     /// a read — and this used to run at launch, for every card, whether or not
     /// anyone was going to open the shelf. One file dragged in from Downloads
     /// months ago meant a dialog on every cold start, arriving with no visible
-    /// cause: the panel was not even open. Cyclop promises no permissions until
-    /// the calendar is opened, and this quietly broke that promise.
+    /// cause: the panel was not even open. Cyclop asks for nothing at launch, and
+    /// this quietly broke that promise.
     ///
     /// So the icon comes from the file *name* — the extension is enough to
     /// name a type, and a type is enough to draw an icon — and whether the file

@@ -124,7 +124,7 @@ would have required Accessibility.
 
 **Hiding contents.** The "Hide Contents" menu bar item covers what the tabs
 show with a field of twinkling dots — for a screen-shared call, a stream, or a
-café. Enabled as a whole or per section — clipboard, snippets, calendar —
+café. Enabled as a whole or per section — clipboard and snippets —
 and off by default. A hidden row is not drawn at all: this is no blur, there is
 nothing in the frame to recover, and the field covers the whole row rather than
 tracing the glyphs — a silhouette would give away the length. The eye on a row
@@ -139,19 +139,10 @@ is also what keeps the app readable when run straight from SwiftPM, where the
 `.lproj` folders are not around at all.
 
 Everything the app composes itself follows the chosen language rather than the
-system one: those two differ more often than one expects. The weekday in the
-meeting list and the language names in the Translate header come from
-`Bundle.main.preferredLocalizations`, or a column headed in one language above a
-button worded in another would read as a mistake.
-
-Capitalisation is a matter of position, not of language. A label starts with a
-capital in both, but the words it starts with may not carry one: English weekday
-and month names are proper nouns and come out of a formatter capitalised wherever
-they stand, while Russian ones are ordinary words and come out lower-case. So the
-capital is applied where the label is built and is not written into the
-translations. The countdown is abbreviated on purpose — "in 12 min" rather than a
-spelled-out word: the full form does not fit the panel header, and an
-abbreviation declines in no language, so plural forms are not needed at all.
+system one: those two differ more often than one expects. The language
+names in the Translate header and the number format of the Currency amounts come
+from `Bundle.main.preferredLocalizations`, or a column headed in one language
+above a button worded in another would read as a mistake.
 
 An individual app's language can be changed in System Settings → General →
 Language & Region → Applications.
@@ -289,9 +280,7 @@ a hover has to survive anyway. A sleeping display stops sampling entirely.
 The track-position ticker runs only while the panel is open: the position is
 derivable at any moment from an anchor of where it stood and when, and moving a
 bar inside a closed panel — four wake-ups a second for as long as anything
-plays — is painting for nobody. The calendar timer lives only while the panel is
-open; changes to the meetings themselves arrive through `EKEventStoreChanged`
-regardless. Store updates do not repaint a collapsed panel at all. Clipboard
+plays — is painting for nobody. Store updates do not repaint a collapsed panel at all. Clipboard
 polling reads one change counter twice a second, and image data is not touched
 while screenshot saving is off — it used to be encoded to PNG in full and thrown
 away. Every timer carries a tolerance so the system can coalesce wake-ups. And

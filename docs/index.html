@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyclop — free open-source notch app for MacBook</title>
-<meta name="description" content="Turn the MacBook notch into a panel: media controls, file shelf, clipboard history, snippets, calendar and offline translation. Native SwiftUI, zero dependencies, no permissions. Free, MIT.">
+<meta name="description" content="Turn the MacBook notch into a panel: media controls, file shelf, clipboard history, snippets and offline translation. Native SwiftUI, zero dependencies, nothing asked at launch. Free, MIT.">
 <link rel="canonical" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="en" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="ru" href="https://akalikbergenov.github.io/cyclop/ru/">
@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Cyclop">
 <meta property="og:title" content="Cyclop — free open-source notch app for MacBook">
-<meta property="og:description" content="The MacBook notch as a working tool: player, file shelf, clipboard, snippets, calendar and offline translation. Native, 2.1 MB, no dependencies, no permissions.">
+<meta property="og:description" content="The MacBook notch as a working tool: player, file shelf, clipboard, snippets and offline translation. Native, 2.1 MB, no dependencies, nothing asked at launch.">
 <meta property="og:url" content="https://akalikbergenov.github.io/cyclop/">
 <meta property="og:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 <meta property="og:image:width" content="1400">
@@ -38,7 +38,7 @@
       "applicationCategory": "UtilitiesApplication",
       "applicationSubCategory": "Menu bar utility",
       "operatingSystem": "macOS 15 or newer",
-      "description": "A macOS utility that turns the MacBook notch into a panel with media controls, a file shelf, clipboard history, snippets, a calendar and offline translation. Native SwiftUI and AppKit, no third-party dependencies.",
+      "description": "A macOS utility that turns the MacBook notch into a panel with media controls, a file shelf, clipboard history, snippets and offline translation. Native SwiftUI and AppKit, no third-party dependencies.",
       "url": "https://akalikbergenov.github.io/cyclop/",
       "downloadUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
       "installUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
@@ -54,7 +54,6 @@
         "File shelf with drag and drop",
         "Clipboard history",
         "Snippets",
-        "Next meeting with a one-click join for Zoom, Meet and Teams",
         "Offline translation between English and Russian",
         "Teleprompter that scrolls a script under the camera"
       ],
@@ -72,7 +71,7 @@
         {
           "@type": "Question",
           "name": "What permissions does Cyclop need?",
-          "acceptedAnswer": { "@type": "Answer", "text": "None until you open the Calendar tab, and that one is requested by an explicit button press rather than at launch. Cyclop asks for no Automation, no Accessibility and no Screen Recording. A file placed on the shelf from Downloads, Documents or the Desktop is the one thing macOS asks about separately, and only when the shelf is opened." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Nothing at launch. The one permission Cyclop asks for itself is Accessibility, for the keyboard lock in Utilities, and it is requested by an explicit button press. Cyclop asks for no Screen Recording. A file placed on the shelf from Downloads, Documents or the Desktop is the one thing macOS asks about separately, and only when the shelf is opened." }
         },
         {
           "@type": "Question",
@@ -184,7 +183,7 @@ footer a{color:var(--dim)}
 <header>
   <h1>The MacBook notch as a working tool</h1>
   <p class="tagline">Cyclop is a free, open-source notch app for macOS. Invisible at rest; on hover it
-  unfolds into a panel with a player, a file shelf, clipboard history, snippets, your next meeting
+  unfolds into a panel with a player, a file shelf, clipboard history, snippets
   and an offline translator.</p>
   <div class="cta">
     <a class="btn" href="https://github.com/akalikbergenov/cyclop/releases/latest">Download for macOS</a>
@@ -204,7 +203,7 @@ with no permissions and nothing configured in the browser.</figcaption>
   <div class="fact"><b>0.0 %</b><span>CPU at rest</span></div>
   <div class="fact"><b>≈40 MB</b><span>memory</span></div>
   <div class="fact"><b>0</b><span>dependencies</span></div>
-  <div class="fact"><b>0</b><span>permissions*</span></div>
+  <div class="fact"><b>1</b><span>permission*</span></div>
   <div class="fact"><b>MIT</b><span>licence</span></div>
 </div>
 
@@ -226,9 +225,6 @@ with no permissions and nothing configured in the browser.</figcaption>
     <div class="tab"><h3>Snippets</h3><p>A hand-kept list of what you are tired of retyping: an
       address, a phone number, an email. The same list is a plain JSON file you can edit in any
       editor.</p></div>
-    <div class="tab"><h3>Calendar</h3><p>The next meeting a week ahead, how long until it starts,
-      and a button that joins the call — Zoom, Meet, Teams and others. Meetings that overlap each
-      get their own join button.</p></div>
     <div class="tab"><h3>Translate</h3><p>Type on the left, the translation appears on the right —
       offline, using macOS's own translation, with no service and no account. English to Russian
       and back; the direction is taken from the script the text is written in.</p></div>
@@ -247,9 +243,9 @@ with no permissions and nothing configured in the browser.</figcaption>
   <table>
     <tr><th>Zero dependencies</th><td>Nothing but Swift, SwiftUI and AppKit. No package manager, no
       vendored frameworks. The whole thing is 5 800 lines you can read in an afternoon.</td></tr>
-    <tr><th>No permissions</th><td>No Automation, no Accessibility, no Screen Recording. Calendar
-      access is the only permission Cyclop ever requests, it belongs to one tab, and the system
-      dialog appears on an explicit button press rather than at launch.</td></tr>
+    <tr><th>One permission, on a button</th><td>Nothing is asked at launch. Accessibility, for the
+      keyboard lock, is the one permission Cyclop asks for itself, and the system dialog appears on
+      an explicit button press.</td></tr>
     <tr><th>Any media source</th><td>Now Playing is read from macOS itself, so a video in a browser
       tab works exactly like a music player — no browser extension, no per-app connector.</td></tr>
     <tr><th>Offline translation</th><td>Translation runs on the device through macOS's own
@@ -287,10 +283,10 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     menu bar and behaves the same way. It works on external displays too.</p></details>
 
   <details><summary>What permissions does Cyclop need?</summary>
-    <p>None until you open the Calendar tab, and that one is asked for by an explicit button press
-    on a screen that explains why — not at launch, and not when the tab opens. Cyclop requests no
-    Automation, no Accessibility and no Screen Recording.</p>
-    <p>*One exception: a file placed on the shelf from Downloads, Documents or the Desktop is
+    <p>Nothing at launch. The one permission Cyclop asks for itself is Accessibility, for the
+    keyboard lock in Utilities, and it is asked for by an explicit button press on a screen that
+    explains why. Cyclop requests no Screen Recording.</p>
+    <p>*Besides that, a file placed on the shelf from Downloads, Documents or the Desktop is
     something macOS asks about separately, and only at the moment the shelf is opened.</p></details>
 
   <details><summary>Is Cyclop free? Is there a paid version?</summary>
@@ -312,9 +308,9 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     ask again. The source is public if you would rather build it yourself.</p></details>
 
   <details><summary>What does it cost in memory and battery?</summary>
-    <p>About 40 MB plus a 14 MB helper process, and 0.0 % CPU while the panel is closed. Each tab
-    runs only while it is being looked at — the clock behind the calendar and the position ticker
-    behind the player both stop when the panel folds.</p></details>
+    <p>About 40 MB plus a 14 MB helper process, and 0.0 % CPU while the panel is closed. A tab's
+    background work runs only while the tab is on a rail, and the position ticker behind the
+    player stops when the panel folds.</p></details>
 
   <details><summary>Which macOS versions are supported?</summary>
     <p>macOS 15 and newer, on both Apple silicon and Intel. The floor comes from the translation

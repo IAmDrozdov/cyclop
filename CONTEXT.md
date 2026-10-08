@@ -118,17 +118,6 @@ An opt-in folder where macOS saves ⌘⇧3 and ⌘⇧4 screenshots; new files in
 One entry in a short, hand-kept list of text worth not retyping, such as an address, with an optional label; clicking it copies the text. The list is a file that can also be edited by hand.
 _Avoid_: template, favourite, pinned clip
 
-**Calendar** «Календарь»:
-The next meetings within a week, with a countdown to the first one and a Join button.
-_Avoid_: agenda, events, schedule
-
-**Meeting** «встреча»:
-A calendar event the Calendar tab shows: timed rather than all-day, not cancelled, and within the week ahead.
-_Avoid_: event
-
-**Join button** (Join «Подключиться»):
-Opens the video-call link found in a meeting, for known call services only.
-
 **Translate** «Перевод»:
 Offline translation between English and Russian. Text in Cyrillic goes to English and everything else to Russian; the direction comes from the script, not from language detection.
 
@@ -164,11 +153,11 @@ A menu bar option that covers what chosen sections show with a field of drifting
 _Avoid_: privacy mode, blur, spoiler
 
 **Section**:
-One tab's share of Hide Contents: clipboard, snippets or calendar.
+One tab's share of Hide Contents: clipboard or snippets.
 _Avoid_: category
 
 **Reveal** (Show «Показать»):
-Uncovering one covered item (a row, or the whole Calendar tab) until the last open panel collapses.
+Uncovering one covered item (a row) until the last open panel collapses.
 _Avoid_: unhide
 
 **Config file** (Show Config File «Показать файл конфигурации»):

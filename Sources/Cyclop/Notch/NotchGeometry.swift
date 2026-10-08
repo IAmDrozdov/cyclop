@@ -57,12 +57,12 @@ struct NotchGeometry {
         expandedSize.height - notchSize.height - Self.bodyBottomPadding
     }
 
-    /// Height each rail icon gets. A ceiling, not a constant: six icons at
-    /// the full 24 pt plus the five 4 pt gaps between them is 164 pt, and
-    /// the body only has `expandedSize.height − notchSize.height −
-    /// bodyBottomPadding` left to give the rail once the header — the notch
-    /// itself — and the padding beneath are taken out of the fixed 208.
-    /// Rounded down rather than to the nearest point: a rail that asks for
+    /// Height each rail icon gets. A ceiling, not a constant: the body only
+    /// has `expandedSize.height − notchSize.height − bodyBottomPadding` left
+    /// to give the rail once the header — the notch itself — and the padding
+    /// beneath are taken out of the fixed 208, and a rail whose icons at the
+    /// full 24 pt plus the 4 pt gaps between them ask for more than that
+    /// shrinks every icon to fit. Rounded down rather than to the nearest point: a rail that asks for
     /// more than it is given should visibly yield, not overflow by a
     /// fraction that clips it.
     var railIconHeight: CGFloat {

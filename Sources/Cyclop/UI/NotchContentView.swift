@@ -116,12 +116,6 @@ struct NotchContentView: View {
             counter(vm.clipboard.items.count)
         case .snippets:
             counter(vm.snippets.items.count)
-        case .calendar:
-            if let next = vm.calendar.next {
-                Text(CalendarPane.countdown(to: next, from: vm.calendar.now))
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(next.isRunning ? Color.white.opacity(0.8) : Theme.tertiary)
-            }
         case .translate:
             // Nothing: the columns name both languages already, and the strip
             // is the one part of the panel worth not spending on a repeat.
@@ -189,8 +183,6 @@ struct NotchContentView: View {
             ShelfPane(shelf: vm.shelf, isTargeted: panel.isDropTargeted)
         case .clipboard:
             ClipboardPane(clipboard: vm.clipboard, privacy: vm.privacy)
-        case .calendar:
-            CalendarPane(calendar: vm.calendar, privacy: vm.privacy)
         case .snippets:
             SnippetsPane(snippets: vm.snippets, privacy: vm.privacy, wantsKeyboard: $panel.wantsKeyboard)
         case .translate:

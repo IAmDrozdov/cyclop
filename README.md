@@ -4,7 +4,7 @@
 
 The MacBook notch as a working tool. A native SwiftUI/AppKit app: invisible at
 rest, and on hover it unfolds downwards into a panel with a player, a shelf for
-files, clipboard history and your next meetings.
+files and clipboard history.
 
 [![build](https://github.com/akalikbergenov/cyclop/actions/workflows/build.yml/badge.svg)](https://github.com/akalikbergenov/cyclop/actions/workflows/build.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-%E2%98%95-FFDD00?style=flat-square&labelColor=000000)](https://buymeacoffee.com/akalikbergenov)
@@ -30,7 +30,6 @@ that works is below.
 | **Shelf** | Drag files into the notch and they stay there until needed; drag a card out and the file goes wherever it is dropped. A click selects a card, ⌘-click selects several, and then the whole group is dragged. A screenshot taken to the clipboard is saved as a file and lands here too — including one taken on an iPhone, if you copy it there |
 | **Clipboard** | The last 40 copies; a click puts an entry back on the clipboard |
 | **Snippets** | A hand-kept list of what you are tired of retyping: an address, a phone number, an email. Added with a button in the panel, removed with the cross on a card; a click puts the text on the clipboard. The same list lives in `~/Library/Application Support/Cyclop/snippets.json` and can be edited there instead |
-| **Calendar** | The next meeting a week ahead: how long until it starts and a button that joins the call — Zoom, Meet, Teams and others. The rest of the meetings as a list |
 | **Translate** | Type on the left, the translation appears on the right — by itself, offline, using macOS's own facilities. English goes to Russian, Russian to English; the direction comes from the script the text is written in. macOS does not preinstall language packs, so the first time you have to download one: System Settings → General → Language & Region → "Translation Languages…" |
 | **Currency** | An amount on one side, the other currency on the other; type into either. Rates are the one thing in Cyclop that comes over the network — a public table of daily rates, fetched once an hour, and only while the tab is on |
 | **Teleprompter** | A script that scrolls under the camera at a speed you set. The notch is the one place on the screen a teleprompter belongs: reading happens right beside the lens, so on the recording the eyes stay on the camera instead of travelling to a window below it. The panel holds itself open while the text is moving — reading a script means not touching the trackpad |
@@ -45,7 +44,7 @@ relaunching Cyclop brings it back.
 
 Any tab can be switched off in **Settings → Show in Panel**. Off means two
 things: the icon leaves the rail, and the tab's background work stops with
-it — the clipboard poll, the calendar watch, the Now Playing helper, the
+it — the clipboard poll, the Now Playing helper, the
 rate fetch. The rail is for what gets a glance between other things; a mode
 used once a month may live there, but only as long as the people who never
 use it can take it off.
@@ -79,10 +78,8 @@ Open `Cyclop-<version>.dmg` and drag the app into Applications. It opens on
 the first try: since 0.8.0 the image is signed with a Developer ID and
 notarised by Apple, so there is nothing to allow and nothing to type.
 
-Updating works the same way: open the new image and replace the app. Coming
-from a version before 0.8.0, macOS may ask for the calendar permission once
-more — the app's signature changed, and that is what the permission was tied
-to. The version is the first line of the menu bar menu.
+Updating works the same way: open the new image and replace the app. The
+version is the first line of the menu bar menu.
 
 A build from source (`Scripts/bundle.sh`) is ad-hoc signed and is not
 notarised, so on any Mac but the one that built it the first launch goes
@@ -126,22 +123,18 @@ that is the link to hand to people instead of a file.
 ## Permissions
 
 **Nothing at launch, and nothing until you press the button that needs it.**
-That is the promise, and it is narrower than "no permissions": Cyclop asks for
-two, each one only when a tab that cannot work without it is used.
+That is the promise, and it is narrower than "no permissions": a permission is
+asked for only by the button that cannot work without it, and the one Cyclop
+asks for itself is Accessibility.
 
-**Calendar**, for the Calendar tab. The system dialog appears neither at launch
-nor when the tab is opened, but on an explicit press of a button on a screen
-that explains why.
+**Accessibility**, for the keyboard lock in Utilities. It deserves to be named
+plainly: it is the permission that lets an app see and swallow every key press
+in the system, and nothing less can stop keys from reaching macOS while you wipe
+them. The system dialog comes from an explicit press of the button, after an
+explanation, and switching the tab off in Settings means it is never asked for.
 
-**Accessibility**, for the keyboard lock in Utilities. This one is heavier than
-the first and deserves to be named plainly: it is the permission that lets an
-app see and swallow every key press in the system, and nothing less can stop
-keys from reaching macOS while you wipe them. Same terms — an explicit press
-after an explanation — and switching the tab off in Settings means it is never
-asked for.
-
-Use neither tab and the app stays without permissions entirely. Nothing is asked
-for at launch in any case, and nothing needs configuring in the browser. The
+Never lock the keyboard and the app stays without permissions entirely. Nothing
+is asked for at launch in any case, and nothing needs configuring in the browser. The
 pointer position is read through `NSEvent.mouseLocation`, the clipboard through
 the public `NSPasteboard`, Now Playing through a helper (see below).
 
@@ -176,9 +169,6 @@ costs — eighteen notes on decisions the code does not show:
   a hand too, not a schedule.
 - Entries typed `org.nspasteboard.ConcealedType` (password managers) never enter
   the clipboard history.
-- The join button appears only if the call link is in the event itself — in the
-  location field, the notes or the URL. Meet, Zoom, Teams, Webex, Whereby, Jitsi,
-  Telemost and Discord are recognised.
 - A screenshot from the iPhone arrives through Universal Clipboard, so it needs
   what that needs: one Apple ID, Bluetooth and Wi-Fi on, Handoff enabled and the
   devices near each other. And it overwrites the clipboard on the Mac — what was
@@ -220,8 +210,7 @@ Sources/Cyclop
 │   ├── Translator.swift       Translation.framework, direction by script
 │   ├── CurrencyStore.swift    rates over the network, the one tab that has any
 │   ├── TeleprompterStore.swift the script and where reading it has got to
-│   ├── ScreenshotFolderWatcher.swift  screenshots saved to disk, onto the shelf
-│   └── CalendarStore.swift    EventKit: next meetings and the call link
+│   └── ScreenshotFolderWatcher.swift  screenshots saved to disk, onto the shelf
 └── UI/                        NotchShape, tab panes, theme
 
 Sources/CyclopMediaHelper
@@ -232,8 +221,8 @@ Sources/CyclopMediaHelper
 
 The rules are short and live in [CONTRIBUTING.md](CONTRIBUTING.md): what gets
 taken, what does not, and what to check before sending. The main one is that
-the app works without macOS permissions and without the network, and a change
-that alters this is a separate conversation.
+the app keeps to the permissions and connections that SECURITY.md lists, and a
+change that adds one is a separate conversation.
 
 What the app reads, what it keeps and where, where it goes on the network —
 [SECURITY.md](SECURITY.md). The channel for vulnerabilities is there too:
