@@ -346,6 +346,7 @@ final class NotchViewModel: ObservableObject {
         for target in Tab.allCases { stopBackground(of: target) }
         // Whatever was typed makes it to disk even when quitting mid-thought.
         notes.flush()
+        teleprompter.flush()
     }
 
     /// A screenshot that arrived on its own — copied elsewhere, or synced
