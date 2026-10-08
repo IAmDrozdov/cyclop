@@ -213,6 +213,23 @@ menu bar icon or a tab stays below it. For the same reason the delay before
 opening is 200 ms here instead of 50. The old full-height notch comes back with a
 switch in Settings.
 
+**Callbacks from system frameworks.** A closure handed to a system framework
+that runs it off the main thread is marked `@Sendable` explicitly, like the
+shelf's QuickLook completion. Whether a closure written inside a `@MainActor`
+type is isolated is decided by the SDK's declaration of the parameter, not by
+Cyclop's code, and the answer differs between compilers. An inherited isolation
+is checked at run time when the closure is called, and the framework calls it
+from a queue of its own, so the check kills the process. A closure that passes
+on one Mac then crashes on a release build: 0.8.0 fell over on shelf previews
+and on the calendar access request this way (#108, #111). Written out,
+`@Sendable` makes the closure nonisolated under any compiler.
+
+The screenshot folder watcher is the exception, and only by construction. Its
+handlers inherit the isolation, because `setEventHandler`
+does not mark its parameter `@Sendable`, and they are safe without the mark
+only because the dispatch source is created on the main queue. Moving it to
+another queue crashes at the first change in the folder.
+
 **Now Playing.** In macOS 15.4 the `mediaremoted` daemon began answering only
 clients it trusts. For an ordinary app that looks like this (checked on 15.7.5
 with music playing):

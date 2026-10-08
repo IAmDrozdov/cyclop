@@ -37,7 +37,7 @@ Elsewhere:
 - **Comments** that name the tab.
 - **Docs.**
   - `README.md` and `README.ru.md`: the tab table and the layout tree.
-  - `docs/architecture.md` and `.ru.md`: the tab's note. Both READMEs count the notes («seventeen notes»); update the count.
+  - `docs/architecture.md` and `.ru.md`: the tab's note. Both READMEs count the notes («eighteen notes»); update the count.
   - `SECURITY.md` (data, permissions, network), the promises in `CONTRIBUTING.md`, and `CONTEXT.md`.
   - The site: `docs/index.html`, `docs/ru/index.html`, `docs/llms.txt`.
   - The agent docs: `CLAUDE.md`, this file and `.claude/skills/run-cyclop/`.

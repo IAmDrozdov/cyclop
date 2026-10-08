@@ -121,6 +121,7 @@ final class ShelfStore: ObservableObject {
         // main thread.  Spell out that the callback itself is nonisolated:
         // otherwise a closure formed in this @MainActor type can inherit that
         // isolation and Swift traps before the Task below is even created.
+        // Why: docs/architecture.md, "Callbacks from system frameworks".
         QLThumbnailGenerator.shared.generateBestRepresentation(for: request) { @Sendable [weak self] rep, _ in
             guard let rep else { return }
             // `nsImage` already carries the right point size for the

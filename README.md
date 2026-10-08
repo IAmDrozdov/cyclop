@@ -157,7 +157,7 @@ the same Accessibility as above.
 
 Why the window is shaped the way it is, why the pointer is polled on a
 timer, why Now Playing lives inside `/usr/bin/perl`, what sitting idle
-costs — seventeen notes on decisions the code does not show:
+costs — eighteen notes on decisions the code does not show:
 **[docs/architecture.md](docs/architecture.md)**.
 
 ## Limitations
