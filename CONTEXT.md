@@ -103,7 +103,7 @@ One entry in a short, hand-kept list of text worth not retyping, such as an addr
 _Avoid_: template, favourite, pinned clip
 
 **Translate** «Перевод»:
-Offline translation between English and Russian. Text in Cyrillic goes to English and everything else to Russian; the direction comes from the script, not from language detection.
+Offline translation between Russian and a second language, English or Polish, switched by a click on its column title. Text in Cyrillic goes to the second language and everything else to Russian; the direction comes from the script, not from language detection.
 
 **Currency** «Валюта»:
 A two-sided converter between a chosen pair of currencies, on public daily rates; either side can be typed into.

@@ -66,6 +66,7 @@
 "Retry" = "Retry";
 "The %@ → %@ language pack is not installed." = "The %@ → %@ language pack is not installed.";
 "macOS does not translate this pair of languages." = "macOS does not translate this pair of languages.";
+"Switch language" = "Switch language";
 
 /* Currency */
 "Search currency" = "Search currency";

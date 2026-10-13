@@ -54,7 +54,7 @@ struct TranslatePane: View {
     // MARK: - Left
 
     private func source(_ font: CGFloat) -> some View {
-        column(Translator.name(translator.route.source)) {
+        column(translator.route.source) {
             if !translator.input.isEmpty {
                 Button { translator.reset() } label: {
                     Image(systemName: "xmark")
@@ -102,7 +102,7 @@ struct TranslatePane: View {
     // MARK: - Right
 
     private func result(_ font: CGFloat) -> some View {
-        column(Translator.name(translator.route.target)) {
+        column(translator.route.target) {
             if !translator.output.isEmpty {
                 CopyButton { translator.copyOutput() }
             }
@@ -186,16 +186,13 @@ struct TranslatePane: View {
     // MARK: - Shared
 
     private func column<Accessory: View, Content: View>(
-        _ title: String,
+        _ language: Locale.Language,
         @ViewBuilder accessory: () -> Accessory,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
-                Text(title.uppercased())
-                    .font(.system(size: 9, weight: .semibold))
-                    .tracking(0.8)
-                    .foregroundStyle(Theme.tertiary)
+                title(language)
                 Spacer(minLength: 4)
                 accessory()
             }
@@ -204,6 +201,32 @@ struct TranslatePane: View {
             content()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    /// The Russian end is fixed; the other one is a button that switches
+    /// between English and Polish, whichever column it is in at the moment.
+    @ViewBuilder
+    private func title(_ language: Locale.Language) -> some View {
+        let name = Text(Translator.name(language).uppercased())
+            .font(.system(size: 9, weight: .semibold))
+            .tracking(0.8)
+            .foregroundStyle(Theme.tertiary)
+        if language == Translator.russian {
+            name
+        } else {
+            Button { translator.switchForeign() } label: {
+                HStack(spacing: 3) {
+                    name
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 7, weight: .semibold))
+                        .foregroundStyle(Theme.tertiary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .pointerStyle(.default)
+            .help(localized("Switch language"))
+        }
     }
 
     // MARK: - Scheduling
@@ -220,7 +243,7 @@ struct TranslatePane: View {
         try? await Task.sleep(for: .milliseconds(320))
         guard !Task.isCancelled else { return }
 
-        let route = Translator.route(for: text)
+        let route = translator.route
         if var current = configuration, current.source == route.source, current.target == route.target {
             // Same pair, different text. The modifier only re-runs when the
             // configuration changes, and invalidating is how one says "again".

@@ -166,10 +166,12 @@ remembered separately, and a panel that sometimes disobeys the pointer is worse
 than one that always obeys it.
 
 **Translation.** `Translation.framework`, entirely offline. Both languages are
-named explicitly: Cyrillic goes out to English, everything else comes in to
-Russian. The direction is decided by script rather than by language
-identification — a single word is far too short to identify reliably, and
-"привет" is regularly detected as Bulgarian. Leaving the source language to the
+named explicitly: Cyrillic goes out to the foreign language, everything else
+comes in to Russian. The foreign language is English or Polish, switched by a
+click on its column title and kept in `UserDefaults`: the two share a script,
+so the text cannot say which one it is. The direction is decided by script
+rather than by language identification — a single word is far too short to
+identify reliably, and "привет" is regularly detected as Bulgarian. Leaving the source language to the
 framework is not an option either: its identifier is a separate asset that is
 equally not installed, so auto-detection fails with `unableToIdentifyLanguage`,
 and the `translate` that follows never returns at all.

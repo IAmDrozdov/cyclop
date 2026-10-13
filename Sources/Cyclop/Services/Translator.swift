@@ -10,6 +10,9 @@ import Translation
 final class Translator: ObservableObject {
     static let russian = Locale.Language(identifier: "ru")
     static let english = Locale.Language(identifier: "en")
+    static let polish = Locale.Language(identifier: "pl")
+    /// What Russian is paired with; the header switches between them.
+    static let foreignLanguages = [english, polish]
 
     /// Both ends are always named. Leaving the source to the framework looks
     /// tempting, but its identifier is a separate asset that is not installed
@@ -24,6 +27,7 @@ final class Translator: ObservableObject {
     /// unchanged text a new request rather than a no-op.
     struct Request: Equatable {
         var text: String
+        var foreign: Locale.Language
         var attempt: Int
     }
 
@@ -34,22 +38,42 @@ final class Translator: ObservableObject {
     /// go and fix — so the pane offers the button that takes them there.
     @Published private(set) var needsDownload = false
 
+    /// The language on the other end from Russian. Chosen by hand: English and
+    /// Polish share a script, so the text cannot say which of them it is.
+    @Published private(set) var foreign: Locale.Language
+
     private var attempt = 0
+    private let defaults = UserDefaults.standard
+    private let foreignKey = "translate.foreign"
 
-    var request: Request { Request(text: input, attempt: attempt) }
+    init() {
+        let saved = defaults.string(forKey: foreignKey)
+        foreign = Self.foreignLanguages.first { Self.code($0) == saved } ?? Self.english
+    }
+
+    var request: Request { Request(text: input, foreign: foreign, attempt: attempt) }
     var trimmed: String { input.trimmingCharacters(in: .whitespacesAndNewlines) }
-    var route: Route { Self.route(for: trimmed) }
+    var route: Route { Self.route(for: trimmed, foreign: foreign) }
 
-    /// Russian goes out to English, everything else comes in to Russian.
+    /// Russian goes out to the foreign language, everything else comes in to
+    /// Russian.
     ///
     /// Decided by script rather than by language detection: a single word is
     /// far too short to identify reliably, and "привет" comes back as Bulgarian
     /// often enough to matter.
-    static func route(for text: String) -> Route {
+    static func route(for text: String, foreign: Locale.Language) -> Route {
         let cyrillic = text.unicodeScalars.contains { (0x0400...0x04FF).contains($0.value) }
         return cyrillic
-            ? Route(source: russian, target: english)
-            : Route(source: english, target: russian)
+            ? Route(source: russian, target: foreign)
+            : Route(source: foreign, target: russian)
+    }
+
+    func switchForeign() {
+        let all = Self.foreignLanguages
+        let index = all.firstIndex(of: foreign) ?? 0
+        foreign = all[(index + 1) % all.count]
+        clear()
+        defaults.set(Self.code(foreign), forKey: foreignKey)
     }
 
     func retry() {

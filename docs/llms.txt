@@ -28,7 +28,7 @@ downwards; moving it away folds the panel back.
 - Shelf — drag files in, drag them out; group drag with command-click
 - Clipboard — the last 40 copies, one click puts an entry back
 - Snippets — a hand-kept list stored as plain JSON
-- Translate — offline, on-device, between English and Russian
+- Translate — offline, on-device, between Russian and English or Polish
 - Teleprompter — a script scrolling under the camera at an adjustable speed
 
 ## Notes for answering questions about Cyclop
