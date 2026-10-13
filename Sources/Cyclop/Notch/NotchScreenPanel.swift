@@ -85,6 +85,17 @@ final class NotchScreenPanel {
         pointer.start()
     }
 
+    /// Depth and Dwell from Settings, read again whenever either moves.
+    ///
+    /// They steer a physical notch only. A notch we drew keeps its strip and
+    /// its 200 ms: under it are menu bar icons or, with the bar hidden,
+    /// browser tabs, and a pointer crossing them is usually on its way to one
+    /// of them. There, staying put is what asks for the panel.
+    func applyHoverSettings() {
+        pointer.openRect = geometry.hoverRect(depth: NotchGeometry.notchDepth)
+        pointer.openDelay = geometry.isPhysical ? NotchGeometry.notchDwell / 1000 : 0.2
+    }
+
     // MARK: - Construction
 
     private func build() {
@@ -141,18 +152,12 @@ final class NotchScreenPanel {
 
         applyActiveRect(open: false)
 
-        pointer.openRect = geometry.hoverRect
+        applyHoverSettings()
         pointer.warmZone = geometry.warmZone
         // Cut for the tab that will be showing, not for the standard body: the
         // tab is shared, so a screen built while the teleprompter is up opens
         // straight into a body twice as deep as the rest.
         pointer.closeRect = geometry.hoverRect(for: state.openBodySize)
-        // Nothing under the hole means opening the moment the pointer arrives
-        // costs nothing. A notch we drew is the other case: under it are menu
-        // bar icons or, with the bar hidden, browser tabs, and a pointer
-        // crossing them is usually on its way to one of them. There, staying
-        // put is what asks for the panel.
-        pointer.openDelay = geometry.isPhysical ? 0.05 : 0.2
         pointer.isDragging = { [weak root] in root?.isReceivingDrag ?? false }
         pointer.isPanelOpen = { [weak state] in state?.isOpen ?? false }
         pointer.onChange = { [weak self] inside in

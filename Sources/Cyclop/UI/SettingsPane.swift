@@ -17,6 +17,8 @@ struct SettingsPane: View {
     @State private var saveClipboardImages = NotchViewModel.saveClipboardImagesEnabled
     @State private var allDisplays = NotchGeometry.showsOnAllDisplays
     @State private var fullSizeNotch = NotchGeometry.drawsFullSizeNotch
+    @State private var notchDepth = NotchGeometry.notchDepth
+    @State private var notchDwell = NotchGeometry.notchDwell
     @State private var watchScreenshotFolder = false
     @State private var screenshotUsage: (files: Int, bytes: Int64) = (0, 0)
 
@@ -62,6 +64,9 @@ struct SettingsPane: View {
                         title: localized("Full-Height Notch Without a Cutout"),
                         isOn: fullSizeNotchBinding
                     )
+                    // Both steer a physical notch only, so without one the
+                    // row would move nothing.
+                    if NotchGeometry.hasPhysicalNotch { notchOpensRow }
                 }
 
                 section(localized("Screenshots")) {
@@ -135,6 +140,8 @@ struct SettingsPane: View {
             saveClipboardImages = NotchViewModel.saveClipboardImagesEnabled
             allDisplays = NotchGeometry.showsOnAllDisplays
             fullSizeNotch = NotchGeometry.drawsFullSizeNotch
+            notchDepth = NotchGeometry.notchDepth
+            notchDwell = NotchGeometry.notchDwell
             watchScreenshotFolder = screenshots.isEnabled
             refreshUsage()
         }
@@ -280,6 +287,51 @@ struct SettingsPane: View {
         }
         .padding(.horizontal, 8)
         .frame(height: 26)
+    }
+
+    /// Sliders rather than a switch: how deep and how long is found by moving
+    /// the pointer at the notch between nudges, and both apply at once.
+    private var notchOpensRow: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "cursorarrow.motionlines")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Theme.secondary)
+                .frame(width: 16)
+            Text(localized("Notch Opens"))
+                .font(.system(size: 11.5, weight: .medium))
+                .foregroundStyle(.white)
+            Spacer(minLength: 8)
+            notchSlider(
+                localized("Depth"),
+                value: Binding(
+                    get: { notchDepth },
+                    set: { notchDepth = $0; NotchGeometry.notchDepth = $0 }
+                ),
+                in: NotchGeometry.depthRange
+            )
+            notchSlider(
+                localized("Dwell"),
+                value: Binding(
+                    get: { notchDwell },
+                    set: { notchDwell = $0; NotchGeometry.notchDwell = $0 }
+                ),
+                in: NotchGeometry.dwellRange
+            )
+        }
+        .padding(.horizontal, 8)
+        .frame(height: 26)
+    }
+
+    private func notchSlider(_ title: String, value: Binding<Double>, in range: ClosedRange<Double>) -> some View {
+        HStack(spacing: 5) {
+            Text(title)
+                .font(.system(size: 10))
+                .foregroundStyle(Theme.secondary)
+            Slider(value: value, in: range)
+                .controlSize(.mini)
+                .tint(.white.opacity(0.7))
+                .frame(width: 64)
+        }
     }
 
     /// The refusal to write over a broken file (#7) is only honest if it is

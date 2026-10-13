@@ -108,6 +108,41 @@ struct NotchGeometry {
         }
     }
 
+    /// Posted when Depth or Dwell moves. Not `settingsChanged`: a rebuild would
+    /// close the panel under the slider being dragged.
+    static let hoverSettingsChanged = Notification.Name("CyclopHoverSettingsChanged")
+
+    /// Points the pointer has to be inside a physical notch from either side.
+    static let depthRange: ClosedRange<Double> = 0...16
+    /// Milliseconds before a physical notch opens.
+    static let dwellRange: ClosedRange<Double> = 50...300
+
+    /// Persisted in `config.json` as `notch.depth`.
+    @MainActor
+    static var notchDepth: Double {
+        get { ConfigStore.shared.notchDepth }
+        set {
+            ConfigStore.shared.notchDepth = newValue
+            NotificationCenter.default.post(name: hoverSettingsChanged, object: nil)
+        }
+    }
+
+    /// Persisted in `config.json` as `notch.dwell`.
+    @MainActor
+    static var notchDwell: Double {
+        get { ConfigStore.shared.notchDwell }
+        set {
+            ConfigStore.shared.notchDwell = newValue
+            NotificationCenter.default.post(name: hoverSettingsChanged, object: nil)
+        }
+    }
+
+    /// True when some attached display has a cutout, so Depth and Dwell apply.
+    @MainActor
+    static var hasPhysicalNotch: Bool {
+        NSScreen.screens.contains { $0.safeAreaInsets.top > 0 }
+    }
+
     /// Every display the panel should stand on.
     ///
     /// Switched off, that is the screen with a physical notch if one is
@@ -223,6 +258,7 @@ struct NotchGeometry {
     ///
     /// A real notch is a hole: nothing is drawn over it, and the whole of it
     /// can be claimed, because there is nothing underneath to claim it from.
+    /// What opens the panel is narrower: see `hoverRect(depth:)`.
     ///
     /// A notch we drew is a strip along the very top edge instead (#109). It
     /// used to be drawn the height of the menu bar, which only holds together
@@ -250,20 +286,34 @@ struct NotchGeometry {
     /// Size of the collapsed notch: the hole itself, or the strip we draw.
     var collapsedSize: CGSize { CGSize(width: notchSize.width, height: collapsedDepth) }
 
-    /// Hover target while collapsed, in global screen coordinates. Slightly
-    /// taller than the notch so the panel opens just before the pointer lands.
-    var hoverRect: CGRect {
-        // The slack is what makes the panel open just before the pointer lands.
-        // Only a hole gets it: under a notch we drew there is a menu bar or
-        // somebody's content, and either would feel it.
-        let slack: CGFloat = isPhysical ? 4 : 0
+    /// Hover target while collapsed, in global screen coordinates.
+    ///
+    /// On a physical notch the arrow's tip has to be `depth` points inside
+    /// from either side and deeper still from below, where the arrow is taller
+    /// than it is wide. A pointer brushing the edge on its way along the menu
+    /// bar or to a window beneath is not asking for the panel. The top edge
+    /// stays in: throwing the pointer up into the notch is.
+    func hoverRect(depth: CGFloat) -> CGRect {
+        guard isPhysical else {
+            return includingTopEdge(CGRect(
+                x: notchCenterX - notchSize.width / 2 - 6,
+                y: screen.frame.maxY - collapsedDepth,
+                width: notchSize.width + 12,
+                height: collapsedDepth
+            ))
+        }
+        let side = min(depth, notchSize.width / 2 - 8)
+        let below = min(depth * Self.arrowAspect, notchSize.height - 4)
         return includingTopEdge(CGRect(
-            x: notchCenterX - notchSize.width / 2 - 6,
-            y: screen.frame.maxY - collapsedDepth - slack,
-            width: notchSize.width + 12,
-            height: collapsedDepth + slack
+            x: notchCenterX - notchSize.width / 2 + side,
+            y: screen.frame.maxY - notchSize.height + below,
+            width: notchSize.width - side * 2,
+            height: notchSize.height - below
         ))
     }
+
+    /// Height over width of half the standard arrow (about 23 × 17 pt).
+    static let arrowAspect: CGFloat = 11.0 / 8.0
 
     /// Band along the top of the display in which pointer sampling runs at
     /// full rate. Deep enough that a pointer heading for the notch is always

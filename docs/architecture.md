@@ -190,6 +190,19 @@ General → Language & Region → "Translation Languages…".
 the panel can claim all of it, because there is nothing underneath to take a
 click away from.
 
+Claiming it is not the same as opening on a touch. The panel used to open a few
+points before the pointer reached the hole, after 50 ms, and a pointer on its way
+along the menu bar or to a window underneath opened it by brushing the edge. Now
+the tip of the arrow has to be inside: 8 pt from either side and 11 pt from
+below, about half the arrow each way, held for 120 ms, which a pointer crossing
+the notch along the menu bar does not last. The rule is about the tip, not the
+arrow's picture: the picture hangs right and down from the tip, so "half the
+arrow overlaps" would open sooner from the left than from the right. The top edge
+stays in the target, so throwing the pointer up into the notch still works. Both
+numbers are the Depth and Dwell sliders in Settings (`notch` in `config.json`),
+and moving one re-reads the target without rebuilding the panel, which would
+close it under the slider.
+
 A notch we draw is an 8-point strip along the very top edge, and the strip is
 what answers the pointer. It used to be drawn the height of the menu bar, which
 holds only while the bar is there: any window in full screen hides it, and on a
@@ -201,8 +214,8 @@ bar and without it.
 
 The strip is reached by throwing the pointer up, while a pointer travelling to a
 menu bar icon or a tab stays below it. For the same reason the delay before
-opening is 200 ms here instead of 50. The old full-height notch comes back with a
-switch in Settings.
+opening is a fixed 200 ms here, and the sliders do not reach it. The old
+full-height notch comes back with a switch in Settings.
 
 **Callbacks from system frameworks.** A closure handed to a system framework
 that runs it off the main thread is marked `@Sendable` explicitly, like the

@@ -25,8 +25,8 @@ final class PointerWatcher {
     /// things too — a drag, the menu bar, a tab that wants the keyboard.
     var isPanelOpen: () -> Bool = { false }
 
-    /// Short enough to feel immediate, long enough that a pointer sweeping
-    /// across the top of the screen does not trigger the panel.
+    /// The dwell before opening. Set per notch by
+    /// `NotchScreenPanel.applyHoverSettings`.
     var openDelay: TimeInterval = 0.05
     var closeDelay: TimeInterval = 0.05
 

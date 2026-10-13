@@ -50,9 +50,13 @@ _Avoid_: home tab, start tab
 What a tab shows between the two rails.
 _Avoid_: tab (the tab is the choice; the pane is its content)
 
-**Dwell**:
-The pause that turns hovering into choosing: on the notch before the panel opens, and on a rail icon before the tab switches.
+**Dwell** (Dwell «Пауза»):
+The pause that turns hovering into choosing: on the notch before the panel opens, and on a rail icon before the tab switches. The setting adjusts the pause on a physical notch only.
 _Avoid_: hover delay
+
+**Depth** (Depth «Глубина»):
+How far into a physical notch the pointer has to be before the dwell starts counting, so a pointer that only brushes the edge opens nothing.
+_Avoid_: sensitivity, inset, slack
 
 **Typing tab**:
 A tab that takes the keyboard on arrival without activating Cyclop: Translate, Currency and Snippets, and the Teleprompter while its script is empty. The keyboard goes back when the tab is left, the panel collapses or another app is clicked; Esc gives it back in no tab; in Translate, Currency and Snippets it clears the field.

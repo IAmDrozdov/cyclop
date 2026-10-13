@@ -27,6 +27,11 @@ final class NotchController {
                 MainActor.assumeIsolated { self?.rebuild() }
             }
         }
+        NotificationCenter.default.addObserver(
+            forName: NotchGeometry.hoverSettingsChanged, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.panels.values.forEach { $0.applyHoverSettings() } }
+        }
         onWorkspace(NSWorkspace.activeSpaceDidChangeNotification) { $0.activeSpaceChanged() }
         onWorkspace(NSWorkspace.screensDidSleepNotification) { $0.screensSlept() }
         onWorkspace(NSWorkspace.screensDidWakeNotification) { $0.screensWoke() }

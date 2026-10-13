@@ -24,6 +24,22 @@ final class ConfigStore: ObservableObject {
         var fontSize: Double = 30
     }
 
+    /// Depth in points, dwell in milliseconds: see `NotchGeometry.hoverRect(depth:)`.
+    private struct Notch: Codable, Equatable {
+        var depth: Double = 8
+        var dwell: Double = 120
+
+        init() {}
+
+        /// Same reason as `File.init(from:)`: a hand edit may keep one key.
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            let d = Notch()
+            depth = try c.decodeIfPresent(Double.self, forKey: .depth) ?? d.depth
+            dwell = try c.decodeIfPresent(Double.self, forKey: .dwell) ?? d.dwell
+        }
+    }
+
     private struct File: Codable, Equatable {
         var showOnAllDisplays = true
         var saveClipboardImages = true
@@ -31,6 +47,7 @@ final class ConfigStore: ObservableObject {
         var teleprompter = Teleprompter()
         var hiddenTabs: [String] = []
         var fullSizeDrawnNotch = false
+        var notch = Notch()
 
         init() {}
 
@@ -48,6 +65,7 @@ final class ConfigStore: ObservableObject {
             teleprompter = try c.decodeIfPresent(Teleprompter.self, forKey: .teleprompter) ?? d.teleprompter
             hiddenTabs = try c.decodeIfPresent([String].self, forKey: .hiddenTabs) ?? d.hiddenTabs
             fullSizeDrawnNotch = try c.decodeIfPresent(Bool.self, forKey: .fullSizeDrawnNotch) ?? d.fullSizeDrawnNotch
+            notch = try c.decodeIfPresent(Notch.self, forKey: .notch) ?? d.notch
         }
     }
 
@@ -96,6 +114,19 @@ final class ConfigStore: ObservableObject {
     var fullSizeDrawnNotch: Bool {
         get { value.fullSizeDrawnNotch }
         set { value.fullSizeDrawnNotch = newValue; persist() }
+    }
+
+    /// How far into a physical notch the pointer has to be, in points. Clamped
+    /// on the way out: the file is edited by hand.
+    var notchDepth: Double {
+        get { value.notch.depth.clamped(to: NotchGeometry.depthRange) }
+        set { value.notch.depth = newValue; persist() }
+    }
+
+    /// The pause before a physical notch opens, in milliseconds.
+    var notchDwell: Double {
+        get { value.notch.dwell.clamped(to: NotchGeometry.dwellRange) }
+        set { value.notch.dwell = newValue; persist() }
     }
 
     /// Off switch for people who copy images all day and do not want them
@@ -190,5 +221,11 @@ final class ConfigStore: ObservableObject {
             shared.write(shared.value)
         }
         NSWorkspace.shared.activateFileViewerSelecting([file])
+    }
+}
+
+private extension Double {
+    func clamped(to range: ClosedRange<Double>) -> Double {
+        Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
     }
 }
