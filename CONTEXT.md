@@ -71,7 +71,7 @@ A tab switched off in Settings: its icon leaves the rail and its background work
 _Avoid_: disabled tab; "hidden" alone, which clashes with Hide Contents
 
 **Background work**:
-What a tab keeps running while the panel is collapsed or on another tab, such as a poll or a timer. It runs only while the tab is on a rail, so hiding the tab stops it.
+What a tab keeps running while the panel is collapsed or on another tab, such as a poll or a timer. It runs only while the tab is on a rail, so hiding the tab stops it. A recording is a tab's own work in this sense: it goes on with the panel collapsed, and switching the tab off ends it and keeps what was recorded.
 _Avoid_: service, daemon
 
 **Menu bar icon** (Show Menu Bar Icon «Показывать иконку в меню-баре»):
@@ -108,6 +108,32 @@ Offline translation between Russian and a second language, English or Polish, sw
 **Caffeine** «Кофеин»:
 The tab that keeps the Mac from sleeping: by a caffeine session, or by lid-closed mode.
 _Avoid_: Keep Awake (as its name), Amphetamine
+
+**Meetings** «Встречи»:
+The tab that records a call and keeps a journal of it. Everything stays on the Mac.
+_Avoid_: recorder, dictaphone
+
+**Meeting** «встреча»:
+One row of the journal: a folder holding the audio of a call and its transcript.
+_Avoid_: recording, session
+
+**Recording** «запись»:
+Only the process, from Start Recording to Stop. It is neither a file nor a journal row.
+
+**Track** «дорожка»:
+One of the two sides of a recording: the microphone, or the sound the Mac plays.
+
+**Transcript** «транскрипт»:
+The text of a meeting, in lines with a speaker and a time.
+
+**Speaker** «говорящий»:
+«Я» for the microphone track; «Собеседник A», «B», «C» for the voices told apart on the system track.
+
+**Export** «Выгрузить»:
+A copy of a meeting in Downloads; the meeting stays in the journal.
+
+**Models** «модели»:
+The files that recognise speech and tell voices apart, downloaded once by a button in the tab.
 
 **Caffeine session** «сессия»:
 A stretch during which the Mac does not fall asleep from idleness: indefinite, or for a chosen time. Only the system is kept awake; the screen still turns off and locks on its own schedule.

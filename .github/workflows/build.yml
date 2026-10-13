@@ -54,6 +54,10 @@ jobs:
         run: ./Scripts/test.sh
 
       - name: Сборка приложения
+        # Эхоподавитель собирается через cmake дольше, чем всё остальное, а CI
+        # проверяет, что бандл вообще собирается.
+        env:
+          CYCLOP_SKIP_LOCALVQE: "1"
         run: ./Scripts/bundle.sh release
 
       - name: Проверить, что в бандле лежит то, что нужно

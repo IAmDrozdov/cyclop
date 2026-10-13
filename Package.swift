@@ -8,9 +8,14 @@ let package = Package(
     products: [
         .executable(name: "Cyclop", targets: ["Cyclop"])
     ],
+    dependencies: [
+        // Распознавание речи для вкладки «Встречи»; версия закреплена точно.
+        .package(url: "https://github.com/FluidInference/FluidAudio.git", exact: "0.15.5")
+    ],
     targets: [
         .executableTarget(
             name: "Cyclop",
+            dependencies: [.product(name: "FluidAudio", package: "FluidAudio")],
             path: "Sources/Cyclop",
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),

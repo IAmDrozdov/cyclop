@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyclop — free open-source notch app for MacBook</title>
-<meta name="description" content="Turn the MacBook notch into a panel: file shelf, clipboard history, snippets and offline translation. Native SwiftUI, zero dependencies, nothing asked at launch. Free, MIT.">
+<meta name="description" content="Turn the MacBook notch into a panel: file shelf, clipboard history, snippets and offline translation. Native SwiftUI, one dependency, nothing asked at launch. Free, MIT.">
 <link rel="canonical" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="en" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="ru" href="https://akalikbergenov.github.io/cyclop/ru/">
@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Cyclop">
 <meta property="og:title" content="Cyclop — free open-source notch app for MacBook">
-<meta property="og:description" content="The MacBook notch as a working tool: file shelf, clipboard, snippets and offline translation. Native, 3.1 MB, no dependencies, nothing asked at launch.">
+<meta property="og:description" content="The MacBook notch as a working tool: file shelf, clipboard, snippets and offline translation. Native, 3.1 MB, one dependency, nothing asked at launch.">
 <meta property="og:url" content="https://akalikbergenov.github.io/cyclop/">
 <meta property="og:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 <meta property="og:image:width" content="1400">
@@ -22,7 +22,7 @@
 <meta property="og:locale:alternate" content="ru_RU">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Cyclop — free open-source notch app for MacBook">
-<meta name="twitter:description" content="The MacBook notch as a working tool. Native SwiftUI, zero dependencies, no permissions. Free, MIT.">
+<meta name="twitter:description" content="The MacBook notch as a working tool. Native SwiftUI, one dependency, nothing asked at launch. Free, MIT.">
 <meta name="twitter:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23111'/><rect x='26' y='18' width='48' height='16' rx='7' fill='%23fff'/><circle cx='50' cy='62' r='13' fill='%23fff'/></svg>">
@@ -38,7 +38,7 @@
       "applicationCategory": "UtilitiesApplication",
       "applicationSubCategory": "Menu bar utility",
       "operatingSystem": "macOS 15 or newer",
-      "description": "A macOS utility that turns the MacBook notch into a panel with a file shelf, clipboard history, snippets and offline translation. Native SwiftUI and AppKit, no third-party dependencies.",
+      "description": "A macOS utility that turns the MacBook notch into a panel with a file shelf, clipboard history, snippets and offline translation. Native SwiftUI and AppKit, one dependency for Meetings.",
       "url": "https://akalikbergenov.github.io/cyclop/",
       "downloadUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
       "installUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
@@ -71,7 +71,7 @@
         {
           "@type": "Question",
           "name": "What permissions does Cyclop need?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Nothing at launch. The one permission Cyclop asks for itself is Accessibility, for the keyboard lock in Utilities, and it is requested by an explicit button press. Cyclop asks for no Screen Recording. A file placed on the shelf from Downloads, Documents or the Desktop is the one thing macOS asks about separately, and only when the shelf is opened." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Nothing is asked at launch. Only the Meetings tab asks, on the first Start Recording: for the microphone and for system audio recording (and for Downloads on the first export). Cyclop asks for no Accessibility and no Screen Recording. A file placed on the shelf from Downloads, Documents or the Desktop is the one thing macOS asks about separately, and only when the shelf is opened." }
         },
         {
           "@type": "Question",
@@ -86,7 +86,7 @@
         {
           "@type": "Question",
           "name": "Does Cyclop send anything over the network?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No telemetry and no analytics. Everything stays on the machine. The only outgoing request is Currency's daily download of exchange rates." }
+          "acceptedAnswer": { "@type": "Answer", "text": "No telemetry and no analytics. Everything stays on the machine. The only outgoing requests are Currency's daily download of exchange rates and, once and by a button, the speech models of Meetings." }
         },
         {
           "@type": "Question",
@@ -195,8 +195,8 @@ footer a{color:var(--dim)}
   <div class="fact"><b>3.1 MB</b><span>bundle</span></div>
   <div class="fact"><b>0.0 %</b><span>CPU at rest</span></div>
   <div class="fact"><b>≈16 MB</b><span>memory</span></div>
-  <div class="fact"><b>0</b><span>dependencies</span></div>
-  <div class="fact"><b>1</b><span>permission*</span></div>
+  <div class="fact"><b>1</b><span>dependency, for Meetings</span></div>
+  <div class="fact"><b>0</b><span>permissions at launch</span></div>
   <div class="fact"><b>MIT</b><span>licence</span></div>
 </div>
 
@@ -221,6 +221,11 @@ footer a{color:var(--dim)}
     <div class="tab"><h3>Caffeine</h3><p>Keeps the Mac from falling asleep: one button for no end,
       or a timer on an hour-and-minute wheel. Only the system stays awake; the screen still turns
       off and locks on its own.</p></div>
+    <div class="tab"><h3>Meetings</h3><p>Records a call on two tracks, the microphone and everything the
+      Mac plays, and writes the transcript on this Mac, with nothing sent anywhere. Your lines are
+      Me, the other side is Speaker A, B, C, and the language is detected by itself, so Russian,
+      Ukrainian and English can share a call. Export puts the transcript and the audio into
+      Downloads.</p></div>
     <div class="tab"><h3>Teleprompter</h3><p>A script that scrolls under the camera at a speed you
       set. The notch is the one place on the screen a teleprompter belongs: the eyes stay on the
       lens instead of travelling to a window below it.</p></div>
@@ -234,11 +239,10 @@ footer a{color:var(--dim)}
 
   <div class="scroll">
   <table>
-    <tr><th>Zero dependencies</th><td>Nothing but Swift, SwiftUI and AppKit. No package manager, no
+    <tr><th>One dependency</th><td>Swift, SwiftUI and AppKit, plus one package, FluidAudio, for the speech recognition of Meetings. No
       vendored frameworks. The whole thing is about 7 000 lines you can read in an afternoon.</td></tr>
-    <tr><th>One permission, on a button</th><td>Nothing is asked at launch. Accessibility, for the
-      keyboard lock, is the one permission Cyclop asks for itself, and the system dialog appears on
-      an explicit button press.</td></tr>
+    <tr><th>Nothing asked at launch</th><td>Only Start Recording in Meetings asks, once: for the microphone and for system audio. No
+      Accessibility, no Screen Recording.</td></tr>
     <tr><th>Offline translation</th><td>Translation runs on the device through macOS's own
       framework. No API key, no account, nothing leaves the machine.</td></tr>
     <tr><th>Nothing collected</th><td>No telemetry, no analytics, no crash reporting. The single
@@ -274,9 +278,9 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     menu bar and behaves the same way. It works on external displays too.</p></details>
 
   <details><summary>What permissions does Cyclop need?</summary>
-    <p>Nothing at launch. The one permission Cyclop asks for itself is Accessibility, for the
-    keyboard lock in Utilities, and it is asked for by an explicit button press on a screen that
-    explains why. Cyclop requests no Screen Recording.</p>
+    <p>Nothing is asked at launch. Only Start Recording in the Meetings tab asks, the first time: for
+    the microphone and for system audio recording. Cyclop requests no Accessibility and
+    no Screen Recording.</p>
     <p>*Besides that, a file placed on the shelf from Downloads, Documents or the Desktop is
     something macOS asks about separately, and only at the moment the shelf is opened.</p></details>
 
@@ -285,8 +289,8 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     nothing is collected.</p></details>
 
   <details><summary>Does it send anything anywhere?</summary>
-    <p>No telemetry and no analytics of any kind. The only outgoing request in the whole app is Currency's
-    daily download of exchange rates, and everything else — clipboard, files,
+    <p>No telemetry and no analytics of any kind. The only outgoing requests in the whole app are Currency's
+    daily download of exchange rates and the one-time download of the Meetings speech models, and everything else — clipboard, files,
     snippets, scripts — stays on the machine.</p></details>
 
   <details><summary>Why does macOS say the app cannot be verified?</summary>

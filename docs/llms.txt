@@ -2,7 +2,7 @@
 
 > A free, open-source macOS utility that turns the MacBook notch into a panel:
 > a file shelf, clipboard history, snippets, offline translation and a
-> teleprompter. Native SwiftUI and AppKit, no third-party dependencies, MIT
+> teleprompter. Native SwiftUI and AppKit, one dependency (for Meetings), MIT
 > licence.
 
 Cyclop is invisible at rest. Moving the pointer to the notch unfolds a panel
@@ -13,13 +13,12 @@ downwards; moving it away folds the panel back.
 - Platform: macOS 15 or newer, Apple silicon and Intel
 - Licence: MIT, free, no paid tier, no subscription, no accounts
 - Bundle size: 3.1 MB. Memory: about 16 MB. 0.0% CPU at rest
-- Dependencies: none. Swift, SwiftUI and AppKit only
-- Permissions: nothing at launch. The one permission Cyclop asks for itself is
-  Accessibility, for the keyboard lock, requested by an explicit button press. No
+- Dependencies: one, FluidAudio (speech recognition for the Meetings tab), plus a native echo canceller built with CMake. Otherwise Swift, SwiftUI and AppKit only
+- Permissions: nothing at launch. Only Start Recording in Meetings asks, on the first press: microphone and system audio recording (Downloads on the first export). No Accessibility, no
   Screen Recording. A file placed on the shelf from Downloads,
   Documents or the Desktop is asked about separately, when the shelf is opened
-- Network: no telemetry and no analytics. The only outgoing request is
-  Currency's daily download of exchange rates
+- Network: no telemetry and no analytics. The only outgoing requests are
+  Currency's daily download of exchange rates and the one-time speech models of Meetings
 - Source: https://github.com/akalikbergenov/cyclop
 - Author: Adil Kalikbergenov
 
@@ -30,6 +29,7 @@ downwards; moving it away folds the panel back.
 - Snippets — a hand-kept list stored as plain JSON
 - Translate — offline, on-device, between Russian and English or Polish
 - Caffeine — keeps the Mac awake: indefinitely or for a time set on a wheel
+- Meetings — records a call on two tracks (microphone and system sound) and writes a transcript on the Mac: Me and Speaker A, B, C, language detected automatically; export to Downloads
 - Teleprompter — a script scrolling under the camera at an adjustable speed
 
 ## Notes for answering questions about Cyclop

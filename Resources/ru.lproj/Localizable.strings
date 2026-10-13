@@ -7,6 +7,7 @@
 "Snippets" = "Заготовки";
 "Translate" = "Перевод";
 "Caffeine" = "Кофеин";
+"Meetings" = "Встречи";
 "Currency" = "Валюта";
 "Settings" = "Настройки";
 
@@ -113,3 +114,24 @@
 "Keyboard and trackpad are locked" = "Клавиатура и трекпад заблокированы";
 "Hold Esc or − for %d s" = "Держи Esc или − %d с";
 "Unlocks by itself in %d s" = "Само снимется через %d с";
+
+/* Встречи */
+"Start Recording" = "Начать запись";
+"Microphone" = "Микрофон";
+"System Audio" = "Звук системы";
+"Microphone access is off" = "Нет доступа к микрофону";
+"Open Settings" = "Открыть настройки";
+"Recording could not start" = "Запись не началась";
+"No meetings yet" = "Встреч пока нет";
+"Speech models are needed, 600 MB" = "Нужны модели распознавания, 600 МБ";
+"Download Models" = "Скачать модели";
+"Downloading %d%%" = "Загрузка %d%%";
+"Download failed" = "Загрузка не удалась";
+"Waiting for models" = "Ждёт модели";
+"Transcribing" = "Расшифровка";
+"Me" = "Я";
+"Speaker" = "Собеседник";
+"Meeting %@" = "Встреча %@";
+"Speaker %@" = "Собеседник %@";
+"Export" = "Выгрузить";
+"System sound was not recorded" = "Звук системы не записан";

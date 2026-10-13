@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Cyclop записывает микрофон во время встречи, чтобы составить её транскрипт.";
+"NSAudioCaptureUsageDescription" = "Cyclop записывает звук системы во время встречи, чтобы собеседники попали в транскрипт.";

@@ -10,6 +10,14 @@ APP="$ROOT/build/Cyclop.app"
 source "$ROOT/Scripts/sdk.sh"
 VERSION="$(sed -n 's/^VERSION=//p' "$ROOT/Scripts/version" 2>/dev/null || echo 0.1.0)"
 
+# Эхоподавитель для вкладки «Встречи»: нативная библиотека и её модель. Без cmake
+# сборка останавливается; CYCLOP_SKIP_LOCALVQE=1 собирает бандл без них (CI), и
+# тогда встречи расшифровываются по сырым дорожкам.
+if [ "${CYCLOP_SKIP_LOCALVQE:-}" != "1" ]; then
+    echo "==> LocalVQE"
+    "$ROOT/Scripts/build-localvqe.sh"
+fi
+
 echo "==> swift build -c $CONFIG"
 swift build -c "$CONFIG" --package-path "$ROOT"
 BIN="$(swift build -c "$CONFIG" --package-path "$ROOT" --show-bin-path)/Cyclop"
@@ -40,10 +48,20 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>NSHighResolutionCapable</key><true/>
     <key>NSSupportsAutomaticTermination</key><false/>
     <key>NSSupportsSuddenTermination</key><false/>
+    <key>NSMicrophoneUsageDescription</key><string>Cyclop records your microphone during a meeting to write its transcript.</string>
+    <key>NSAudioCaptureUsageDescription</key><string>Cyclop records system audio during a meeting so the other side of the call is in the transcript.</string>
     <key>NSHumanReadableCopyright</key><string>MIT License</string>
 </dict>
 </plist>
 PLIST
+
+LOCALVQE="$ROOT/.build/localvqe"
+if [ "${CYCLOP_SKIP_LOCALVQE:-}" != "1" ]; then
+    mkdir -p "$APP/Contents/Frameworks" "$APP/Contents/Resources/Models" "$APP/Contents/Resources/Licenses"
+    cp "$LOCALVQE/lib/liblocalvqe.dylib" "$APP/Contents/Frameworks/"
+    cp "$LOCALVQE"/model/*.gguf "$APP/Contents/Resources/Models/"
+    cp "$LOCALVQE"/licenses/* "$APP/Contents/Resources/Licenses/"
+fi
 
 if [ -f "$ROOT/Resources/AppIcon.icns" ]; then
     cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
@@ -59,14 +77,25 @@ for lproj in "$ROOT"/Resources/*.lproj; do
     echo "    $(basename "$lproj")"
 done
 
-# Подпись. Кем — решает CODESIGN_IDENTITY: пусто или «-» — ad-hoc, как для
-# любой локальной сборки; «Developer ID Application: …» — настоящая, с
-# hardened runtime и отметкой времени, как для релиза. Ключ и сертификат
-# в скрипте не живут, они в связке ключей того, кто выпускает, или в
-# секретах раннера (см. docs/signing.md).
-IDENTITY="${CODESIGN_IDENTITY:--}"
+# Подпись. Кем — решает CODESIGN_IDENTITY: «-» — ad-hoc; «Developer ID
+# Application: …» — настоящая, с hardened runtime и отметкой времени, как для
+# релиза. Пусто — берётся самоподписанный «Cyclop Local», если он есть в связке
+# (разрешения на микрофон и звук системы привязаны к подписи и переживают
+# пересборку), иначе ad-hoc. Ключ и сертификат в скрипте не живут, они в связке
+# ключей того, кто выпускает, или в секретах раннера (см. docs/signing.md).
+LOCAL_IDENTITY="Cyclop Local"
+IDENTITY="${CODESIGN_IDENTITY:-}"
+if [ -z "$IDENTITY" ]; then
+    if security find-identity -v -p codesigning | grep -q "\"$LOCAL_IDENTITY\""; then
+        IDENTITY="$LOCAL_IDENTITY"
+    else
+        IDENTITY="-"
+    fi
+fi
 if [ "$IDENTITY" = "-" ]; then
-    echo "==> ad-hoc signing"
+    echo "==> ad-hoc signing: разрешения на микрофон и звук системы не переживут пересборку (docs/signing.md)"
+elif [ "$IDENTITY" = "$LOCAL_IDENTITY" ]; then
+    echo "==> signing as $IDENTITY (без hardened runtime)"
 else
     echo "==> signing as $IDENTITY"
 fi
@@ -86,10 +115,16 @@ xattr -cr "$APP"
 # бандл, про который codesign говорит «code object is not signed at all».
 # Заметить это можно было только по возвращающимся запросам TCC — то есть у
 # того, кто уже поставил приложение.
-if [ "$IDENTITY" = "-" ]; then
-    codesign --force --sign - "$APP"
+# Библиотека подписывается раньше бандла, тем же ключом.
+DYLIB="$APP/Contents/Frameworks/liblocalvqe.dylib"
+if [ "$IDENTITY" = "-" ] || [ "$IDENTITY" = "$LOCAL_IDENTITY" ]; then
+    [ -f "$DYLIB" ] && codesign --force --sign "$IDENTITY" "$DYLIB"
+    codesign --force --sign "$IDENTITY" "$APP"
 else
-    codesign --force --timestamp --options runtime --sign "$IDENTITY" "$APP"
+    [ -f "$DYLIB" ] && codesign --force --timestamp --options runtime --sign "$IDENTITY" "$DYLIB"
+    # Под hardened runtime микрофон без этого права молчит, без запроса.
+    codesign --force --timestamp --options runtime \
+        --entitlements "$ROOT/Resources/Cyclop.entitlements" --sign "$IDENTITY" "$APP"
 fi || {
     echo "!!! codesign не смог подписать бандл — см. вывод выше" >&2
     exit 1

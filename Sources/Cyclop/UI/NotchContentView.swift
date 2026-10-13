@@ -100,6 +100,16 @@ struct NotchContentView: View {
 
     @ViewBuilder
     private var trailing: some View {
+        // A running recording shows its timer on every tab.
+        if vm.meetings.recording != nil {
+            MeetingsBadge(store: vm.meetings)
+        } else {
+            tabBadge
+        }
+    }
+
+    @ViewBuilder
+    private var tabBadge: some View {
         switch vm.tab {
         case .shelf:
             counter(vm.shelf.items.count)
@@ -119,6 +129,8 @@ struct NotchContentView: View {
             EmptyView()
         case .utilities:
             EmptyView()
+        case .meetings:
+            MeetingsBadge(store: vm.meetings)
         case .settings:
             EmptyView()
         }
@@ -186,6 +198,8 @@ struct NotchContentView: View {
             TeleprompterPane(prompter: vm.teleprompter, wantsKeyboard: $panel.wantsKeyboard)
         case .utilities:
             UtilitiesPane(lock: vm.keyboardLock)
+        case .meetings:
+            MeetingsPane(store: vm.meetings)
         case .settings:
             SettingsPane(vm: vm, shelf: vm.shelf, screenshots: vm.screenshotFolder)
         }
@@ -278,6 +292,7 @@ private struct Rail: View {
     /// A running caffeine session tints its icon on every tab.
     private func tint(for tab: NotchViewModel.Tab) -> Color {
         if tab == .caffeine, vm.caffeine.isRunning { return .accentColor }
+        if tab == .meetings, vm.meetings.recording != nil { return .red }
         return vm.tab == tab ? Color.white : Theme.tertiary
     }
 

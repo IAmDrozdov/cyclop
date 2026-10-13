@@ -5,8 +5,48 @@
 файл внутри бандла не запускается вовсе (#20). Делает это раннер в
 `release.yml`; ему нужны пять секретов. Как их получить — ниже, один раз.
 
-Локальная сборка (`Scripts/bundle.sh`) остаётся ad-hoc и ничего из этого не
-требует.
+Локальная сборка (`Scripts/bundle.sh`) ничего из этого не требует: она
+подписывается самоподписанным «Cyclop Local», если он есть (см. ниже), иначе
+ad-hoc.
+
+## 0. Локальный сертификат «Cyclop Local»
+
+Вкладка «Встречи» пишет микрофон и звук системы. Разрешения на них macOS
+привязывает к подписи приложения, а у ad-hoc подпись другая при каждой сборке:
+разрешения спрашиваются заново, а запись звука системы без разрешения молча
+даёт тишину. Самоподписанный сертификат делает подпись одной и той же от сборки
+к сборке. Скрипт находит его сам и подписывает без hardened runtime.
+
+Ассистент сертификации в Связке ключей на части систем падает с «The specified
+item could not be found in the keychain», поэтому через терминал:
+
+```sh
+mkdir ~/cyclop-cert && cd ~/cyclop-cert
+cat > cert.cnf <<'EOF'
+[req]
+distinguished_name = dn
+x509_extensions = ext
+prompt = no
+[dn]
+CN = Cyclop Local
+[ext]
+keyUsage = critical, digitalSignature
+extendedKeyUsage = critical, codeSigning
+EOF
+/usr/bin/openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
+    -config cert.cnf -keyout key.pem -out cert.pem
+/usr/bin/openssl pkcs12 -export -inkey key.pem -in cert.pem \
+    -out cyclop.p12 -passout pass:cyclop
+security import cyclop.p12 -k ~/Library/Keychains/login.keychain-db \
+    -P cyclop -T /usr/bin/codesign
+security add-trusted-cert -p codeSign cert.pem
+cd ~ && rm -rf ~/cyclop-cert
+security find-identity -v -p codesigning     # должна быть строка "Cyclop Local"
+```
+
+Релизная подпись (Developer ID, hardened runtime) передаёт `Resources/Cyclop.entitlements` с правом на микрофон: без него записанная дорожка «Я» молчит.
+
+Пароль `cyclop` защищает только временный `.p12`, который удаляется сразу.
 
 ## 1. Сертификат Developer ID Application
 

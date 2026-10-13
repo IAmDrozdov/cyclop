@@ -8,6 +8,7 @@
 "Snippets" = "Snippets";
 "Translate" = "Translate";
 "Caffeine" = "Caffeine";
+"Meetings" = "Meetings";
 "Currency" = "Currency";
 "Settings" = "Settings";
 
@@ -114,3 +115,24 @@
 "Keyboard and trackpad are locked" = "Keyboard and trackpad are locked";
 "Hold Esc or − for %d s" = "Hold Esc or − for %d s";
 "Unlocks by itself in %d s" = "Unlocks by itself in %d s";
+
+/* Meetings */
+"Start Recording" = "Start Recording";
+"Microphone" = "Microphone";
+"System Audio" = "System Audio";
+"Microphone access is off" = "Microphone access is off";
+"Open Settings" = "Open Settings";
+"Recording could not start" = "Recording could not start";
+"No meetings yet" = "No meetings yet";
+"Speech models are needed, 600 MB" = "Speech models are needed, 600 MB";
+"Download Models" = "Download Models";
+"Downloading %d%%" = "Downloading %d%%";
+"Download failed" = "Download failed";
+"Waiting for models" = "Waiting for models";
+"Transcribing" = "Transcribing";
+"Me" = "Me";
+"Speaker" = "Speaker";
+"Meeting %@" = "Meeting %@";
+"Speaker %@" = "Speaker %@";
+"Export" = "Export";
+"System sound was not recorded" = "System sound was not recorded";

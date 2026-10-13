@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Cyclop records your microphone during a meeting to write its transcript.";
+"NSAudioCaptureUsageDescription" = "Cyclop records system audio during a meeting so the other side of the call is in the transcript.";

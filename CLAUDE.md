@@ -1,6 +1,6 @@
 # Cyclop
 
-A macOS app that turns the notch into a hover panel of tabs. Swift 6 (SwiftUI + AppKit) on SwiftPM alone: there is no Xcode project, and a script assembles the `.app`. macOS 15+. A personal fork of akalikbergenov/cyclop.
+A macOS app that turns the notch into a hover panel of tabs. Swift 6 (SwiftUI + AppKit) on SwiftPM, with one package (FluidAudio) and one native library built with CMake: there is no Xcode project, and a script assembles the `.app`. macOS 15+. A personal fork of akalikbergenov/cyclop.
 
 Domain words (tab, rail, pane, panel, drawn notch, Hide Contents) are defined in `CONTEXT.md`, with each tab's Russian UI name. One goes by another name in code: Hide Contents («Скрывать содержимое») is `PrivacyMode`.
 
@@ -8,14 +8,14 @@ Domain words (tab, rail, pane, panel, drawn notch, Hide Contents) are defined in
 
 Run from the repo root.
 
-- `./Scripts/bundle.sh`: builds `build/Cyclop.app` (about 30 s) and is the compile check. Plain `swift build` fails with Command Line Tools on the macOS 27 SDK, where `@State` is a macro; the script switches to an older SDK through `Scripts/sdk.sh`.
+- `./Scripts/bundle.sh`: builds `build/Cyclop.app` (about 30 s; the first run also builds LocalVQE with CMake, which `brew install cmake` provides, and `CYCLOP_SKIP_LOCALVQE=1` skips it) and is the compile check. Plain `swift build` fails with Command Line Tools on the macOS 27 SDK, where `@State` is a macro; the script switches to an older SDK through `Scripts/sdk.sh`.
 - `./Scripts/test.sh`: unit tests (`swift test` plus the Command Line Tools paths for `Testing`).
 - `./Scripts/check-strings.py`: every on-screen string has a key in both `Resources/*.lproj/Localizable.strings`. CI runs the same check first.
 - To run the app and see it working, use the `run-cyclop` skill.
 
 ## Done
 
-A change is done when `bundle.sh`, `test.sh` and `check-strings.py` pass. Unit tests are for stores (`Services/*Store.swift`) only, and today `SnippetStore` and `CaffeineStore` have them. The panel (notch, hover, rails, animation) is checked by eye by design, as the comment in `Package.swift` explains, so finish a UI change by telling the owner what to look at in the running app.
+A change is done when `bundle.sh`, `test.sh` and `check-strings.py` pass. Unit tests are for stores (`Services/*Store.swift`) only, and today `SnippetStore`, `CaffeineStore` and `MeetingStore` have them, plus the pure transcript assembly and echo filters in `Services/Meetings/`. The panel (notch, hover, rails, animation) is checked by eye by design, as the comment in `Package.swift` explains, so finish a UI change by telling the owner what to look at in the running app.
 
 ## Rules
 

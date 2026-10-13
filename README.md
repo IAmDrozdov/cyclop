@@ -27,7 +27,8 @@ macOS 15 or newer. Signed and notarised, so it opens on the first try.
 | **Snippets** | A hand-kept list of what you are tired of retyping: an address, a phone number, an email. Added with a button in the panel, removed with the cross on a card; a click puts the text on the clipboard. The same list lives in `~/Library/Application Support/Cyclop/snippets.json` and can be edited there instead |
 | **Translate** | Type on the left, the translation appears on the right — by itself, offline, using macOS's own facilities. English or Polish goes to Russian, Russian goes back; a click on the language's column title switches between English and Polish, and the direction comes from the script the text is written in. macOS does not preinstall language packs, so the first time you have to download one: System Settings → General → Language & Region → "Translation Languages…" |
 | **Caffeine** | Keeps the Mac from falling asleep: one button for no end, or a timer on an hour-and-minute wheel. Only the system stays awake — the screen still turns off and locks on its own schedule. The tab's icon is tinted while a session runs, and the header shows the time left. A session ends when you stop it, when the tab is switched off, or when Cyclop quits. A separate switch, Stay Awake with the Lid Closed, keeps the Mac awake with the lid shut, so that agents keep working while you are away |
-| **Currency** | An amount on one side, the other currency on the other; type into either. Rates are the one thing in Cyclop that comes over the network — a public table of daily rates, fetched once an hour, and only while the tab is on |
+| **Currency** | An amount on one side, the other currency on the other; type into either. Rates come over the network — a public table of daily rates, fetched once an hour, and only while the tab is on (the other download is the one-time speech models of Meetings) |
+| **Meetings** | A *Start Recording* button records a call on two tracks: the microphone and everything the Mac plays. After *Stop* the meeting becomes a transcript on this Mac, nothing leaves it: your lines are *Me*, the other side is *Speaker*, with a letter (A, B, C) when several voices can be told apart, and the language is detected by itself, so Russian, Ukrainian and English may share a call. The journal keeps every meeting; *Export* puts a folder with the transcript and the audio into Downloads. The speech models (about 600 MB) are downloaded once, by a button, and the first Start asks macOS for the microphone and system audio |
 | **Teleprompter** | A script that scrolls under the camera at a speed you set. The notch is the one place on the screen a teleprompter belongs: reading happens right beside the lens, so on the recording the eyes stay on the camera instead of travelling to a window below it. The panel holds itself open while the text is moving — reading a script means not touching the trackpad |
 
 The panel opens when the pointer reaches the notch and collapses when it leaves.
@@ -49,6 +50,7 @@ use it can take it off.
 
 - macOS 15 or newer (the Translate tab runs on Translation.framework)
 - Swift 6 toolchain (the full Xcode is not needed, Command Line Tools are enough)
+- CMake (`brew install cmake`), for the echo canceller of the Meetings tab; `CYCLOP_SKIP_LOCALVQE=1` builds without it
 
 The app works on Macs without a notch too: the panel then treats a 180 × 24 pt
 area at the top centre of the screen as one.
@@ -119,18 +121,9 @@ that is the link to hand to people instead of a file.
 ## Permissions
 
 **Nothing at launch, and nothing until you press the button that needs it.**
-That is the promise, and it is narrower than "no permissions": a permission is
-asked for only by the button that cannot work without it, and the one Cyclop
-asks for itself is Accessibility.
-
-**Accessibility**, for the keyboard lock in Utilities. It deserves to be named
-plainly: it is the permission that lets an app see and swallow every key press
-in the system, and nothing less can stop keys from reaching macOS while you wipe
-them. The system dialog comes from an explicit press of the button, after an
-explanation, and switching the tab off in Settings means it is never asked for.
-
-Never lock the keyboard and the app stays without permissions entirely. Nothing
-is asked for at launch in any case. The pointer position is read through
+That is the promise. The one button that needs permissions is Start Recording in
+the Meetings tab: it asks for the microphone and for system audio recording, on
+the first press. The pointer position is read through
 `NSEvent.mouseLocation`, the clipboard through the public `NSPasteboard`.
 
 A file put on the shelf from Downloads, Documents or the Desktop is the one thing
@@ -140,7 +133,7 @@ Refusing breaks nothing: the card stays, just without a preview.
 ## How it works
 
 Why the window is shaped the way it is, why the pointer is polled on a
-timer, what sitting idle costs — seventeen notes on decisions the code does not show:
+timer, what sitting idle costs — eighteen notes on decisions the code does not show:
 **[docs/architecture.md](docs/architecture.md)**.
 
 ## Limitations
@@ -189,8 +182,9 @@ Sources/Cyclop
 │   ├── Support.swift          ~/Library/Application Support/Cyclop
 │   ├── DebouncedWrite.swift   writes to disk no more often than needed
 │   ├── Translator.swift       Translation.framework, direction by script
-│   ├── CurrencyStore.swift    rates over the network, the one tab that has any
+│   ├── CurrencyStore.swift    rates over the network (the models of Meetings are the other download)
 │   ├── CaffeineStore.swift    caffeine sessions and the sleep hold
+│   ├── Meetings/              recording, speech recognition, transcript assembly, export
 │   ├── TeleprompterStore.swift the script and where reading it has got to
 │   └── ScreenshotFolderWatcher.swift  screenshots saved to disk, onto the shelf
 └── UI/                        NotchShape, tab panes, theme

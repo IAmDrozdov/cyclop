@@ -4,7 +4,7 @@ import Combine
 @MainActor
 final class NotchViewModel: ObservableObject {
     enum Tab: String, CaseIterable, Identifiable {
-        case shelf, clipboard, snippets, translate, caffeine, currency, teleprompter, utilities, settings
+        case shelf, clipboard, snippets, translate, caffeine, currency, teleprompter, utilities, meetings, settings
         var id: String { rawValue }
 
         var symbol: String {
@@ -17,6 +17,7 @@ final class NotchViewModel: ObservableObject {
             case .currency: return "dollarsign.circle"
             case .teleprompter: return "text.viewfinder"
             case .utilities: return "wrench.and.screwdriver.fill"
+            case .meetings: return "waveform"
             case .settings: return "gearshape.fill"
             }
         }
@@ -31,6 +32,7 @@ final class NotchViewModel: ObservableObject {
             case .currency: return localized("Currency")
             case .teleprompter: return localized("Teleprompter")
             case .utilities: return localized("Utilities")
+            case .meetings: return localized("Meetings")
             case .settings: return localized("Settings")
             }
         }
@@ -62,7 +64,7 @@ final class NotchViewModel: ObservableObject {
         /// actually rest on. Icon height is a ceiling derived from the left
         /// rail's length alone, so a shorter or longer rail resizes itself.
         static let leftRail: [Tab] = [.shelf, .clipboard, .snippets, .translate, .caffeine]
-        static let rightRail: [Tab] = [.currency, .teleprompter, .utilities, .settings]
+        static let rightRail: [Tab] = [.currency, .teleprompter, .utilities, .meetings, .settings]
     }
 
     /// What every screen's panel adds up to, kept by `NotchController`: this
@@ -134,6 +136,8 @@ final class NotchViewModel: ObservableObject {
             currencies.start()
         case .caffeine:
             caffeine.beginBackground()
+        case .meetings:
+            meetings.start()
         case .snippets, .translate, .teleprompter, .utilities, .settings:
             break
         }
@@ -148,6 +152,7 @@ final class NotchViewModel: ObservableObject {
         // Taking the tab off the rail with the screen still covered would
         // leave the tap installed and no way back to it.
         case .utilities: keyboardLock.unlock()
+        case .meetings: meetings.stop()
         case .snippets, .translate, .teleprompter, .settings: break
         }
     }
@@ -226,6 +231,7 @@ final class NotchViewModel: ObservableObject {
     let snippets: SnippetStore
     let teleprompter: TeleprompterStore
     let caffeine: CaffeineStore
+    let meetings: MeetingStore
     /// Shared by every pane that shows something worth not showing.
     let privacy = PrivacyMode()
     /// Here rather than in the controller, which now rebuilds a window per
@@ -243,6 +249,7 @@ final class NotchViewModel: ObservableObject {
         self.currencies = CurrencyStore()
         self.snippets = SnippetStore()
         self.teleprompter = TeleprompterStore()
+        self.meetings = MeetingStore()
         self.caffeine = CaffeineStore(
             minutes: ConfigStore.shared.caffeineMinutes,
             lidClosedMode: ConfigStore.shared.caffeineLidClosed,
@@ -273,6 +280,7 @@ final class NotchViewModel: ObservableObject {
             shelf.objectWillChange,
             clipboard.objectWillChange,
             caffeine.objectWillChange,
+            meetings.objectWillChange,
         ] {
             child
                 .sink { [weak self] _ in
