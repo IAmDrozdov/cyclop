@@ -22,6 +22,16 @@ final class ConfigStore: ObservableObject {
     private struct Teleprompter: Codable, Equatable {
         var speed: Double = 1
         var fontSize: Double = 30
+
+        init() {}
+
+        /// Same reason as `File.init(from:)`: a hand edit may keep one key.
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            let d = Teleprompter()
+            speed = try c.decodeIfPresent(Double.self, forKey: .speed) ?? d.speed
+            fontSize = try c.decodeIfPresent(Double.self, forKey: .fontSize) ?? d.fontSize
+        }
     }
 
     /// Depth in points, dwell in milliseconds: see `NotchGeometry.hoverRect(depth:)`.
