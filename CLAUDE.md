@@ -15,7 +15,7 @@ Run from the repo root.
 
 ## Done
 
-A change is done when `bundle.sh`, `test.sh` and `check-strings.py` pass. Unit tests are for stores (`Services/*Store.swift`) only, and today only `SnippetStore` has them. The panel (notch, hover, rails, animation) is checked by eye by design, as the comment in `Package.swift` explains, so finish a UI change by telling the owner what to look at in the running app.
+A change is done when `bundle.sh`, `test.sh` and `check-strings.py` pass. Unit tests are for stores (`Services/*Store.swift`) only, and today `SnippetStore` and `CaffeineStore` have them. The panel (notch, hover, rails, animation) is checked by eye by design, as the comment in `Package.swift` explains, so finish a UI change by telling the owner what to look at in the running app.
 
 ## Rules
 

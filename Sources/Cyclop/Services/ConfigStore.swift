@@ -50,6 +50,22 @@ final class ConfigStore: ObservableObject {
         }
     }
 
+    /// The last duration on the Caffeine wheel, in minutes.
+    private struct Caffeine: Codable, Equatable {
+        var minutes: Int = CaffeineStore.defaultMinutes
+        var lidClosed = false
+
+        init() {}
+
+        /// Same reason as `File.init(from:)`: a hand edit may keep one key.
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            let d = Caffeine()
+            minutes = try c.decodeIfPresent(Int.self, forKey: .minutes) ?? d.minutes
+            lidClosed = try c.decodeIfPresent(Bool.self, forKey: .lidClosed) ?? d.lidClosed
+        }
+    }
+
     private struct File: Codable, Equatable {
         var showOnAllDisplays = true
         var saveClipboardImages = true
@@ -58,6 +74,7 @@ final class ConfigStore: ObservableObject {
         var hiddenTabs: [String] = []
         var fullSizeDrawnNotch = false
         var notch = Notch()
+        var caffeine = Caffeine()
 
         init() {}
 
@@ -76,6 +93,7 @@ final class ConfigStore: ObservableObject {
             hiddenTabs = try c.decodeIfPresent([String].self, forKey: .hiddenTabs) ?? d.hiddenTabs
             fullSizeDrawnNotch = try c.decodeIfPresent(Bool.self, forKey: .fullSizeDrawnNotch) ?? d.fullSizeDrawnNotch
             notch = try c.decodeIfPresent(Notch.self, forKey: .notch) ?? d.notch
+            caffeine = try c.decodeIfPresent(Caffeine.self, forKey: .caffeine) ?? d.caffeine
         }
     }
 
@@ -167,6 +185,20 @@ final class ConfigStore: ObservableObject {
     var teleprompterFontSize: Double {
         get { value.teleprompter.fontSize }
         set { value.teleprompter.fontSize = newValue; persist() }
+    }
+
+    /// The Caffeine wheel's last duration, written by `flush()` when the tab is
+    /// left and on quit: a fling turns the wheel through many rows. Read as the nearest value on the
+    /// wheel: the file is edited by hand.
+    var caffeineMinutes: Int {
+        get { CaffeineStore.onWheel(value.caffeine.minutes) }
+        set { value.caffeine.minutes = newValue; isDirty = true }
+    }
+
+    /// Lid-closed mode of the Caffeine tab: the switch survives a relaunch.
+    var caffeineLidClosed: Bool {
+        get { value.caffeine.lidClosed }
+        set { value.caffeine.lidClosed = newValue; persist() }
     }
 
     /// Tabs switched off in Settings (#80), by `Tab.rawValue`. Kept as the set

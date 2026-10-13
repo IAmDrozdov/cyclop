@@ -7,6 +7,7 @@
 "Clipboard" = "Clipboard";
 "Snippets" = "Snippets";
 "Translate" = "Translate";
+"Caffeine" = "Caffeine";
 "Currency" = "Currency";
 "Settings" = "Settings";
 
@@ -67,6 +68,14 @@
 "The %@ → %@ language pack is not installed." = "The %@ → %@ language pack is not installed.";
 "macOS does not translate this pair of languages." = "macOS does not translate this pair of languages.";
 "Switch language" = "Switch language";
+
+/* Caffeine */
+"Stay Awake Indefinitely" = "Stay Awake Indefinitely";
+"Stay Awake with the Lid Closed" = "Stay Awake with the Lid Closed";
+"Start" = "Start";
+"Stop" = "Stop";
+"h" = "h";
+"min" = "min";
 
 /* Currency */
 "Search currency" = "Search currency";

@@ -26,6 +26,7 @@ macOS 15 or newer. Signed and notarised, so it opens on the first try.
 | **Clipboard** | The last 40 copies; a click puts an entry back on the clipboard |
 | **Snippets** | A hand-kept list of what you are tired of retyping: an address, a phone number, an email. Added with a button in the panel, removed with the cross on a card; a click puts the text on the clipboard. The same list lives in `~/Library/Application Support/Cyclop/snippets.json` and can be edited there instead |
 | **Translate** | Type on the left, the translation appears on the right — by itself, offline, using macOS's own facilities. English or Polish goes to Russian, Russian goes back; a click on the language's column title switches between English and Polish, and the direction comes from the script the text is written in. macOS does not preinstall language packs, so the first time you have to download one: System Settings → General → Language & Region → "Translation Languages…" |
+| **Caffeine** | Keeps the Mac from falling asleep: one button for no end, or a timer on an hour-and-minute wheel. Only the system stays awake — the screen still turns off and locks on its own schedule. The tab's icon is tinted while a session runs, and the header shows the time left. A session ends when you stop it, when the tab is switched off, or when Cyclop quits. A separate switch, Stay Awake with the Lid Closed, keeps the Mac awake with the lid shut, so that agents keep working while you are away |
 | **Currency** | An amount on one side, the other currency on the other; type into either. Rates are the one thing in Cyclop that comes over the network — a public table of daily rates, fetched once an hour, and only while the tab is on |
 | **Teleprompter** | A script that scrolls under the camera at a speed you set. The notch is the one place on the screen a teleprompter belongs: reading happens right beside the lens, so on the recording the eyes stay on the camera instead of travelling to a window below it. The panel holds itself open while the text is moving — reading a script means not touching the trackpad |
 
@@ -139,7 +140,7 @@ Refusing breaks nothing: the card stays, just without a preview.
 ## How it works
 
 Why the window is shaped the way it is, why the pointer is polled on a
-timer, what sitting idle costs — sixteen notes on decisions the code does not show:
+timer, what sitting idle costs — seventeen notes on decisions the code does not show:
 **[docs/architecture.md](docs/architecture.md)**.
 
 ## Limitations
@@ -189,6 +190,7 @@ Sources/Cyclop
 │   ├── DebouncedWrite.swift   writes to disk no more often than needed
 │   ├── Translator.swift       Translation.framework, direction by script
 │   ├── CurrencyStore.swift    rates over the network, the one tab that has any
+│   ├── CaffeineStore.swift    caffeine sessions and the sleep hold
 │   ├── TeleprompterStore.swift the script and where reading it has got to
 │   └── ScreenshotFolderWatcher.swift  screenshots saved to disk, onto the shelf
 └── UI/                        NotchShape, tab panes, theme

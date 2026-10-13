@@ -4,7 +4,7 @@ import Combine
 @MainActor
 final class NotchViewModel: ObservableObject {
     enum Tab: String, CaseIterable, Identifiable {
-        case shelf, clipboard, snippets, translate, currency, teleprompter, utilities, settings
+        case shelf, clipboard, snippets, translate, caffeine, currency, teleprompter, utilities, settings
         var id: String { rawValue }
 
         var symbol: String {
@@ -13,6 +13,7 @@ final class NotchViewModel: ObservableObject {
             case .clipboard: return "list.clipboard.fill"
             case .snippets: return "pin.fill"
             case .translate: return "translate"
+            case .caffeine: return "cup.and.saucer.fill"
             case .currency: return "dollarsign.circle"
             case .teleprompter: return "text.viewfinder"
             case .utilities: return "wrench.and.screwdriver.fill"
@@ -26,6 +27,7 @@ final class NotchViewModel: ObservableObject {
             case .clipboard: return localized("Clipboard")
             case .snippets: return localized("Snippets")
             case .translate: return localized("Translate")
+            case .caffeine: return localized("Caffeine")
             case .currency: return localized("Currency")
             case .teleprompter: return localized("Teleprompter")
             case .utilities: return localized("Utilities")
@@ -59,7 +61,7 @@ final class NotchViewModel: ObservableObject {
         /// it is not something to hover past on the way to a tab people
         /// actually rest on. Icon height is a ceiling derived from the left
         /// rail's length alone, so a shorter or longer rail resizes itself.
-        static let leftRail: [Tab] = [.shelf, .clipboard, .snippets, .translate]
+        static let leftRail: [Tab] = [.shelf, .clipboard, .snippets, .translate, .caffeine]
         static let rightRail: [Tab] = [.currency, .teleprompter, .utilities, .settings]
     }
 
@@ -130,6 +132,8 @@ final class NotchViewModel: ObservableObject {
             screenshotFolder.resumeIfEnabled()
         case .currency:
             currencies.start()
+        case .caffeine:
+            caffeine.beginBackground()
         case .snippets, .translate, .teleprompter, .utilities, .settings:
             break
         }
@@ -140,6 +144,7 @@ final class NotchViewModel: ObservableObject {
         case .clipboard: clipboard.stop()
         case .shelf: screenshotFolder.stop()
         case .currency: currencies.stop()
+        case .caffeine: caffeine.endBackground()
         // Taking the tab off the rail with the screen still covered would
         // leave the tap installed and no way back to it.
         case .utilities: keyboardLock.unlock()
@@ -198,6 +203,7 @@ final class NotchViewModel: ObservableObject {
             // Leaving the teleprompter stops the scroll and drops the pin, so
             // the panel goes back to obeying the pointer like everything else.
             if oldValue == .teleprompter, tab != .teleprompter { teleprompter.suspend() }
+            if oldValue == .caffeine, tab != .caffeine { ConfigStore.shared.flush() }
         }
     }
 
@@ -219,6 +225,7 @@ final class NotchViewModel: ObservableObject {
     let currencies: CurrencyStore
     let snippets: SnippetStore
     let teleprompter: TeleprompterStore
+    let caffeine: CaffeineStore
     /// Shared by every pane that shows something worth not showing.
     let privacy = PrivacyMode()
     /// Here rather than in the controller, which now rebuilds a window per
@@ -236,6 +243,12 @@ final class NotchViewModel: ObservableObject {
         self.currencies = CurrencyStore()
         self.snippets = SnippetStore()
         self.teleprompter = TeleprompterStore()
+        self.caffeine = CaffeineStore(
+            minutes: ConfigStore.shared.caffeineMinutes,
+            lidClosedMode: ConfigStore.shared.caffeineLidClosed,
+            onMinutesChange: { ConfigStore.shared.caffeineMinutes = $0 },
+            onLidClosedModeChange: { ConfigStore.shared.caffeineLidClosed = $0 }
+        )
 
         // The panel header reads through to the stores — the counters. Nested
         // ObservableObjects do not propagate on their own, so those would only
@@ -259,6 +272,7 @@ final class NotchViewModel: ObservableObject {
         for child in [
             shelf.objectWillChange,
             clipboard.objectWillChange,
+            caffeine.objectWillChange,
         ] {
             child
                 .sink { [weak self] _ in

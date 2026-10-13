@@ -236,6 +236,22 @@ does not mark its parameter `@Sendable`, and they are safe without the mark
 only because the dispatch source is created on the main queue. Moving it to
 another queue crashes at the first change in the folder.
 
+**Staying awake.** The Caffeine tab does two different things. A caffeine
+session takes a public IOKit assertion against idle system sleep, which dies with
+the process; the display is deliberately not held. Lid-closed mode sets a bit
+in the kernel through the power-management root domain's user client
+(`kPMSetClamshellSleepState`, whose selector is in a public header; the call
+itself is undocumented). It needs no root and no permission, but the bit
+outlives the process, is shared with `powerd` and other apps (last writer
+wins), cannot be read back, and clearing it while the lid is closed sleeps the
+Mac at once. So the store sends it again after a screen change, a power-source
+change, a wake, a lid change and every 30 seconds, clears it on quit, and on
+every launch sends the value the switch calls for. No watchdog: after a crash
+the bit stays until the next launch or a reboot. Only while the lid is closed
+does the mode also hold the idle-sleep assertion, since the bit alone only
+stops the lid from sleeping the Mac, not the idle timer. Everything goes through
+a power port, the one seam the store's tests use.
+
 **The cost of sitting still.** At rest the app does nothing, and that is
 measurable: with the pointer still and the panel collapsed it sits at 0.0 % CPU,
 and a sampling profiler shows the whole process asleep in `mach_msg2_trap`. The

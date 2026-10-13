@@ -105,6 +105,18 @@ _Avoid_: template, favourite, pinned clip
 **Translate** «Перевод»:
 Offline translation between Russian and a second language, English or Polish, switched by a click on its column title. Text in Cyrillic goes to the second language and everything else to Russian; the direction comes from the script, not from language detection.
 
+**Caffeine** «Кофеин»:
+The tab that keeps the Mac from sleeping: by a caffeine session, or by lid-closed mode.
+_Avoid_: Keep Awake (as its name), Amphetamine
+
+**Caffeine session** «сессия»:
+A stretch during which the Mac does not fall asleep from idleness: indefinite, or for a chosen time. Only the system is kept awake; the screen still turns off and locks on its own schedule.
+_Avoid_: timer (a timed session is one kind), keep-awake
+
+**Lid-closed mode** (Stay Awake with the Lid Closed «Не спать с закрытой крышкой»):
+A standing switch, independent of any caffeine session: while it is on and the lid is closed, the Mac stays awake, with or without an external display.
+_Avoid_: clamshell mode (macOS's name for a closed Mac driving an external display), closed-display mode
+
 **Currency** «Валюта»:
 A two-sided converter between a chosen pair of currencies, on public daily rates; either side can be typed into.
 _Avoid_: exchange

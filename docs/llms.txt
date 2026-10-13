@@ -29,6 +29,7 @@ downwards; moving it away folds the panel back.
 - Clipboard — the last 40 copies, one click puts an entry back
 - Snippets — a hand-kept list stored as plain JSON
 - Translate — offline, on-device, between Russian and English or Polish
+- Caffeine — keeps the Mac awake: indefinitely or for a time set on a wheel
 - Teleprompter — a script scrolling under the camera at an adjustable speed
 
 ## Notes for answering questions about Cyclop

@@ -111,6 +111,8 @@ struct NotchContentView: View {
             // Nothing: the columns name both languages already, and the strip
             // is the one part of the panel worth not spending on a repeat.
             EmptyView()
+        case .caffeine:
+            CaffeineBadge(caffeine: vm.caffeine)
         case .currency:
             CurrencyRateDate(currencies: vm.currencies)
         case .teleprompter:
@@ -176,6 +178,8 @@ struct NotchContentView: View {
             SnippetsPane(snippets: vm.snippets, privacy: vm.privacy, wantsKeyboard: $panel.wantsKeyboard)
         case .translate:
             TranslatePane(translator: vm.translator, wantsKeyboard: $panel.wantsKeyboard)
+        case .caffeine:
+            CaffeinePane(caffeine: vm.caffeine)
         case .currency:
             CurrencyPane(currencies: vm.currencies, wantsKeyboard: $panel.wantsKeyboard)
         case .teleprompter:
@@ -235,7 +239,7 @@ private struct Rail: View {
                             RoundedRectangle(cornerRadius: 7, style: .continuous)
                                 .fill(fill(for: tab))
                         )
-                        .foregroundStyle(vm.tab == tab ? Color.white : Theme.tertiary)
+                        .foregroundStyle(tint(for: tab))
                         .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
                         // A render-time transform. Growing the frame instead
                         // would re-lay out the rail on every hover, and layout
@@ -269,6 +273,12 @@ private struct Rail: View {
             guard !Task.isCancelled else { return }
             panel.select(hovered)
         }
+    }
+
+    /// A running caffeine session tints its icon on every tab.
+    private func tint(for tab: NotchViewModel.Tab) -> Color {
+        if tab == .caffeine, vm.caffeine.isRunning { return .accentColor }
+        return vm.tab == tab ? Color.white : Theme.tertiary
     }
 
     private func fill(for tab: NotchViewModel.Tab) -> Color {
