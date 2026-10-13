@@ -76,6 +76,8 @@ final class NotchController {
         vm?.keyboardLock.unlock()
         cleaning.hide()
         vm?.stop()
+        // A slider value set just before quitting may still be unwritten.
+        ConfigStore.shared.flush()
         panels.values.forEach { $0.teardown() }
     }
 

@@ -290,6 +290,8 @@ final class NotchScreenPanel {
             // That was the translate tab "hanging open" — type, move the
             // pointer away, and the picture stayed while the state closed.
             state.wantsKeyboard = false
+            // A slider dragged out of the panel is removed without being let go.
+            ConfigStore.shared.flush()
             let generation = openGeneration
             DispatchQueue.main.async { [weak self] in
                 guard let self, openGeneration == generation else { return }

@@ -327,10 +327,12 @@ struct SettingsPane: View {
             Text(title)
                 .font(.system(size: 10))
                 .foregroundStyle(Theme.secondary)
-            Slider(value: value, in: range)
-                .controlSize(.mini)
-                .tint(.white.opacity(0.7))
-                .frame(width: 64)
+            Slider(value: value, in: range) { editing in
+                if !editing { ConfigStore.shared.flush() }
+            }
+            .controlSize(.mini)
+            .tint(.white.opacity(0.7))
+            .frame(width: 64)
         }
     }
 

@@ -92,6 +92,9 @@ final class ConfigStore: ObservableObject {
 
     private var value: File
 
+    /// A slider's value is in `value` but not on disk yet: see `flush()`.
+    private var isDirty = false
+
     private init() {
         if let data = try? Data(contentsOf: Self.file) {
             do {
@@ -127,16 +130,17 @@ final class ConfigStore: ObservableObject {
     }
 
     /// How far into a physical notch the pointer has to be, in points. Clamped
-    /// on the way out: the file is edited by hand.
+    /// on the way out: the file is edited by hand. Set by a slider, so it is
+    /// written by `flush()` and not on every step of a drag.
     var notchDepth: Double {
         get { value.notch.depth.clamped(to: NotchGeometry.depthRange) }
-        set { value.notch.depth = newValue; persist() }
+        set { value.notch.depth = newValue; isDirty = true }
     }
 
-    /// The pause before a physical notch opens, in milliseconds.
+    /// The pause before a physical notch opens, in milliseconds. Written by `flush()`.
     var notchDwell: Double {
         get { value.notch.dwell.clamped(to: NotchGeometry.dwellRange) }
-        set { value.notch.dwell = newValue; persist() }
+        set { value.notch.dwell = newValue; isDirty = true }
     }
 
     /// Off switch for people who copy images all day and do not want them
@@ -154,9 +158,10 @@ final class ConfigStore: ObservableObject {
         set { value.privacy = newValue; persist() }
     }
 
+    /// Set by a slider: written by `flush()`.
     var teleprompterSpeed: Double {
         get { value.teleprompter.speed }
-        set { value.teleprompter.speed = newValue; persist() }
+        set { value.teleprompter.speed = newValue; isDirty = true }
     }
 
     var teleprompterFontSize: Double {
@@ -209,7 +214,15 @@ final class ConfigStore: ObservableObject {
     // MARK: - Storage
 
     private func persist() {
+        isDirty = false
         write(value)
+    }
+
+    /// Writes what the sliders left unwritten. Called when a slider is let go
+    /// and on quit: a drag changes the value some sixty times a second.
+    func flush() {
+        guard isDirty else { return }
+        persist()
     }
 
     /// Pretty-printed, and slashes left alone — same reason as

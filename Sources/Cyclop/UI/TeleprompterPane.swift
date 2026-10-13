@@ -224,10 +224,12 @@ struct TeleprompterPane: View {
     /// from a list beforehand.
     private var speedControl: some View {
         HStack(spacing: 7) {
-            Slider(value: $prompter.speed, in: 0.3...3.0)
-                .controlSize(.mini)
-                .tint(.white.opacity(0.7))
-                .frame(width: 96)
+            Slider(value: $prompter.speed, in: 0.3...3.0) { editing in
+                if !editing { ConfigStore.shared.flush() }
+            }
+            .controlSize(.mini)
+            .tint(.white.opacity(0.7))
+            .frame(width: 96)
             Text(String(format: "%.1f×", prompter.speed))
                 .font(.system(size: 11, weight: .medium, design: .monospaced))
                 .foregroundStyle(Theme.secondary)
