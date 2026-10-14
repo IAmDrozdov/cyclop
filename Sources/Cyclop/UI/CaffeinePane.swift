@@ -169,6 +169,7 @@ private struct WheelColumn: View {
 
     var body: some View {
         HStack(spacing: 4) {
+            ScrollViewReader { proxy in
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
                     ForEach(values, id: \.self) { value in
@@ -188,6 +189,9 @@ private struct WheelColumn: View {
                 get: { selection },
                 set: { newValue in if let newValue { selection = newValue } }
             ), anchor: .center)
+            // The binding alone leaves a column that appears with the panel at its first row.
+            .onAppear { proxy.scrollTo(selection, anchor: .center) }
+            }
             .frame(width: 44, height: rowHeight * CGFloat(rows))
             .background(
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
@@ -209,6 +213,7 @@ private struct WheelColumn: View {
             Text(LocalizedStringKey(unit))
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(Theme.secondary)
+                .fixedSize()
         }
     }
 }
