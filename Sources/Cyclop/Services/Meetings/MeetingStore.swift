@@ -29,6 +29,7 @@ final class MeetingStore: ObservableObject {
     private let makeCapture: () -> MeetingCapturing
     private let now: () -> Date
     private let engine: SpeechEngine
+    private let reveal: ([URL]) -> Void
     private var processingTask: Task<Void, Never>?
     private var downloadTask: Task<Void, Never>?
     private var isStarted = false
@@ -43,13 +44,15 @@ final class MeetingStore: ObservableObject {
         downloads: URL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0],
         makeCapture: @escaping () -> MeetingCapturing = { MeetingRecorder() },
         engine: SpeechEngine = ParakeetEngine(),
-        now: @escaping () -> Date = Date.init
+        now: @escaping () -> Date = Date.init,
+        reveal: @escaping ([URL]) -> Void = { NSWorkspace.shared.activateFileViewerSelecting($0) }
     ) {
         self.folder = folder
         self.downloads = downloads
         self.makeCapture = makeCapture
         self.engine = engine
         self.now = now
+        self.reveal = reveal
     }
 
     /// Peaks of the two tracks. Plain reads, not published: the pane polls them while drawn.
@@ -295,7 +298,7 @@ final class MeetingStore: ObservableObject {
             try? fm.removeItem(at: target)
             return nil
         }
-        NSWorkspace.shared.activateFileViewerSelecting([target])
+        reveal([target])
         return target
     }
 

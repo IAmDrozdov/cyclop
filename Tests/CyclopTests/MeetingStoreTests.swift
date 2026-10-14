@@ -77,7 +77,8 @@ struct MeetingStoreTests {
             downloads: downloads,
             makeCapture: { capture },
             engine: engine,
-            now: { queue.isEmpty ? Date() : queue.removeFirst() }
+            now: { queue.isEmpty ? Date() : queue.removeFirst() },
+            reveal: { _ in }  // тест не должен открывать Finder
         )
         return (store, folder)
     }
