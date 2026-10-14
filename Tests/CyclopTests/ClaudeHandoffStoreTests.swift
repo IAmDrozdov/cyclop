@@ -278,7 +278,7 @@ struct ClaudeHandoffStoreTests {
                     executable: claude,
                     arguments: [
                         "-p", "--resume", "new-session", "--model", "sonnet", "--effort", "xhigh", "--permission-mode",
-                        "default", "--max-turns", "1", Self.ready,
+                        "acceptEdits", "--max-turns", "1", "--settings", ClaudeHandoff.noToolSettings, Self.ready,
                     ], folder: work),
             ])
         #expect(rig.opener.opened == [URL(string: "claude://resume?session=new-session")!])
@@ -306,8 +306,14 @@ struct ClaudeHandoffStoreTests {
         rig.store.approve(id)
         await rig.store.waitForHandoffs()
 
-        #expect(rig.runner.calls.count == 1)
-        #expect(rig.runner.calls[0].arguments.first == "-p")
+        // Импорт редактора не проверен: ход подготовки спрашивает, какой бы режим ни был выбран.
+        #expect(
+            rig.runner.calls.map(\.arguments) == [
+                [
+                    "-p", "--session-id", "new-session", "--model", "sonnet", "--effort", "medium", "--permission-mode", "default",
+                    "--max-turns", "1", "--settings", ClaudeHandoff.noToolSettings, Self.ready,
+                ]
+            ])
         #expect(rig.opener.opened == [URL(string: "cursor://anthropic.claude-code/open?session=new-session")!])
         #expect(rig.store.handoffs.map(\.phase) == [.opened])
     }

@@ -205,52 +205,90 @@ struct ClaudeHandoffTests {
     // MARK: - Подготовка сессии для приложения и редактора
 
     @Test func clearPreparesANewSessionWithAReadyPrompt() {
-        let steps = Self.handoff(Self.choice(.clear, .sonnet)).headlessSteps
+        let steps = Self.handoff(Self.choice(.clear, .sonnet)).headlessSteps(in: .app)
 
         #expect(
             steps == [
                 [
-                    "-p", "--session-id", "new-id", "--model", "sonnet", "--effort", "medium", "--permission-mode", "default",
-                    "--max-turns", "1", Self.ready,
+                    "-p", "--session-id", "new-id", "--model", "sonnet", "--effort", "medium", "--permission-mode", "acceptEdits",
+                    "--max-turns", "1", "--settings", ClaudeHandoff.noToolSettings, Self.ready,
                 ]
             ])
     }
 
-    /// Подготовка идёт без владельца: выбранный режим в ней не действует, ход один.
-    @Test func everyPreparationTurnRunsInTheDefaultModeForOneTurnWhateverTheChoice() {
-        for context in PlanChoice.Context.allCases {
-            for mode in PlanChoice.Mode.allCases {
-                for step in Self.handoff(Self.choice(context, .sonnet, mode: mode)).headlessSteps {
-                    let isCompact = step.contains(Self.instruction)
-                    #expect(step.contains("--max-turns") == !isCompact, "\(step)")
-                    #expect(!step.contains("bypassPermissions") && !step.contains("acceptEdits") && !step.contains("auto"), "\(step)")
-                    #expect(isCompact || step.firstIndex(of: "--permission-mode").map { step[$0 + 1] == "default" } == true, "\(step)")
+    /// Приложение берёт режим из хвоста транскрипта и само открывает обход как правки без вопросов;
+    /// импорт редактора не проверен, там остаётся «Спрашивать».
+    @Test func aPreparedTurnRunsInTheChosenModeInTheAppAndAsksInTheEditor() {
+        #expect(ClaudeHandoff.preparedMode(.bypassPermissions, in: .app) == .acceptEdits)
+        #expect(ClaudeHandoff.preparedMode(.auto, in: .app) == .auto)
+        #expect(ClaudeHandoff.preparedMode(.acceptEdits, in: .app) == .acceptEdits)
+        #expect(ClaudeHandoff.preparedMode(.default, in: .app) == .default)
+        for mode in PlanChoice.Mode.allCases {
+            #expect(ClaudeHandoff.preparedMode(mode, in: .editor) == .default)
+        }
+    }
+
+    /// Подготовка идёт без владельца: ход один, и хук отказывает любому инструменту; обхода в ней не бывает.
+    @Test func everyPreparedTurnIsOneTurnBehindTheHookThatRefusesTools() {
+        for place in [ClaudeSession.Place.app, .editor] {
+            for context in PlanChoice.Context.allCases {
+                for mode in PlanChoice.Mode.allCases {
+                    for step in Self.handoff(Self.choice(context, .sonnet, mode: mode)).headlessSteps(in: place) {
+                        let isCompact = step.contains(Self.instruction)
+                        #expect(step.contains("--max-turns") == !isCompact, "\(step)")
+                        #expect(step.contains("--settings") == !isCompact, "\(step)")
+                        #expect(
+                            isCompact
+                                || step.firstIndex(of: "--settings").map { step[$0 + 1] == ClaudeHandoff.noToolSettings } == true,
+                            "\(step)")
+                        #expect(!step.contains("bypassPermissions"), "\(step)")
+                        #expect(
+                            isCompact
+                                || step.firstIndex(of: "--permission-mode").map {
+                                    step[$0 + 1] == ClaudeHandoff.preparedMode(mode, in: place).rawValue
+                                } == true, "\(step)")
+                    }
                 }
             }
         }
     }
 
+    /// Хук ловит любой инструмент и блокирует его выходом с кодом 2.
+    @Test func theNoToolSettingsAreAPreToolUseHookForEveryTool() throws {
+        let data = Data(ClaudeHandoff.noToolSettings.utf8)
+        let root = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let hooks = try #require(root["hooks"] as? [String: Any])
+        #expect(Set(hooks.keys) == ["PreToolUse"])
+        let entries = try #require(hooks["PreToolUse"] as? [[String: Any]])
+        #expect(entries.count == 1)
+        #expect(entries[0]["matcher"] as? String == "*")
+        let commands = try #require(entries[0]["hooks"] as? [[String: Any]])
+        #expect(commands.count == 1)
+        #expect(commands[0]["type"] as? String == "command")
+        #expect((commands[0]["command"] as? String)?.hasSuffix("; exit 2") == true)
+    }
+
     @Test func compactPreparesTwoStepsTheSecondOnTheTargetModel() {
-        let steps = Self.handoff(Self.choice(.compact, .sonnet, effort: .xhigh, mode: .acceptEdits)).headlessSteps
+        let steps = Self.handoff(Self.choice(.compact, .sonnet, effort: .xhigh, mode: .acceptEdits)).headlessSteps(in: .app)
 
         #expect(
             steps == [
                 ["-p", "--resume", "old-id", "--fork-session", "--session-id", "new-id", Self.instruction],
                 [
-                    "-p", "--resume", "new-id", "--model", "sonnet", "--effort", "xhigh", "--permission-mode", "default",
-                    "--max-turns", "1", Self.ready,
+                    "-p", "--resume", "new-id", "--model", "sonnet", "--effort", "xhigh", "--permission-mode", "acceptEdits",
+                    "--max-turns", "1", "--settings", ClaudeHandoff.noToolSettings, Self.ready,
                 ],
             ])
     }
 
-    @Test func keepWithSonnetPreparesOneForkedStep() {
-        let steps = Self.handoff(Self.choice(.keep, .sonnet)).headlessSteps
+    @Test func keepWithSonnetPreparesOneForkedStepAskingInTheEditor() {
+        let steps = Self.handoff(Self.choice(.keep, .sonnet)).headlessSteps(in: .editor)
 
         #expect(
             steps == [
                 [
                     "-p", "--resume", "old-id", "--fork-session", "--session-id", "new-id", "--model", "sonnet", "--effort", "medium",
-                    "--permission-mode", "default", "--max-turns", "1", Self.ready,
+                    "--permission-mode", "default", "--max-turns", "1", "--settings", ClaudeHandoff.noToolSettings, Self.ready,
                 ]
             ])
     }

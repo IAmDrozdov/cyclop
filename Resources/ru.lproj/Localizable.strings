@@ -183,9 +183,10 @@
 "A new session is started for compact, clear or another model: in the terminal it ran in, or prepared and opened in Claude or the editor." = "Для сжатия, очистки или другой модели запускается новая сессия: в терминале, где шла эта, или подготовленная и открытая в Claude или редакторе.";
 "Preparing a session for «%@»…" = "Готовлю сессию для «%@»…";
 "Opening a terminal for «%@»…" = "Открываю терминал для «%@»…";
-"Opened in Claude. Choose the mode there and type go to start." = "Открыто в Claude. Выберите режим там и напишите go, чтобы начать.";
+"Opened in Claude. Type go there to start." = "Открыто в Claude. Напишите там go, чтобы начать.";
 "Opened in the editor. Choose the mode there and type go to start." = "Открыто в редакторе. Выберите режим там и напишите go, чтобы начать.";
-"Effort and mode are chosen in Claude when the session opens" = "Effort и режим выбираются в Claude, когда сессия откроется";
+"Effort is chosen in Claude when the session opens" = "Effort выбирается в Claude, когда сессия откроется";
+"Claude opens bypass as accept edits" = "Claude откроет «Без вопросов» как «Правки без вопросов»";
 "Effort and mode are chosen in the editor when the session opens" = "Effort и режим выбираются в редакторе, когда сессия откроется";
 "Started in the terminal." = "Запущено в терминале.";
 "Could not hand the plan off: %@" = "Не удалось передать план: %@";

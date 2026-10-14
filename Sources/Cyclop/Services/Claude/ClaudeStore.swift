@@ -392,8 +392,8 @@ final class ClaudeStore: ObservableObject {
         facts[id].map { planChoice(of: id).route(sessionModel: $0.sessionModel) } ?? .inPlace
     }
 
-    /// Claude or the editor when Approve hands the plan off to a session prepared for it, where the effort and
-    /// the mode are chosen when the session opens; nil otherwise.
+    /// Claude or the editor when Approve hands the plan off to a session prepared for it, where the effort (and,
+    /// in the editor, the mode) is chosen when the session opens; nil otherwise.
     func preparedHandoffPlace(of id: UUID) -> ClaudeSession.Place? {
         guard planRoute(of: id) == .handoff, let place = facts[id]?.place, place != .terminal else { return nil }
         return place
@@ -584,7 +584,7 @@ final class ClaudeStore: ObservableObject {
         // A hand-off is offered only with an executable (unavailable otherwise); this is a guard.
         guard let executable = facts.executable else { return .noExecutable }
         let environment = ClaudeHandoff.scrubbedEnvironment(ProcessInfo.processInfo.environment)
-        for arguments in handoff.headlessSteps {
+        for arguments in handoff.headlessSteps(in: facts.place) {
             let run = await runner.run(
                 executable: executable, arguments: arguments, folder: URL(fileURLWithPath: handoff.folder, isDirectory: true),
                 environment: environment, timeout: 600)

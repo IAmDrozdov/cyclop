@@ -391,14 +391,17 @@ folder through `ClaudeRunning` (the session's own `claude` executable, else the
 usual places; the environment without `CLAUDECODE` and the other session variables;
 ten minutes a step), then opens `claude://resume?session=<id>` or the editor's own
 link. The prepared session ends with a turn on the target model, because the app
-reads the model from the transcript's tail. Every prep step that runs a model turn
-is `--permission-mode default --max-turns 1` whatever mode was chosen (headless, it
-cannot answer a permission request, so a tool call is refused, not run), the seed
-prompt says to use no tool and answer only Ready, and `--model` and `--effort` stay
-on the seed step (the `/compact` step has neither). The chosen effort and mode do
-not carry to the app or the editor, so the card hides those two rows for that
-route and says they are chosen in Claude; the terminal route runs interactively
-in the chosen mode. The `claude` executable for an app or editor session is
+reads the model and the mode from the transcript's tail. Every prep step that runs
+a model turn is `--max-turns 1` with `--settings` holding a `PreToolUse` hook that
+refuses every tool (`ClaudeHandoff.noToolSettings`): `--max-turns 1` alone still runs
+the first turn's tools, and the hook refuses them in any mode, bypass included. The
+seed prompt says to use no tool and answer only Ready, and `--model`, `--effort` and
+`--permission-mode` stay on the seed step (the `/compact` step has none of them). The
+mode of that turn is the chosen one for the app, with bypass as accept edits as the
+app opens it anyway, and ask for the editor, whose import is unverified
+(`ClaudeHandoff.preparedMode`). The effort does not carry to the app, so the card
+hides that row and says it is chosen in Claude; for the editor it hides both rows.
+The terminal route runs interactively in the chosen mode. The `claude` executable for an app or editor session is
 resolved when the plan arrives. The session's current model comes from the last main-thread assistant record
 in the last 256 KB of its transcript (`ClaudeHandoff.lastModel`), the only thing
 read from one. Hand-off is not offered, and the card says so, when the plan has no

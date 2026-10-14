@@ -155,10 +155,22 @@ struct ClaudeHandoff: Equatable {
         (modelArgument.map { ["--model", $0] } ?? []) + ["--effort", choice.effort.rawValue, "--permission-mode", choice.mode.rawValue]
     }
 
-    /// A prepared session never runs in the chosen mode: one turn, and a tool call is refused, not run unattended.
-    private var preparationOptions: [String] {
+    /// The mode of a prepared session's turn, which the Claude app takes from the transcript: the chosen one there,
+    /// with bypass as accept edits as the app itself opens it; ask in the editor, whose import is unverified.
+    static func preparedMode(_ mode: PlanChoice.Mode, in place: ClaudeSession.Place) -> PlanChoice.Mode {
+        guard place == .app else { return .default }
+        return mode == .bypassPermissions ? .acceptEdits : mode
+    }
+
+    /// `--settings` of a prepared turn: a hook that refuses every tool in any mode, since `--max-turns 1`
+    /// still runs the first turn's tools.
+    static let noToolSettings = #"{"hooks":{"PreToolUse":[{"matcher":"*","hooks":[{"type":"command","command":"echo No tool runs while Cyclop prepares this session. >&2; exit 2"}]}]}}"#
+
+    /// A prepared turn runs unattended: one turn, and the hook refuses any tool call.
+    private func preparationOptions(in place: ClaudeSession.Place) -> [String] {
         (modelArgument.map { ["--model", $0] } ?? [])
-            + ["--effort", choice.effort.rawValue, "--permission-mode", "default", "--max-turns", "1"]
+            + ["--effort", choice.effort.rawValue, "--permission-mode", Self.preparedMode(choice.mode, in: place).rawValue]
+            + ["--max-turns", "1", "--settings", Self.noToolSettings]
     }
 
     /// `'` becomes `'\''` and `\` becomes `'\\'`: the same in POSIX shells and fish, where a backslash
@@ -195,9 +207,9 @@ struct ClaudeHandoff: Equatable {
     }
 
     /// The `claude -p` runs that prepare a session for the app or the editor, one argument list each.
-    var headlessSteps: [[String]] {
+    func headlessSteps(in place: ClaudeSession.Place) -> [[String]] {
         let text = prompt(prepared: true)
-        let options = preparationOptions
+        let options = preparationOptions(in: place)
         switch choice.context {
         case .clear:
             return [["-p", "--session-id", newSessionID] + options + [text]]

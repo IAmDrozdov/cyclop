@@ -164,7 +164,7 @@ private struct HandoffRow: View {
 
     private var openedText: String {
         switch status.place {
-        case .app: return localized("Opened in Claude. Choose the mode there and type go to start.")
+        case .app: return localized("Opened in Claude. Type go there to start.")
         case .editor: return localized("Opened in the editor. Choose the mode there and type go to start.")
         case .terminal: return localized("Started in the terminal.")
         }
@@ -754,10 +754,14 @@ private struct PlanSummaryLine: View {
             case .same: model = PlanChoiceLabels.shortModel(store.sessionModel(of: id)) ?? localized("Same")
             }
             parts = [choice.context.label, model]
-            // Claude and the editor ask for the effort and the mode themselves when the session opens.
+            // Claude and the editor ask for the effort themselves when the session opens, the editor for the mode too.
             if store.preparedHandoffPlace(of: id) == nil { parts.append(choice.effort.rawValue) }
         }
-        if store.preparedHandoffPlace(of: id) == nil { parts.append(choice.mode.title) }
+        switch store.preparedHandoffPlace(of: id) {
+        case .app: parts.append(ClaudeHandoff.preparedMode(choice.mode, in: .app).title)
+        case .editor: break
+        case .terminal, nil: parts.append(choice.mode.title)
+        }
         return parts.joined(separator: " · ")
     }
 
@@ -824,13 +828,10 @@ private struct PlanChoiceRows: View {
                     text: unavailable == .noExecutable
                         ? localized("No claude executable found") : localized("Only in this session here"))
             }
-            if let prepared {
-                PlanChoiceNote(
-                    text: prepared == .app
-                        ? localized("Effort and mode are chosen in Claude when the session opens")
-                        : localized("Effort and mode are chosen in the editor when the session opens"))
+            if prepared == .editor {
+                PlanChoiceNote(text: localized("Effort and mode are chosen in the editor when the session opens"))
             } else {
-                if route == .handoff {
+                if route == .handoff && prepared == nil {
                     PlanChoiceRow(title: localized("Effort")) {
                         NotchSegmented(
                             selection: binding(\.effort), options: PlanChoice.Effort.allCases, label: { $0.rawValue })
@@ -843,6 +844,12 @@ private struct PlanChoiceRows: View {
                 }
                 if bypassOff {
                     PlanChoiceNote(text: localized("Not allowed in this session"))
+                }
+                if prepared == .app {
+                    if store.planChoice(of: id).mode == .bypassPermissions {
+                        PlanChoiceNote(text: localized("Claude opens bypass as accept edits"))
+                    }
+                    PlanChoiceNote(text: localized("Effort is chosen in Claude when the session opens"))
                 }
             }
         }

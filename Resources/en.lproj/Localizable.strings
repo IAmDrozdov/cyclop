@@ -184,9 +184,10 @@
 "A new session is started for compact, clear or another model: in the terminal it ran in, or prepared and opened in Claude or the editor." = "A new session is started for compact, clear or another model: in the terminal it ran in, or prepared and opened in Claude or the editor.";
 "Preparing a session for «%@»…" = "Preparing a session for «%@»…";
 "Opening a terminal for «%@»…" = "Opening a terminal for «%@»…";
-"Opened in Claude. Choose the mode there and type go to start." = "Opened in Claude. Choose the mode there and type go to start.";
+"Opened in Claude. Type go there to start." = "Opened in Claude. Type go there to start.";
 "Opened in the editor. Choose the mode there and type go to start." = "Opened in the editor. Choose the mode there and type go to start.";
-"Effort and mode are chosen in Claude when the session opens" = "Effort and mode are chosen in Claude when the session opens";
+"Effort is chosen in Claude when the session opens" = "Effort is chosen in Claude when the session opens";
+"Claude opens bypass as accept edits" = "Claude opens bypass as accept edits";
 "Effort and mode are chosen in the editor when the session opens" = "Effort and mode are chosen in the editor when the session opens";
 "Started in the terminal." = "Started in the terminal.";
 "Could not hand the plan off: %@" = "Could not hand the plan off: %@";
