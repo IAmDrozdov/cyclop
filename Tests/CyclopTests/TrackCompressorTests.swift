@@ -12,8 +12,8 @@ struct TrackCompressorTests {
         return url
     }
 
-    /// Тон заданной частоты и длины в 16-битном PCM, как пишут рекордеры.
-    private static func tone(_ url: URL, seconds: Double, rate: Double, channels: AVAudioChannelCount, amplitude: Float) throws {
+    /// Тон заданной частоты и длины в 16-битном PCM, как пишут рекордеры. Им же пользуются тесты `MeetingStore`.
+    static func tone(_ url: URL, seconds: Double, rate: Double, channels: AVAudioChannelCount, amplitude: Float) throws {
         let file = try AVAudioFile(
             forWriting: url, settings: AudioLevel.pcmSettings(sampleRate: rate, channels: channels),
             commonFormat: .pcmFormatFloat32, interleaved: false

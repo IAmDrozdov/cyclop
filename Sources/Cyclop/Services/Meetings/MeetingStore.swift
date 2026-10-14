@@ -242,8 +242,10 @@ final class MeetingStore: ObservableObject {
         guard !leftovers.isEmpty || next != nil else { return }
         processingTask = Task { [engine] in
             if !leftovers.isEmpty {
-                await Task.detached(priority: .utility) {
-                    for (folder, offsets) in leftovers { try? MeetingPipeline.compressAudio(in: folder, offsets: offsets) }
+                await Task.detached(priority: .utility) { [keepTracks] in
+                    for (folder, offsets) in leftovers {
+                        try? MeetingPipeline.compressAudio(in: folder, offsets: offsets, keepTracks: keepTracks)
+                    }
                 }.value
             }
             if let next, !Task.isCancelled { await process(next, with: MeetingPipeline(engine: engine, keepTracks: keepTracks)) }

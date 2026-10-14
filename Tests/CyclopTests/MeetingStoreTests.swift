@@ -63,7 +63,8 @@ struct MeetingStoreTests {
     private static func makeStore(
         capture: FakeCapture = FakeCapture(),
         engine: FakeEngine = FakeEngine(),
-        dates: [Date] = []
+        dates: [Date] = [],
+        defaults: UserDefaults = .standard
     ) throws -> (store: MeetingStore, folder: URL) {
         let downloads = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent("cyclop-downloads-\(UUID().uuidString)", isDirectory: true)
@@ -78,7 +79,8 @@ struct MeetingStoreTests {
             makeCapture: { capture },
             engine: engine,
             now: { queue.isEmpty ? Date() : queue.removeFirst() },
-            reveal: { _ in }  // тест не должен открывать Finder
+            reveal: { _ in },  // тест не должен открывать Finder
+            defaults: defaults
         )
         return (store, folder)
     }
@@ -400,6 +402,35 @@ struct MeetingStoreTests {
         }
         #expect(store.meetings[0].state == .ready)
         #expect(engine.heard.count <= 2)
+    }
+
+    @Test func leftoverCompressionAtStartKeepsTheTracksWhenAsked() async throws {
+        let suite = "cyclop-tests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let (store, folder) = try Self.makeStore(defaults: defaults)
+        store.keepTracks = true
+
+        // Готовая встреча из прошлого запуска: расшифровка есть, дорожки настоящие, audio.m4a нет.
+        let dir = folder.appendingPathComponent("2026-10-10 10-00", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try TrackCompressorTests.tone(
+            dir.appendingPathComponent(MeetingFile.mic), seconds: 1, rate: 48_000, channels: 1, amplitude: 0.5)
+        try TrackCompressorTests.tone(
+            dir.appendingPathComponent(MeetingFile.system), seconds: 1, rate: 48_000, channels: 2, amplitude: 0.5)
+        try MeetingMeta.encoder.encode(MeetingMeta(startedAt: Self.date("2026-10-10T10:00:00Z")))
+            .write(to: dir.appendingPathComponent(MeetingFile.meta))
+        try Data("{}".utf8).write(to: dir.appendingPathComponent(MeetingFile.transcriptData))
+
+        store.start()
+        for _ in 0..<300 where store.meetings.first?.audioReady != true {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+
+        #expect(store.meetings.first?.audioReady == true)
+        #expect(FileManager.default.fileExists(atPath: dir.appendingPathComponent(MeetingFile.audio).path))
+        #expect(FileManager.default.fileExists(atPath: dir.appendingPathComponent(MeetingFile.mic).path))
+        #expect(FileManager.default.fileExists(atPath: dir.appendingPathComponent(MeetingFile.system).path))
     }
 
     @Test func exportWaitsForTheAudioToBeCompressed() async throws {
