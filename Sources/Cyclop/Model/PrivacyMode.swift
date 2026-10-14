@@ -20,7 +20,7 @@ import Combine
 @MainActor
 final class PrivacyMode: ObservableObject {
     enum Section: String, CaseIterable, Identifiable {
-        case clipboard, snippets
+        case clipboard, snippets, claude
 
         var id: String { rawValue }
 
@@ -30,6 +30,7 @@ final class PrivacyMode: ObservableObject {
             switch self {
             case .clipboard: return localized("Clipboard")
             case .snippets: return localized("Snippets")
+            case .claude: return localized("Claude")
             }
         }
     }

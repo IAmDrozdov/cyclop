@@ -3,6 +3,7 @@
    a phrase can be reworded here without touching the code. */
 
 /* Tabs */
+"Claude" = "Claude";
 "Shelf" = "Shelf";
 "Clipboard" = "Clipboard";
 "Snippets" = "Snippets";
@@ -99,22 +100,6 @@
 "Paste the script here" = "Paste the script here";
 "Ready" = "Ready";
 "Done" = "Done";
-"Utilities" = "Utilities";
-"Lock Keyboard" = "Lock Keyboard";
-"Wipe the keys and the screen. Hold Esc or − for %d s to\nunlock; it also unlocks by itself after a minute" = "Wipe the keys and the screen. Hold Esc or − for %d s to\nunlock; it also unlocks by itself after a minute";
-"Allow in Settings" = "Allow in Settings";
-"Input is protected" = "Input is protected";
-"Could not take over input" = "Could not take over input";
-"Still unlocking" = "Still unlocking";
-"Lock ended early" = "Lock ended early";
-"An app turned on secure keyboard entry, so keys stopped\nreaching the lock. It ended instead of pretending" = "An app turned on secure keyboard entry, so keys stopped\nreaching the lock. It ended instead of pretending";
-"The previous lock is still being taken down.\nPress again in a moment" = "The previous lock is still being taken down.\nPress again in a moment";
-"An app is holding secure keyboard entry — a password field,\na password manager, a terminal. Close it and press again" = "An app is holding secure keyboard entry — a password field,\na password manager, a terminal. Close it and press again";
-"The system refused the event tap. Re-granting Accessibility\nusually fixes it — the permission is tied to the app's signature" = "The system refused the event tap. Re-granting Accessibility\nusually fixes it — the permission is tied to the app's signature";
-"Cyclop needs Accessibility to swallow keys and clicks.\nSystem Settings → Privacy & Security → Accessibility" = "Cyclop needs Accessibility to swallow keys and clicks.\nSystem Settings → Privacy & Security → Accessibility";
-"Keyboard and trackpad are locked" = "Keyboard and trackpad are locked";
-"Hold Esc or − for %d s" = "Hold Esc or − for %d s";
-"Unlocks by itself in %d s" = "Unlocks by itself in %d s";
 
 /* Meetings */
 "Start Recording" = "Start Recording";
@@ -136,3 +121,41 @@
 "Speaker %@" = "Speaker %@";
 "Export" = "Export";
 "System sound was not recorded" = "System sound was not recorded";
+
+/* Claude */
+"No Claude sessions" = "No Claude sessions";
+"working" = "working";
+"waiting" = "waiting";
+"idle" = "idle";
+"Claude app" = "Claude app";
+"Editor" = "Editor";
+"Terminal" = "Terminal";
+"Open in Claude" = "Open in Claude";
+"Answer" = "Answer";
+"1 more request · list" = "1 more request · list";
+"%d more requests · list" = "%d more requests · list";
+"Question %d of %d" = "Question %d of %d";
+"Back" = "Back";
+"This question takes several options: answer it in Claude" = "This question takes several options: answer it in Claude";
+"Own Answer…" = "Own Answer…";
+"Your answer" = "Your answer";
+"Allow" = "Allow";
+"Always Allow" = "Always Allow";
+"Always Allow: %@" = "Always Allow: %@";
+"Deny" = "Deny";
+"Denied from Cyclop" = "Denied from Cyclop";
+"Plan" = "Plan";
+"Approve" = "Approve";
+"Send Back with Remarks…" = "Send Back with Remarks…";
+"Remarks" = "Remarks";
+"Connect in Settings to answer here" = "Connect in Settings to answer here";
+"Cyclop cannot listen for Claude's requests" = "Cyclop cannot listen for Claude's requests";
+"Connect to Claude" = "Connect to Claude";
+"Disconnect from Claude" = "Disconnect from Claude";
+"Open Panel for Requests" = "Open Panel for Requests";
+"Not connected" = "Not connected";
+"Connected" = "Connected";
+"Connected to another copy of Cyclop" = "Connected to another copy of Cyclop";
+"Claude's settings file could not be read; nothing was changed" = "Claude's settings file could not be read; nothing was changed";
+"Claude's settings file could not be changed; try again" = "Claude's settings file could not be changed; try again";
+"Adds one hook to Claude's settings so that requests reach the panel, after keeping a copy of the file. Sessions already running pick it up without a restart. Disconnect before deleting Cyclop." = "Adds one hook to Claude's settings so that requests reach the panel, after keeping a copy of the file. Sessions already running pick it up without a restart. Disconnect before deleting Cyclop.";

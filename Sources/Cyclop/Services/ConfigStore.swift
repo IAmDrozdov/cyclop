@@ -75,6 +75,7 @@ final class ConfigStore: ObservableObject {
         var fullSizeDrawnNotch = false
         var notch = Notch()
         var caffeine = Caffeine()
+        var openPanelForRequests = true
 
         init() {}
 
@@ -94,6 +95,7 @@ final class ConfigStore: ObservableObject {
             fullSizeDrawnNotch = try c.decodeIfPresent(Bool.self, forKey: .fullSizeDrawnNotch) ?? d.fullSizeDrawnNotch
             notch = try c.decodeIfPresent(Notch.self, forKey: .notch) ?? d.notch
             caffeine = try c.decodeIfPresent(Caffeine.self, forKey: .caffeine) ?? d.caffeine
+            openPanelForRequests = try c.decodeIfPresent(Bool.self, forKey: .openPanelForRequests) ?? d.openPanelForRequests
         }
     }
 
@@ -199,6 +201,12 @@ final class ConfigStore: ObservableObject {
     var caffeineLidClosed: Bool {
         get { value.caffeine.lidClosed }
         set { value.caffeine.lidClosed = newValue; persist() }
+    }
+
+    /// Whether the panel slides out by itself for a Claude request. On by default; older files lack the key.
+    var openPanelForRequests: Bool {
+        get { value.openPanelForRequests }
+        set { value.openPanelForRequests = newValue; persist() }
     }
 
     /// Tabs switched off in Settings (#80), by `Tab.rawValue`. Kept as the set

@@ -2,6 +2,7 @@
    просто останется английской, а не превратится в идентификатор. */
 
 /* Вкладки */
+"Claude" = "Claude";
 "Shelf" = "Полка";
 "Clipboard" = "Буфер";
 "Snippets" = "Заготовки";
@@ -98,22 +99,6 @@
 "Paste the script here" = "Вставьте сюда сценарий";
 "Ready" = "Готово";
 "Done" = "Готово";
-"Utilities" = "Утилиты";
-"Lock Keyboard" = "Заблокировать клавиатуру";
-"Wipe the keys and the screen. Hold Esc or − for %d s to\nunlock; it also unlocks by itself after a minute" = "Протри клавиши и экран. Чтобы разблокировать — держи Esc\nили − %d с; само снимется через минуту";
-"Allow in Settings" = "Разрешить в настройках";
-"Input is protected" = "Ввод защищён";
-"Could not take over input" = "Не удалось перехватить ввод";
-"Still unlocking" = "Ещё разблокируется";
-"Lock ended early" = "Блокировка прервалась";
-"An app turned on secure keyboard entry, so keys stopped\nreaching the lock. It ended instead of pretending" = "Приложение включило защищённый ввод, и нажатия перестали\nдоходить до блокировки. Она снялась, а не сделала вид";
-"The previous lock is still being taken down.\nPress again in a moment" = "Предыдущая блокировка ещё снимается.\nНажми снова через мгновение";
-"An app is holding secure keyboard entry — a password field,\na password manager, a terminal. Close it and press again" = "Какое-то приложение держит защищённый ввод — поле пароля,\nменеджер паролей, терминал. Закрой его и нажми снова";
-"The system refused the event tap. Re-granting Accessibility\nusually fixes it — the permission is tied to the app's signature" = "Система не дала перехват событий. Обычно помогает выдать\nУниверсальный доступ заново — он привязан к подписи сборки";
-"Cyclop needs Accessibility to swallow keys and clicks.\nSystem Settings → Privacy & Security → Accessibility" = "Нужен Универсальный доступ, чтобы гасить нажатия и клики.\nНастройки → Конфиденциальность → Универсальный доступ";
-"Keyboard and trackpad are locked" = "Клавиатура и трекпад заблокированы";
-"Hold Esc or − for %d s" = "Держи Esc или − %d с";
-"Unlocks by itself in %d s" = "Само снимется через %d с";
 
 /* Встречи */
 "Start Recording" = "Начать запись";
@@ -135,3 +120,41 @@
 "Speaker %@" = "Собеседник %@";
 "Export" = "Выгрузить";
 "System sound was not recorded" = "Звук системы не записан";
+
+/* Claude */
+"No Claude sessions" = "Сессий Claude нет";
+"working" = "работает";
+"waiting" = "ждёт";
+"idle" = "свободна";
+"Claude app" = "Приложение Claude";
+"Editor" = "Редактор";
+"Terminal" = "Терминал";
+"Open in Claude" = "Открыть в Claude";
+"Answer" = "Ответить";
+"1 more request · list" = "Ещё один запрос · список";
+"%d more requests · list" = "Ещё запросов: %d · список";
+"Question %d of %d" = "Вопрос %d из %d";
+"Back" = "Назад";
+"This question takes several options: answer it in Claude" = "В этом вопросе можно выбрать несколько вариантов: ответьте в Claude";
+"Own Answer…" = "Свой ответ…";
+"Your answer" = "Ваш ответ";
+"Allow" = "Разрешить";
+"Always Allow" = "Разрешать всегда";
+"Always Allow: %@" = "Разрешать всегда: %@";
+"Deny" = "Отказать";
+"Denied from Cyclop" = "Отказано из Cyclop";
+"Plan" = "План";
+"Approve" = "Утвердить";
+"Send Back with Remarks…" = "Вернуть с замечанием…";
+"Remarks" = "Замечание";
+"Connect in Settings to answer here" = "Подключите в «Настройках», чтобы отвечать здесь";
+"Cyclop cannot listen for Claude's requests" = "Cyclop не может принимать запросы Claude";
+"Connect to Claude" = "Подключить к Claude";
+"Disconnect from Claude" = "Отключить от Claude";
+"Open Panel for Requests" = "Выезжать при запросе";
+"Not connected" = "Не подключено";
+"Connected" = "Подключено";
+"Connected to another copy of Cyclop" = "Подключено к другой копии Cyclop";
+"Claude's settings file could not be read; nothing was changed" = "Файл настроек Claude не прочитан; ничего не изменено";
+"Claude's settings file could not be changed; try again" = "Файл настроек Claude не удалось изменить; попробуйте ещё раз";
+"Adds one hook to Claude's settings so that requests reach the panel, after keeping a copy of the file. Sessions already running pick it up without a restart. Disconnect before deleting Cyclop." = "Добавляет в настройки Claude один хук, чтобы запросы приходили в панель; перед этим сохраняется копия файла. Уже запущенные сессии подхватят его без перезапуска. Перед удалением Cyclop отключите.";

@@ -15,11 +15,12 @@ Run from the repo root.
 
 ## Done
 
-A change is done when `bundle.sh`, `test.sh` and `check-strings.py` pass. Unit tests are for stores (`Services/*Store.swift`) only, and today `SnippetStore`, `CaffeineStore` and `MeetingStore` have them, plus the pure transcript assembly and echo filters in `Services/Meetings/`. The panel (notch, hover, rails, animation) is checked by eye by design, as the comment in `Package.swift` explains, so finish a UI change by telling the owner what to look at in the running app.
+A change is done when `bundle.sh`, `test.sh` and `check-strings.py` pass. Unit tests are for stores (`Services/*Store.swift`) only, and today `SnippetStore`, `CaffeineStore`, `MeetingStore` and `ClaudeStore` have them, plus the pure transcript assembly and echo filters in `Services/Meetings/`. The Claude tab's three: the store (`ClaudeStoreTests`, `ClaudeRequestTests`: sessions, requests, the unseen flag, replies), the settings edit (`ClaudeSettingsEditTests`, with `ClaudeConnectionTests` for the file on disk) and the listener with the relay (`ClaudeListenerTests`). The panel (notch, hover, rails, animation) is checked by eye by design, as the comment in `Package.swift` explains, so finish a UI change by telling the owner what to look at in the running app.
 
 ## Rules
 
 - A new macOS permission or a new network request is the owner's call: ask first. `SECURITY.md` lists the current ones.
+- The real `~/.claude/settings.json` is never edited by an agent: only the owner presses Connect to Claude. Tests use temporary files, and a run of the app that needs the connection sets `CYCLOP_CLAUDE_SETTINGS` to a throwaway project's settings file (`.claude/skills/run-cyclop/SKILL.md`).
 - A tab's background work (poll, observer, timer) starts in `NotchViewModel.startBackground(of:)` and stops in `stopBackground(of:)`, so a tab switched off in Settings costs nothing.
 - UI strings are keyed by their English text in both `Localizable.strings` tables; `ru.lproj` holds the translation.
 - A comment is written in the language of the comments around it: English in most Swift files, Russian in `Scripts/`, `.github/`, `Package.swift` and the tests.

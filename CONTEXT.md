@@ -43,7 +43,7 @@ One of the things the panel does, chosen from a rail. All displays share the cur
 _Avoid_: section (that belongs to Hide Contents), page, mode
 
 **Default tab**:
-The tab the panel shows after launch: the first tab that is not a hidden tab, reading the left rail before the right. From then on the panel stays on whichever tab was chosen last.
+The tab the panel shows after launch: the first tab that is not a hidden tab, reading the left rail before the right. From then on the panel stays on whichever tab was chosen last, with one exception: a request that has arrived and is still waiting when the panel opens counts as choosing Claude. One answered in Claude before the opening moves nothing. With the switch Open Panel for Requests «Выезжать при запросе» on (the default), such a request opens the panel by itself, on Claude, when nothing is showing.
 _Avoid_: home tab, start tab
 
 **Pane**:
@@ -59,7 +59,7 @@ How far into a physical notch the pointer has to be before the dwell starts coun
 _Avoid_: sensitivity, inset, slack
 
 **Typing tab**:
-A tab that takes the keyboard on arrival without activating Cyclop: Translate, Currency and Snippets, and the Teleprompter while its script is empty. The keyboard goes back when the tab is left, the panel collapses or another app is clicked; Esc gives it back in no tab; in Translate, Currency and Snippets it clears the field.
+A tab that takes the keyboard on arrival without activating Cyclop: Translate, Currency and Snippets, and the Teleprompter while its script is empty. Claude is not one: it takes the keyboard only when the owner asks to type an answer. The keyboard goes back when the tab is left, the panel collapses or another app is clicked; Esc gives it back in no tab; in Translate, Currency and Snippets it clears the field.
 _Avoid_: focus mode
 
 **Pin**:
@@ -154,16 +154,33 @@ _Avoid_: prompter
 **Script** «сценарий»:
 The teleprompter's text.
 
-**Utilities** «Утилиты»:
-The tab for rarely needed modes; today it holds the keyboard lock.
-_Avoid_: Tools (as its name)
+**Claude** «Claude»:
+The tab that shows the Claude sessions on this Mac and lets a request be answered without switching to Claude.
+_Avoid_: Agents, Sessions (as its name), chat
 
-**Keyboard lock** (Lock Keyboard «Заблокировать клавиатуру»):
-A cleaning mode that swallows every key press and click so the keyboard and trackpad can be wiped. It needs the Accessibility permission.
-_Avoid_: input lock
+**Claude session** «сессия»:
+One running Claude Code on this Mac, started from the Claude app, an editor or a terminal. Chats on claude.ai and cloud sessions are not Claude sessions: Cyclop cannot see them.
+_Avoid_: chat, agent, conversation; "session" alone outside the tab (a caffeine session is another thing)
 
-**Cleaning overlay**:
-The black windows over every display while the keyboard lock is on.
+**Working** «работает», **waiting** «ждёт», **idle** «свободна»:
+The three states of a Claude session: busy on its own, stopped on a request, or done with its turn and ready for the owner's next message.
+_Avoid_: running, finished, blocked
+
+**Request** «запрос»:
+What a waiting Claude session wants from the owner. One of three kinds: a permission «разрешение» to do one thing, such as run a command; a question «вопрос», with options and room for the owner's own words; a plan «план», to approve or send back with remarks.
+_Avoid_: approval, prompt, dialog, card; "permission" alone in the docs, where it means a macOS permission
+
+**Answer** «ответ»:
+The owner's reply to a request, given in the panel or in Claude itself. The first one counts, and the other place stops asking.
+_Avoid_: approve (one answer to one kind of request), decision
+
+**Connection** (Connect to Claude «Подключить к Claude»):
+What lets requests reach the panel: an entry Cyclop writes into Claude's settings at the press of a button and removes the same way. Without it the tab shows Claude sessions but cannot answer.
+_Avoid_: hook (how it is made), integration, «соединение» (a network request)
+
+**Open in Claude** «Открыть в Claude»:
+Going to a Claude session in the app it runs in.
+_Avoid_: jump, focus
 
 **Settings** «Настройки»:
 The tab that cannot be hidden.
@@ -175,7 +192,7 @@ A menu bar option that covers what chosen sections show with a field of drifting
 _Avoid_: privacy mode, blur, spoiler
 
 **Section**:
-One tab's share of Hide Contents: clipboard or snippets.
+One tab's share of Hide Contents: clipboard, snippets or Claude. The Claude section covers the names of Claude sessions and the text of requests, and a covered request cannot be answered until it is revealed.
 _Avoid_: category
 
 **Reveal** (Show «Показать»):

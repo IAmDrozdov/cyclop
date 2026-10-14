@@ -124,7 +124,7 @@ would have required Accessibility.
 
 **Hiding contents.** The "Hide Contents" menu bar item covers what the tabs
 show with a field of twinkling dots — for a screen-shared call, a stream, or a
-café. Enabled as a whole or per section — clipboard and snippets —
+café. Enabled as a whole or per section — clipboard, snippets and Claude —
 and off by default. A hidden row is not drawn at all: this is no blur, there is
 nothing in the frame to recover, and the field covers the whole row rather than
 tracing the glyphs — a silhouette would give away the length. The eye on a row
@@ -156,7 +156,8 @@ keyboard input without activating the app, so the editor underneath stays
 active. The keyboard goes back on a tab change, on a click into another app —
 which the panel catches as the loss of key status — and simply when the panel
 collapses. Esc does not give it back: in Translate, Currency and Snippets it
-clears the field.
+clears the field. Claude is the exception that asks only on a press (see the
+Claude note).
 
 The panel does not try to stay open on account of text typed into it: there is
 one rule for the whole app — open while the pointer is on it. What was typed
@@ -253,6 +254,106 @@ stops the lid from sleeping the Mac, not the idle timer. Everything goes through
 a power port, the one seam the store's tests use.
 
 **Meetings.** A recording is two tracks because the owner's voice and the other side's reach the Mac by different roads: the microphone, and everything the Mac plays, caught by a Core Audio process tap on a private aggregate device. Two tracks make «Me» and «Speaker» exact for free; separating voices is only needed on the system track. Both are written as uncompressed 16-bit PCM in CAF, because compressed AAC in a CAF is unreadable until its packet table is written at close, and a killed app would lose the whole meeting. The tracks are compressed to one stereo `audio.m4a` only after the transcript is on disk, and the originals go only after the result is checked. Processing runs after Stop, one meeting at a time: with both sides present, the microphone is cleaned against a mono mix of the system track (LocalVQE), each track is recognised with no language hint, the system track is split into voices on the same file the recogniser read so both share one clock, words get a voice when it covers half of them and leads the runner-up by a fifth, the lines are merged by time, and a line of the owner that only repeats the other side is dropped. `transcript.json` is written after the Markdown file and is the mark of a finished meeting, so a crash in between is simply processed again. Every step falls back toward keeping text: no library, a bad checksum or a failed separation leaves a transcript from the raw tracks. The signature has to be stable: macOS ties the microphone and system audio permissions to it, and an ad-hoc signature changes with every build, so the build signs with a self-signed «Cyclop Local» when it exists.
+
+**Claude.** Claude Code leaves one small file per running process in
+`~/.claude/sessions/`: the process id and its start time, the name, the folder,
+the entrypoint (which says whether the session runs in the Claude app, an editor
+or a terminal) and the state. The tab reads those files and nothing else, never a
+transcript. The format is internal, so the decoder is tolerant: every field is
+optional, a file that does not parse or has no state is skipped, an unknown state
+reads as waiting, and a session is alive when its id and start time match a
+process, because the age of the file says nothing. The folder is watched for
+entries added and removed, a slow timer covers a file rewritten in place and a
+process that died without removing its file, and a reading is also taken when the
+panel opens and when a request arrives.
+
+States can be read; an answer has to get into the Claude Code process, and the one
+supported door is a hook. Cyclop keeps one `PermissionRequest` entry in Claude's
+user settings, written only by the Connect button. Its command is Cyclop's own
+executable with `--claude-relay`, which never becomes an app: it passes the request
+to a Unix socket in Cyclop's support folder (owner-only, the peer's user id is
+checked, one connection carries one request), keeps the connection open and prints
+whatever comes back. On every failure it prints nothing and exits 0, so Claude asks
+as it always did. It is not the system's `nc`, which shuts its sending side when its
+input ends, after which Cyclop could not tell a relay that still waits from one
+that was killed. The hook is `PermissionRequest` and not `PreToolUse`, the
+documented way to answer a question: Claude waits for `PreToolUse` before it draws
+its own card, so a question would never show in Claude and Claude's notification
+would never fire: with Cyclop closed the owner would never learn it waits.
+`PermissionRequest` runs alongside Claude's card and the first answer wins. It takes
+a question's answer too when the reply carries `updatedInput`, which is not in the
+documentation: it was verified on Claude Code 2.1.295 and 2.1.296, and if an update
+drops it a question is shown with Open in Claude and no buttons. A bare allow is
+ignored for a question and for a plan, so a plan is approved by repeating the
+tool's input. Always Allow sends back only the `addRules` entries of the request's
+suggestions: the others (`setMode`, `addDirectories`) are for the session, and
+sending the whole list switched it to accepting edits. After a plan is approved
+through the hook the session returns to the mode it had before the plan.
+
+A request goes away in three ways, any of them enough, and its text lives in memory
+only. The relay's connection closes (the hook ended: timed out, or the session
+died). The session's state changed after the request arrived and is no longer
+waiting; the times are compared, because the session file can lag the request by a
+fraction of a second. The session left the list. An answer given in Claude is the
+case the first signal does not cover: Claude Code does not end the hook of a
+request answered there, it stays until its timeout (the entry asks for a day) or
+the end of the session, so for that case the state change and the list are the
+signals, and Cyclop ends the hook itself by closing the relay. A decision printed
+late is ignored.
+
+Claude is not a typing tab, so the panel never takes the keyboard because Claude is
+on screen, and pressing a button dims nothing. Own Answer… and Send Back with
+Remarks… show a field and ask for the keyboard on that press; while a field is
+shown, a click into the panel asks again, as it does for the teleprompter's empty
+script. Return sends; Esc cancels and gives the keyboard back, and so do the
+request going away, leaving the tab and the panel collapsing. The draft stays
+across a collapse, kept in the store and not published: a change per keystroke
+would be forwarded to the whole panel and rebuild the field, dropping its focus,
+which is why the typing tabs' stores stay out of the header's forwarding too.
+
+A request brings the panel out by itself, like a notification that carries its
+buttons, and it is the one thing besides the pointer that does. Cyclop still makes
+no sound and posts no notification; a switch in Settings (`openPanelForRequests` in
+`config.json`, on by default, an older file loads it on) turns it off, and then
+nothing comes out and the collapsed notch looks the same with and without a
+request. The next opening after a request has arrived lands on Claude either way.
+
+Which tab. The store publishes whether a request has arrived that the owner has
+not seen: an arrival raises it, showing Claude in an open panel clears it, and the
+last unseen request going away clears it. The view model does the rest. While every
+panel is collapsed a rising flag makes it remember the tab and switch to Claude
+then and there, so that the opening reads `openBodySize` from the Claude tab and is
+at the tall height from its first frame; switching after the opening would show a
+frame of the short body. Opening on Claude counts the requests as seen and forgets
+the remembered tab: Claude is now the tab the owner "chose". A request answered in
+Claude before the opening brings the remembered tab back, so one that came and went
+moves nothing. A request arriving while a panel is open on another tab moves nothing
+under the pointer; the switch waits for the last panel to collapse. A running
+teleprompter pins its panel open, so the same rule leaves it alone, and with the tab
+hidden nothing moves at all.
+
+Whether to come out. The store also announces every arrival and the moment the last
+request leaves. On an arrival the view model asks `RequestOpening.shouldOpen`: the
+switch is on, the tab is on the rail, and no panel shows anything. A panel the owner
+has open, a teleprompter included, is never moved or covered; the request stays
+unseen, and the next opening lands on Claude as before. The controller opens one
+screen, the one the pointer is on, else the main display, as a menu bar click
+does. The open takes no keyboard and does not activate the app: the keyboard still
+arrives only on a press on a field. The pointer's close rect is cut again at every
+opening, because a tab that grew tall while the panel was collapsed was never
+re-cut.
+
+How long. Such a panel waits for the pointer. `PointerWatcher.awaitPointer()`
+suspends the rule that closes an open panel whose pointer is away, until the
+pointer is first inside the panel's close rect; from then on the ordinary rule
+holds, so moving in and out collapses it as usual, and the request stays in the
+tab, already seen. The panel also remembers that it came out for a request. When
+the last request goes away (answered in the panel, answered in Claude, withdrawn,
+the tab switched off, Disconnect) a panel that still has that mark folds, even with
+the pointer on it, because answering means pointing at it. The mark goes with any
+close and with a change to another tab, so a panel the owner opened by hover, or
+went elsewhere in, obeys the pointer alone. Several requests keep it out until the
+last is gone; there is no timeout.
 
 **The cost of sitting still.** At rest the app does nothing, and that is
 measurable: with the pointer still and the panel collapsed it sits at 0.0 % CPU,

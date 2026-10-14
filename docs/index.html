@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyclop — free open-source notch app for MacBook</title>
-<meta name="description" content="Turn the MacBook notch into a panel: file shelf, clipboard history, snippets and offline translation. Native SwiftUI, one dependency, nothing asked at launch. Free, MIT.">
+<meta name="description" content="Turn the MacBook notch into a panel: Claude sessions, file shelf, clipboard history, snippets and offline translation. Native SwiftUI, one dependency, nothing asked at launch. Free, MIT.">
 <link rel="canonical" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="en" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="ru" href="https://akalikbergenov.github.io/cyclop/ru/">
@@ -38,7 +38,7 @@
       "applicationCategory": "UtilitiesApplication",
       "applicationSubCategory": "Menu bar utility",
       "operatingSystem": "macOS 15 or newer",
-      "description": "A macOS utility that turns the MacBook notch into a panel with a file shelf, clipboard history, snippets and offline translation. Native SwiftUI and AppKit, one dependency for Meetings.",
+      "description": "A macOS utility that turns the MacBook notch into a panel with your Claude sessions, a file shelf, clipboard history, snippets and offline translation. Native SwiftUI and AppKit, one dependency for Meetings.",
       "url": "https://akalikbergenov.github.io/cyclop/",
       "downloadUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
       "installUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
@@ -50,6 +50,7 @@
       "programmingLanguage": "Swift",
       "codeRepository": "https://github.com/akalikbergenov/cyclop",
       "featureList": [
+        "Claude: the state of your Claude Code sessions, and answers to their requests from the panel",
         "File shelf with drag and drop",
         "Clipboard history",
         "Snippets",
@@ -71,7 +72,7 @@
         {
           "@type": "Question",
           "name": "What permissions does Cyclop need?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Nothing is asked at launch. Only the Meetings tab asks, on the first Start Recording: for the microphone and for system audio recording (and for Downloads on the first export). Cyclop asks for no Accessibility and no Screen Recording. A file placed on the shelf from Downloads, Documents or the Desktop is the one thing macOS asks about separately, and only when the shelf is opened." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Nothing is asked at launch. Only the Meetings tab asks, on the first Start Recording: for the microphone and for system audio recording (and for Downloads on the first export). Cyclop asks for no Accessibility and no Screen Recording. A file placed on the shelf from Downloads, Documents or the Desktop is the one thing macOS asks about separately, and only when the shelf is opened. The Claude tab asks macOS for nothing." }
         },
         {
           "@type": "Question",
@@ -86,7 +87,7 @@
         {
           "@type": "Question",
           "name": "Does Cyclop send anything over the network?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No telemetry and no analytics. Everything stays on the machine. The only outgoing requests are Currency's daily download of exchange rates and, once and by a button, the speech models of Meetings." }
+          "acceptedAnswer": { "@type": "Answer", "text": "No telemetry and no analytics. Everything stays on the machine. The only outgoing requests are Currency's daily download of exchange rates and, once and by a button, the speech models of Meetings. The Claude tab listens on a local socket that only you can reach, and writes one entry into Claude Code's settings file only when you press a button; neither is a network connection." }
         },
         {
           "@type": "Question",
@@ -178,8 +179,8 @@ footer a{color:var(--dim)}
 <header>
   <h1>The MacBook notch as a working tool</h1>
   <p class="tagline">Cyclop is a free, open-source notch app for macOS. Invisible at rest; on hover it
-  unfolds into a panel with a file shelf, clipboard history, snippets
-  and an offline translator.</p>
+  unfolds into a panel with your Claude sessions, a file shelf, clipboard history,
+  snippets and an offline translator.</p>
   <div class="cta">
     <a class="btn" href="https://github.com/akalikbergenov/cyclop/releases/latest">Download for macOS</a>
     <a class="btn ghost" href="https://github.com/akalikbergenov/cyclop">Source on GitHub</a>
@@ -206,6 +207,11 @@ footer a{color:var(--dim)}
   Settings and it costs nothing.</p>
 
   <div class="tabs">
+    <div class="tab"><h3>Claude</h3><p>Your Claude Code sessions on this Mac, the ones that wait
+      first: working, waiting or idle, and where each runs. When a session asks for a permission,
+      puts a question or proposes a plan, the request appears in the panel and can be answered there,
+      while Claude keeps asking in its own window and the first answer counts. The panel opens on this
+      tab the first time after a request has arrived. Connecting is one button in Settings.</p></div>
     <div class="tab"><h3>Shelf</h3><p>Drag files into the notch and they wait there. Drag a card out
       and the file goes wherever it is dropped. ⌘-click selects several and drags them as a group.
       A screenshot copied to the clipboard is saved and lands here too — including one taken on an
@@ -242,11 +248,11 @@ footer a{color:var(--dim)}
     <tr><th>One dependency</th><td>Swift, SwiftUI and AppKit, plus one package, FluidAudio, for the speech recognition of Meetings. No
       vendored frameworks. The whole thing is about 7 000 lines you can read in an afternoon.</td></tr>
     <tr><th>Nothing asked at launch</th><td>Only Start Recording in Meetings asks, once: for the microphone and for system audio. No
-      Accessibility, no Screen Recording.</td></tr>
+      Accessibility, no Screen Recording. The Claude tab asks macOS for nothing.</td></tr>
     <tr><th>Offline translation</th><td>Translation runs on the device through macOS's own
       framework. No API key, no account, nothing leaves the machine.</td></tr>
-    <tr><th>Nothing collected</th><td>No telemetry, no analytics, no crash reporting. The single
-      outgoing request in the whole app is Currency's daily download of exchange rates.</td></tr>
+    <tr><th>Nothing collected</th><td>No telemetry, no analytics, no crash reporting. Two
+      outgoing requests in the whole app: Currency's daily download of exchange rates and the one-time speech models of Meetings.</td></tr>
     <tr><th>Actually small</th><td>3.1 MB on disk, around 16 MB of memory, 0.0 % CPU while the panel
       is closed.</td></tr>
   </table>
@@ -280,7 +286,7 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
   <details><summary>What permissions does Cyclop need?</summary>
     <p>Nothing is asked at launch. Only Start Recording in the Meetings tab asks, the first time: for
     the microphone and for system audio recording. Cyclop requests no Accessibility and
-    no Screen Recording.</p>
+    no Screen Recording. The Claude tab asks macOS for nothing.</p>
     <p>*Besides that, a file placed on the shelf from Downloads, Documents or the Desktop is
     something macOS asks about separately, and only at the moment the shelf is opened.</p></details>
 
@@ -291,7 +297,11 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
   <details><summary>Does it send anything anywhere?</summary>
     <p>No telemetry and no analytics of any kind. The only outgoing requests in the whole app are Currency's
     daily download of exchange rates and the one-time download of the Meetings speech models, and everything else — clipboard, files,
-    snippets, scripts — stays on the machine.</p></details>
+    snippets, scripts — stays on the machine.</p>
+    <p>The Claude tab is not a network connection: it listens on a local socket that only you can
+    reach, and writes one entry into Claude Code's settings file, only when you press Connect to
+    Claude and with a copy of the file kept. SECURITY.md in the repository says what is left behind
+    if the app is deleted while connected.</p></details>
 
   <details><summary>Why does macOS say the app cannot be verified?</summary>
     <p>Because the disk image is ad-hoc signed, without an Apple Developer ID, and is not notarised.

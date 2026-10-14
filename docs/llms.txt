@@ -1,8 +1,8 @@
 # Cyclop
 
 > A free, open-source macOS utility that turns the MacBook notch into a panel:
-> a file shelf, clipboard history, snippets, offline translation and a
-> teleprompter. Native SwiftUI and AppKit, one dependency (for Meetings), MIT
+> a view of your Claude Code sessions with answers to their requests, a file
+> shelf, clipboard history, snippets, offline translation and a teleprompter. Native SwiftUI and AppKit, one dependency (for Meetings), MIT
 > licence.
 
 Cyclop is invisible at rest. Moving the pointer to the notch unfolds a panel
@@ -16,14 +16,19 @@ downwards; moving it away folds the panel back.
 - Dependencies: one, FluidAudio (speech recognition for the Meetings tab), plus a native echo canceller built with CMake. Otherwise Swift, SwiftUI and AppKit only
 - Permissions: nothing at launch. Only Start Recording in Meetings asks, on the first press: microphone and system audio recording (Downloads on the first export). No Accessibility, no
   Screen Recording. A file placed on the shelf from Downloads,
-  Documents or the Desktop is asked about separately, when the shelf is opened
+  Documents or the Desktop is asked about separately, when the shelf is opened.
+  The Claude tab asks macOS for nothing
 - Network: no telemetry and no analytics. The only outgoing requests are
-  Currency's daily download of exchange rates and the one-time speech models of Meetings
+  Currency's daily download of exchange rates and the one-time speech models of Meetings.
+  The Claude tab listens on a local socket reachable only by the owner (not a network
+  port) and writes one entry into Claude Code's settings file, only when the button
+  Connect to Claude is pressed; nothing about a request is written to disk
 - Source: https://github.com/akalikbergenov/cyclop
 - Author: Adil Kalikbergenov
 
 ## Tabs
 
+- Claude — the Claude Code sessions on this Mac with their state (working, waiting, idle); once connected by a button in Settings, a permission, a question or a plan is answered from the panel while Claude keeps asking in its own window, and the first answer counts
 - Shelf — drag files in, drag them out; group drag with command-click
 - Clipboard — the last 40 copies, one click puts an entry back
 - Snippets — a hand-kept list stored as plain JSON

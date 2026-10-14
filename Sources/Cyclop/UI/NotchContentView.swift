@@ -111,6 +111,8 @@ struct NotchContentView: View {
     @ViewBuilder
     private var tabBadge: some View {
         switch vm.tab {
+        case .claude:
+            counter(vm.claude.waitingCount)
         case .shelf:
             counter(vm.shelf.items.count)
         case .clipboard:
@@ -126,8 +128,6 @@ struct NotchContentView: View {
         case .currency:
             CurrencyRateDate(currencies: vm.currencies)
         case .teleprompter:
-            EmptyView()
-        case .utilities:
             EmptyView()
         case .meetings:
             MeetingsBadge(store: vm.meetings)
@@ -182,6 +182,8 @@ struct NotchContentView: View {
     @ViewBuilder
     private var pane: some View {
         switch vm.tab {
+        case .claude:
+            ClaudePane(store: vm.claude, privacy: vm.privacy, wantsKeyboard: $panel.wantsKeyboard, showSettings: { vm.tab = .settings })
         case .shelf:
             ShelfPane(shelf: vm.shelf, isTargeted: panel.isDropTargeted)
         case .clipboard:
@@ -196,8 +198,6 @@ struct NotchContentView: View {
             CurrencyPane(currencies: vm.currencies, wantsKeyboard: $panel.wantsKeyboard)
         case .teleprompter:
             TeleprompterPane(prompter: vm.teleprompter, wantsKeyboard: $panel.wantsKeyboard)
-        case .utilities:
-            UtilitiesPane(lock: vm.keyboardLock)
         case .meetings:
             MeetingsPane(store: vm.meetings)
         case .settings:

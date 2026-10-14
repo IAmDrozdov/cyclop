@@ -219,8 +219,8 @@ final class SnippetStore: ObservableObject {
     /// Puts a snippet on the pasteboard, ready to paste.
     ///
     /// The pasteboard is the only way to hand text to another app without
-    /// Accessibility, which only the keyboard lock's button asks for. Whatever
-    /// was there is overwritten, and stays available in the clipboard tab.
+    /// Accessibility, which the app does not ask for. Whatever was there is
+    /// overwritten, and stays available in the clipboard tab.
     func copy(_ snippet: Snippet) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()

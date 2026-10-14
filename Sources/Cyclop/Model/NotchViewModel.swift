@@ -4,11 +4,12 @@ import Combine
 @MainActor
 final class NotchViewModel: ObservableObject {
     enum Tab: String, CaseIterable, Identifiable {
-        case shelf, clipboard, snippets, translate, caffeine, currency, teleprompter, utilities, meetings, settings
+        case claude, shelf, clipboard, snippets, translate, caffeine, currency, teleprompter, meetings, settings
         var id: String { rawValue }
 
         var symbol: String {
             switch self {
+            case .claude: return "asterisk"
             case .shelf: return "tray.full.fill"
             case .clipboard: return "list.clipboard.fill"
             case .snippets: return "pin.fill"
@@ -16,7 +17,6 @@ final class NotchViewModel: ObservableObject {
             case .caffeine: return "cup.and.saucer.fill"
             case .currency: return "dollarsign.circle"
             case .teleprompter: return "text.viewfinder"
-            case .utilities: return "wrench.and.screwdriver.fill"
             case .meetings: return "waveform"
             case .settings: return "gearshape.fill"
             }
@@ -24,6 +24,7 @@ final class NotchViewModel: ObservableObject {
 
         var title: String {
             switch self {
+            case .claude: return localized("Claude")
             case .shelf: return localized("Shelf")
             case .clipboard: return localized("Clipboard")
             case .snippets: return localized("Snippets")
@@ -31,7 +32,6 @@ final class NotchViewModel: ObservableObject {
             case .caffeine: return localized("Caffeine")
             case .currency: return localized("Currency")
             case .teleprompter: return localized("Teleprompter")
-            case .utilities: return localized("Utilities")
             case .meetings: return localized("Meetings")
             case .settings: return localized("Settings")
             }
@@ -51,7 +51,7 @@ final class NotchViewModel: ObservableObject {
         /// privacy switches — where a long list of switches in 208 pt is a
         /// list of three and a scroll, and settings is the one tab somebody
         /// opens specifically to go through the whole of it.
-        var wantsTallBody: Bool { self == .teleprompter || self == .settings }
+        var wantsTallBody: Bool { self == .claude || self == .teleprompter || self == .settings }
 
         /// Every tab can be taken off the rail except the one the switches
         /// live on: with Settings gone there would be no way back.
@@ -63,8 +63,8 @@ final class NotchViewModel: ObservableObject {
         /// it is not something to hover past on the way to a tab people
         /// actually rest on. Icon height is a ceiling derived from the left
         /// rail's length alone, so a shorter or longer rail resizes itself.
-        static let leftRail: [Tab] = [.shelf, .clipboard, .snippets, .translate, .caffeine]
-        static let rightRail: [Tab] = [.currency, .teleprompter, .utilities, .meetings, .settings]
+        static let leftRail: [Tab] = [.claude, .shelf, .clipboard, .snippets, .translate, .caffeine]
+        static let rightRail: [Tab] = [.currency, .teleprompter, .meetings, .settings]
     }
 
     /// What every screen's panel adds up to, kept by `NotchController`: this
@@ -138,7 +138,9 @@ final class NotchViewModel: ObservableObject {
             caffeine.beginBackground()
         case .meetings:
             meetings.start()
-        case .snippets, .translate, .teleprompter, .utilities, .settings:
+        case .claude:
+            claude.beginBackground()
+        case .snippets, .translate, .teleprompter, .settings:
             break
         }
     }
@@ -149,10 +151,8 @@ final class NotchViewModel: ObservableObject {
         case .shelf: screenshotFolder.stop()
         case .currency: currencies.stop()
         case .caffeine: caffeine.endBackground()
-        // Taking the tab off the rail with the screen still covered would
-        // leave the tap installed and no way back to it.
-        case .utilities: keyboardLock.unlock()
         case .meetings: meetings.stop()
+        case .claude: claude.endBackground()
         case .snippets, .translate, .teleprompter, .settings: break
         }
     }
@@ -168,6 +168,55 @@ final class NotchViewModel: ObservableObject {
             shelf.refreshFromDisk()
             shelfRefreshed = true
         }
+        // A session may have changed state while nobody looked.
+        if active, isVisible(.claude) { claude.reload() }
+        if active {
+            // Opening on Claude is the owner seeing the requests, and the tab is theirs again.
+            if tab == .claude { claude.markSeen() }
+            tabBeforeRequest = nil
+        } else if claude.hasUnseenRequest {
+            // A request came while the panel was open elsewhere; the next opening lands on Claude.
+            showClaudeForRequest()
+        }
+    }
+
+    /// The tab to bring back if the request that moved the panel to Claude goes away unseen.
+    private var tabBeforeRequest: Tab?
+
+    /// The store raised or cleared its unseen flag. With a panel open nothing under the pointer
+    /// moves; with every panel collapsed the tab is switched now, so the next opening is already
+    /// on Claude at the tall height.
+    private func unseenRequestChanged() {
+        if isPanelActive {
+            if claude.hasUnseenRequest, tab == .claude { claude.markSeen() }
+        } else if claude.hasUnseenRequest {
+            showClaudeForRequest()
+        } else if let before = tabBeforeRequest {
+            tabBeforeRequest = nil
+            tab = isVisible(before) ? before : firstVisibleTab
+        }
+    }
+
+    private func showClaudeForRequest() {
+        guard isVisible(.claude), tab != .claude else { return }
+        tabBeforeRequest = tab
+        tab = .claude
+    }
+
+    /// Set by the controller: slides a panel out of the notch, with no pointer on it.
+    var onOpenForRequest: (() -> Void)?
+
+    /// A request joined the list. With nothing showing and the switch on, the panel comes out
+    /// on Claude; otherwise the unseen flag alone decides what the next opening shows.
+    private func requestArrived() {
+        guard RequestOpening.shouldOpen(
+            enabled: ConfigStore.shared.openPanelForRequests,
+            claudeVisible: isVisible(.claude),
+            anyPanelActive: isPanelActive
+        ) else { return }
+        // The flag may have been up already, with the tab moved off Claude since.
+        showClaudeForRequest()
+        onOpenForRequest?()
     }
 
     private var started = false
@@ -182,15 +231,22 @@ final class NotchViewModel: ObservableObject {
     /// hover request on arrival is one chance, and a click has to be the
     /// second. With a script in it the tab is read, not written, and a click
     /// on play must not dim the caret of the window underneath.
+    /// Claude is the same: its buttons never take the keyboard, a field on screen does.
     var clickTakesKeyboard: Bool {
         tab.needsKeyboard || (tab == .teleprompter && teleprompter.script.isEmpty)
+            || (tab == .claude && claude.fieldShown)
     }
 
-    @Published var tab: Tab = .shelf {
+    @Published var tab: Tab = .claude {
         didSet {
             // The snippets file is edited from outside the app, so it is read
             // on the way in rather than held from launch.
             if tab == .snippets { snippets.reload() }
+            if tab == .claude {
+                claude.reload()
+                // The pane of an open panel shows the requests.
+                if isPanelActive { claude.markSeen() }
+            }
             // Same reason, sharper stakes: the shelf can hold files inside the
             // folders macOS guards, and looking at one raises a permission
             // prompt. It is asked here, with the shelf on screen, rather than
@@ -232,12 +288,9 @@ final class NotchViewModel: ObservableObject {
     let teleprompter: TeleprompterStore
     let caffeine: CaffeineStore
     let meetings: MeetingStore
+    let claude: ClaudeStore
     /// Shared by every pane that shows something worth not showing.
     let privacy = PrivacyMode()
-    /// Here rather than in the controller, which now rebuilds a window per
-    /// display: the lock is a system-wide mode and must outlive plugging a
-    /// monitor in mid-wipe. The model is what survives a reconfiguration.
-    let keyboardLock = KeyboardLock()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -250,6 +303,7 @@ final class NotchViewModel: ObservableObject {
         self.snippets = SnippetStore()
         self.teleprompter = TeleprompterStore()
         self.meetings = MeetingStore()
+        self.claude = ClaudeStore()
         self.caffeine = CaffeineStore(
             minutes: ConfigStore.shared.caffeineMinutes,
             lidClosedMode: ConfigStore.shared.caffeineLidClosed,
@@ -281,6 +335,7 @@ final class NotchViewModel: ObservableObject {
             clipboard.objectWillChange,
             caffeine.objectWillChange,
             meetings.objectWillChange,
+            claude.objectWillChange,
         ] {
             child
                 .sink { [weak self] _ in
@@ -289,6 +344,8 @@ final class NotchViewModel: ObservableObject {
                 }
                 .store(in: &cancellables)
         }
+        claude.onUnseenChange = { [weak self] in self?.unseenRequestChanged() }
+        claude.onArrival = { [weak self] in self?.requestArrived() }
     }
 
     /// Off switch for people who copy images all day and do not want them

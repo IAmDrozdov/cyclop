@@ -10,7 +10,6 @@ import Combine
 final class NotchController {
     private var vm: NotchViewModel?
     private var panels: [CGDirectDisplayID: NotchScreenPanel] = [:]
-    private let cleaning = CleaningOverlay()
     private var cancellables = Set<AnyCancellable>()
 
     func install() {
@@ -36,24 +35,10 @@ final class NotchController {
         onWorkspace(NSWorkspace.screensDidSleepNotification) { $0.screensSlept() }
         onWorkspace(NSWorkspace.screensDidWakeNotification) { $0.screensWoke() }
 
-        // The cleaning mode blacks out every display and swallows the pointer,
-        // so each panel is in the same position as on a sleeping screen: nothing
-        // to hover, nothing worth showing underneath the cover.
-        vm.keyboardLock.$isLocked
-            .removeDuplicates()
-            .sink { [weak self] locked in
-                MainActor.assumeIsolated {
-                    guard let self else { return }
-                    if locked {
-                        self.panels.values.forEach { $0.screensSlept() }
-                        self.cleaning.show(lock: vm.keyboardLock)
-                    } else {
-                        self.cleaning.hide()
-                        self.panels.values.forEach { $0.screensWoke() }
-                    }
-                }
-            }
-            .store(in: &cancellables)
+        // A request slides the panel out on the screen being looked at, and the last one going
+        // away folds every panel that came out for it.
+        vm.onOpenForRequest = { [weak self] in self?.target()?.openForRequest() }
+        vm.claude.onRequestsGone = { [weak self] in self?.panels.values.forEach { $0.requestsEnded() } }
 
         vm.teleprompter.$isRunning
             .removeDuplicates()
@@ -72,9 +57,6 @@ final class NotchController {
     }
 
     func teardown() {
-        // Quitting mid-wipe must not leave the tap installed.
-        vm?.keyboardLock.unlock()
-        cleaning.hide()
         vm?.stop()
         // A slider value set just before quitting may still be unwritten.
         ConfigStore.shared.flush()

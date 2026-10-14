@@ -17,6 +17,7 @@ struct SettingsPane: View {
     @State private var saveClipboardImages = NotchViewModel.saveClipboardImagesEnabled
     @State private var allDisplays = NotchGeometry.showsOnAllDisplays
     @State private var fullSizeNotch = NotchGeometry.drawsFullSizeNotch
+    @State private var openPanelForRequests = ConfigStore.shared.openPanelForRequests
     @State private var notchDepth = NotchGeometry.notchDepth
     @State private var notchDwell = NotchGeometry.notchDwell
     @State private var watchScreenshotFolder = false
@@ -104,6 +105,9 @@ struct SettingsPane: View {
                     }
                 }
 
+                // Shown with the tab hidden too: the entry in Claude's settings is removed from here.
+                section(localized("Claude")) { claudeRows }
+
                 // What lives in this file is documented in #67: everything
                 // above that makes sense on another Mac, in one place instead
                 // of five.
@@ -140,11 +144,87 @@ struct SettingsPane: View {
             saveClipboardImages = NotchViewModel.saveClipboardImagesEnabled
             allDisplays = NotchGeometry.showsOnAllDisplays
             fullSizeNotch = NotchGeometry.drawsFullSizeNotch
+            openPanelForRequests = ConfigStore.shared.openPanelForRequests
             notchDepth = NotchGeometry.notchDepth
             notchDwell = NotchGeometry.notchDwell
             watchScreenshotFolder = screenshots.isEnabled
             refreshUsage()
+            vm.claude.refreshConnection()
         }
+    }
+
+    // MARK: - Claude
+
+    private var claudeConnected: Bool { vm.claude.connection == .connected }
+
+    @ViewBuilder
+    private var claudeRows: some View {
+        let claude = vm.claude
+        HStack(spacing: 8) {
+            Circle()
+                .fill(claudeConnected ? Color.green : claude.connection == .notConnected ? Theme.tertiary : Color.yellow)
+                .frame(width: 7, height: 7)
+                .frame(width: 16)
+            Text(claudeStatus)
+                .font(.system(size: 11.5, weight: .medium))
+                .foregroundStyle(.white)
+                .lineLimit(2)
+            Spacer(minLength: 8)
+        }
+        .padding(.horizontal, 8)
+        .frame(minHeight: 26)
+        if claude.connectionFailure == .notChanged {
+            claudeNote(localized("Claude's settings file could not be changed; try again"), color: Color.yellow.opacity(0.85))
+        }
+        if claude.listenFailed {
+            claudeNote(localized("Cyclop cannot listen for Claude's requests"), color: Color.yellow.opacity(0.85))
+        }
+        actionRow(
+            symbol: claudeConnected ? "xmark.circle" : "link",
+            title: claudeConnected ? localized("Disconnect from Claude") : localized("Connect to Claude")
+        ) {
+            if claudeConnected { claude.disconnect() } else { claude.connect() }
+        }
+        claudeNote(
+            localized(
+                "Adds one hook to Claude's settings so that requests reach the panel, after keeping a copy of the file. Sessions already running pick it up without a restart. Disconnect before deleting Cyclop."
+            ),
+            color: Theme.tertiary
+        )
+        toggleRow(
+            symbol: "arrow.up.left.and.arrow.down.right",
+            title: localized("Open Panel for Requests"),
+            isOn: openPanelForRequestsBinding
+        )
+    }
+
+    private var openPanelForRequestsBinding: Binding<Bool> {
+        Binding(
+            get: { openPanelForRequests },
+            set: { wants in
+                openPanelForRequests = wants
+                ConfigStore.shared.openPanelForRequests = wants
+            }
+        )
+    }
+
+    private var claudeStatus: String {
+        switch vm.claude.connection {
+        case .notConnected: return localized("Not connected")
+        case .connected: return localized("Connected")
+        case .anotherCopy: return localized("Connected to another copy of Cyclop")
+        case .unreadable: return localized("Claude's settings file could not be read; nothing was changed")
+        }
+    }
+
+    private func claudeNote(_ text: String, color: Color) -> some View {
+        Text(text)
+            .font(.system(size: 9.5))
+            .foregroundStyle(color)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
     }
 
     private var clearTitle: String {

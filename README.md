@@ -22,6 +22,7 @@ macOS 15 or newer. Signed and notarised, so it opens on the first try.
 
 | Tab | What it does |
 |---|---|
+| **Claude** | The Claude Code sessions on this Mac, the ones that wait first: working, waiting or idle, where each runs (the Claude app, an editor, a terminal) and for how long; the header counts the waiting ones, and a press on a row opens that session in Claude. Press *Connect to Claude* once in Settings and a request (a permission, a question, a plan) shows up in the panel to be answered there: allow or deny, pick an option or type your own answer, approve a plan or send it back with remarks. Claude keeps asking in its own window too, and whichever answer comes first counts. When a request arrives the panel slides out on this tab by itself, with the buttons, and folds when the request is answered or gone; if you move the pointer into it and out again it folds as usual and the request waits in the tab. A switch in Settings turns this off. There is no sound and no notification. The connection is one entry in Claude's settings file, written only by that button and removed by its twin (see SECURITY.md). Hide Contents can cover session names and the text of requests |
 | **Shelf** | Drag files into the notch and they stay there until needed; drag a card out and the file goes wherever it is dropped. A click selects a card, ⌘-click selects several, and then the whole group is dragged. A screenshot taken to the clipboard is saved as a file and lands here too — including one taken on an iPhone, if you copy it there |
 | **Clipboard** | The last 40 copies; a click puts an entry back on the clipboard |
 | **Snippets** | A hand-kept list of what you are tired of retyping: an address, a phone number, an email. Added with a button in the panel, removed with the cross on a card; a click puts the text on the clipboard. The same list lives in `~/Library/Application Support/Cyclop/snippets.json` and can be edited there instead |
@@ -126,6 +127,11 @@ the Meetings tab: it asks for the microphone and for system audio recording, on
 the first press. The pointer position is read through
 `NSEvent.mouseLocation`, the clipboard through the public `NSPasteboard`.
 
+The Claude tab asks macOS for nothing. Its one button, Connect to Claude, adds an
+entry to Claude Code's settings file and listens on a local socket that only you
+can reach; both happen only after the press, and SECURITY.md says what they touch
+and what is left behind.
+
 A file put on the shelf from Downloads, Documents or the Desktop is the one thing
 macOS asks about separately, and it asks when the shelf is opened, not at launch.
 Refusing breaks nothing: the card stays, just without a preview.
@@ -133,7 +139,7 @@ Refusing breaks nothing: the card stays, just without a preview.
 ## How it works
 
 Why the window is shaped the way it is, why the pointer is polled on a
-timer, what sitting idle costs — eighteen notes on decisions the code does not show:
+timer, what sitting idle costs — nineteen notes on decisions the code does not show:
 **[docs/architecture.md](docs/architecture.md)**.
 
 ## Limitations
@@ -174,6 +180,7 @@ Sources/Cyclop
 │   ├── NotchViewModel.swift
 │   └── PrivacyMode.swift      hiding contents: sections and reveals
 ├── Services/
+│   ├── Claude/                sessions from Claude Code's files, requests over a local socket, the entry in Claude's settings
 │   ├── ShelfStore.swift
 │   ├── ClipboardStore.swift
 │   ├── ScreenshotVault.swift  clipboard screenshots onto disk

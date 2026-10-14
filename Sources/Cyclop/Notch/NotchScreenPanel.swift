@@ -22,6 +22,10 @@ final class NotchScreenPanel {
     /// `NotchController.updatePin` for why it is granted to a single screen.
     var isPinned = false
 
+    /// Whether this panel slid out for a request and the owner has done nothing else with it
+    /// since (no other tab, no close): the last request going away then folds it.
+    private var openedForRequest = false
+
     private let vm: NotchViewModel
     private let pointer = PointerWatcher()
     private var panel: NotchPanel?
@@ -53,6 +57,23 @@ final class NotchScreenPanel {
     func toggle() {
         setOpen(!state.isOpen)
         pointer.setInside(state.isOpen)
+    }
+
+    /// A request came in: slides out on the current tab with no pointer on it, and stays until the
+    /// pointer has been on it or `requestsEnded`. It takes no keyboard and does not activate the app.
+    func openForRequest() {
+        guard !state.isOpen else { return }
+        openedForRequest = true
+        pointer.awaitPointer()
+        setOpen(true)
+    }
+
+    /// The last request is gone. A panel that came out for it and was left alone folds; one the
+    /// owner opened or moved on to another tab keeps obeying the pointer.
+    func requestsEnded() {
+        guard state.isOpen, openedForRequest else { return }
+        setOpen(false)
+        pointer.setInside(false)
     }
 
     /// Same display, same notch, moved: keep the panel and everything on it.
@@ -188,6 +209,7 @@ final class NotchScreenPanel {
                     // Leaving the tab that types gives the keyboard back, on
                     // whichever screen was holding it.
                     if !tab.needsKeyboard { self.state.wantsKeyboard = false }
+                    if tab != .claude { self.openedForRequest = false }
                     guard self.state.isOpen else { return }
                     // A pass later: `openBodySize` reads `tab`, and this fires
                     // while the property is still being set.
@@ -279,8 +301,11 @@ final class NotchScreenPanel {
             // Grow the interactive area first so the pointer never falls
             // through a region the animation has not covered yet.
             applyActiveRect(open: true)
+            // The tab may have grown tall while collapsed, which nothing re-cut.
+            pointer.closeRect = geometry.hoverRect(for: state.openBodySize)
             withAnimation(Theme.openAnimation) { state.isOpen = true }
         } else {
+            openedForRequest = false
             // The keyboard goes first and the fold goes second — one run-loop
             // pass apart, never together. Dropped in the same pass, resigning
             // the field's first responder and structurally removing that field

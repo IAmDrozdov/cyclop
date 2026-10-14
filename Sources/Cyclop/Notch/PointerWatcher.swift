@@ -47,6 +47,9 @@ final class PointerWatcher {
     var onInteractiveChange: ((Bool) -> Void)?
 
     private(set) var isInside = false
+    /// The panel was opened with no pointer on it and is waiting for one: until the pointer
+    /// is first in `closeRect` it does not count as having left, so nothing closes the panel.
+    private(set) var isAwaitingPointer = false
     private var timer: Timer?
     private var awaitingSince: Date?
     private var wasInteractive: Bool?
@@ -62,6 +65,7 @@ final class PointerWatcher {
         timer?.invalidate()
         timer = nil
         awaitingSince = nil
+        isAwaitingPointer = false
         // The last sent interactivity dies with the panel it was sent to. The
         // watcher outlives a rebuild, and a fresh panel starts click-through;
         // holding on to the old "already interactive" would swallow the first
@@ -105,7 +109,7 @@ final class PointerWatcher {
         }
         let moving = Date().timeIntervalSince(lastMovedAt) < restThreshold
         let near: Bool
-        if isInside {
+        if isInside || isAwaitingPointer {
             near = true
         } else if isWarm {
             near = point.y >= warmZone.minY - coolMargin
@@ -120,7 +124,15 @@ final class PointerWatcher {
     /// Force the state, e.g. when the panel is toggled from the menu bar.
     func setInside(_ value: Bool) {
         awaitingSince = nil
+        isAwaitingPointer = false
         isInside = value
+    }
+
+    /// The panel has just opened by itself: wait for the pointer instead of closing for its absence.
+    func awaitPointer() {
+        awaitingSince = nil
+        isInside = false
+        isAwaitingPointer = true
     }
 
     private func tick() {
@@ -131,6 +143,14 @@ final class PointerWatcher {
         if wasInteractive != interactive {
             wasInteractive = interactive
             onInteractiveChange?(interactive)
+        }
+
+        if isAwaitingPointer {
+            guard closeRect.contains(point) else { return }
+            // From here the ordinary rules: leaving closes the panel.
+            isAwaitingPointer = false
+            isInside = true
+            return
         }
 
         let inside = (isInside ? closeRect : openRect).contains(point)
