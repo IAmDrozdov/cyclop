@@ -293,7 +293,7 @@ struct MeetingStoreTests {
 
     // MARK: - Выгрузка и удаление
 
-    /// Готовая встреча с обоими файлами; сжатие в тестах не участвует, файлы кладутся руками.
+    /// Готовая встреча с обоими файлами. Поддельные дорожки не сжимаются, поэтому `audio.m4a` кладётся руками.
     private static func readyMeeting(_ store: MeetingStore) async throws -> Meeting {
         store.start()
         await store.startRecording()
@@ -302,6 +302,8 @@ struct MeetingStoreTests {
             try? await Task.sleep(for: .milliseconds(10))
         }
         let meeting = try #require(store.meetings.first)
+        // Не дождались готовности — тест падает здесь, а не на проверке после.
+        try #require(meeting.state == .ready)
         try Data("audio".utf8).write(to: meeting.folder.appendingPathComponent(MeetingFile.audio))
         store.reload()
         return try #require(store.meetings.first)

@@ -248,7 +248,11 @@ final class MeetingStore: ObservableObject {
                     }
                 }.value
             }
-            if let next, !Task.isCancelled { await process(next, with: MeetingPipeline(engine: engine, keepTracks: keepTracks)) }
+            if let next, !Task.isCancelled {
+                // The pipeline compresses the tracks itself: that is this launch's one try, not a leftover.
+                compressionTried.insert(next.id)
+                await process(next, with: MeetingPipeline(engine: engine, keepTracks: keepTracks))
+            }
             processingTask = nil
             reload()
             processPending()
