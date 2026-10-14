@@ -218,6 +218,21 @@ final class NotchScreenPanel {
             }
             .store(in: &cancellables)
 
+        // The rail decides how tall the body is: a moved, shown or hidden
+        // icon, or a new icon size, can grow or shrink it like a tab switch.
+        Publishers.Merge3(
+            vm.$rails.removeDuplicates().map { _ in () },
+            vm.$hiddenTabs.removeDuplicates().map { _ in () },
+            vm.$railIconSize.removeDuplicates().map { _ in () }
+        )
+        .sink { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self, self.state.isOpen else { return }
+                DispatchQueue.main.async { self.refreshOpenRects() }
+            }
+        }
+        .store(in: &cancellables)
+
         // Driven by the deliberate request, not by which tab is showing: a
         // hover can land on the typing tab now, and that alone must not take
         // the keyboard away from the window underneath.

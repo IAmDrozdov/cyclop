@@ -21,6 +21,9 @@
 "Launch at Login" = "Запускать при входе";
 "Show Menu Bar Icon" = "Показывать иконку в меню-баре";
 "Show in Panel" = "Показывать в панели";
+"Icon Size" = "Размер иконок";
+"Hold an icon to move it" = "Удерживайте иконку, чтобы переставить";
+"Restore Default Order" = "Вернуть порядок по умолчанию";
 "Displays" = "Дисплеи";
 "Show on All Displays" = "Показывать на всех дисплеях";
 "Full-Height Notch Without a Cutout" = "Высокая чёлка на экранах без выреза";
@@ -44,6 +47,7 @@
 "config.json is broken — click to open; nothing is overwritten" = "config.json не читается — нажми, чтобы открыть; поверх ничего не пишется";
 
 "Cyclop" = "Cyclop";
+"Tabs" = "Вкладки";
 "Quit Cyclop" = "Выйти из Cyclop";
 
 /* Полка */
@@ -108,7 +112,7 @@
 "Open Settings" = "Открыть настройки";
 "Recording could not start" = "Запись не началась";
 "No meetings yet" = "Встреч пока нет";
-"Speech models are needed, 600 MB" = "Нужны модели распознавания, 600 МБ";
+"Speech models are needed, 700 MB" = "Нужны модели распознавания, 700 МБ";
 "Download Models" = "Скачать модели";
 "Downloading %d%%" = "Загрузка %d%%";
 "Download failed" = "Загрузка не удалась";
@@ -158,3 +162,38 @@
 "Claude's settings file could not be read; nothing was changed" = "Файл настроек Claude не прочитан; ничего не изменено";
 "Claude's settings file could not be changed; try again" = "Файл настроек Claude не удалось изменить; попробуйте ещё раз";
 "Adds one hook to Claude's settings so that requests reach the panel, after keeping a copy of the file. Sessions already running pick it up without a restart. Disconnect before deleting Cyclop." = "Добавляет в настройки Claude один хук, чтобы запросы приходили в панель; перед этим сохраняется копия файла. Уже запущенные сессии подхватят его без перезапуска. Перед удалением Cyclop отключите.";
+"Context" = "Контекст";
+"Keep" = "Оставить";
+"Compact" = "Сжать";
+"Model" = "Модель";
+"Same" = "Та же";
+"Same (%@)" = "Та же (%@)";
+"Effort" = "Effort";
+"Mode" = "Режим";
+"Bypass" = "Без вопросов";
+"Auto" = "Авто";
+"Edits" = "Правки";
+"Ask" = "Спрашивать";
+"Bypass permissions" = "Без вопросов";
+"Accept edits" = "Правки без вопросов";
+"In this session" = "В этой сессии";
+"Only in this session here" = "Здесь только в этой сессии";
+"Not allowed in this session" = "Не разрешено в этой сессии";
+"Approving a Plan" = "Утверждение плана";
+"A new session is started for compact, clear or another model: in the terminal it ran in, or prepared and opened in Claude or the editor." = "Для сжатия, очистки или другой модели запускается новая сессия: в терминале, где шла эта, или подготовленная и открытая в Claude или редакторе.";
+"Preparing a session for «%@»…" = "Готовлю сессию для «%@»…";
+"Opening a terminal for «%@»…" = "Открываю терминал для «%@»…";
+"Opened in Claude. Choose the mode there and type go to start." = "Открыто в Claude. Выберите режим там и напишите go, чтобы начать.";
+"Opened in the editor. Choose the mode there and type go to start." = "Открыто в редакторе. Выберите режим там и напишите go, чтобы начать.";
+"Effort and mode are chosen in Claude when the session opens" = "Effort и режим выбираются в Claude, когда сессия откроется";
+"Effort and mode are chosen in the editor when the session opens" = "Effort и режим выбираются в редакторе, когда сессия откроется";
+"Started in the terminal." = "Запущено в терминале.";
+"Could not hand the plan off: %@" = "Не удалось передать план: %@";
+"Dismiss" = "Закрыть";
+"Copy Command" = "Скопировать команду";
+"Automation is not allowed" = "Автоматизация не разрешена";
+"The terminal did not run the command" = "Терминал не выполнил команду";
+"The session was made but cannot be opened from here" = "Сессия создана, но отсюда её не открыть";
+"No claude executable found" = "Не найден исполняемый файл claude";
+"It took too long" = "Заняло слишком много времени";
+"claude exited with status %d" = "claude завершился со статусом %d";

@@ -22,116 +22,13 @@ struct SettingsPane: View {
     @State private var notchDwell = NotchGeometry.notchDwell
     @State private var watchScreenshotFolder = false
     @State private var screenshotUsage: (files: Int, bytes: Int64) = (0, 0)
+    @State private var planDefaults = PlanChoice(ConfigStore.shared.planApproval)
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 14) {
-                section(localized("General")) {
-                    toggleRow(
-                        symbol: "arrow.forward.to.line",
-                        title: localized("Launch at Login"),
-                        isOn: launchAtLoginBinding
-                    )
-                    // Off means the same thing a ⌘-drag off the bar does —
-                    // both go through `AppDelegate.isMenuBarIconVisible`, so
-                    // whichever one somebody used, this switch shows it (#5).
-                    toggleRow(
-                        symbol: "eye.fill",
-                        title: localized("Show Menu Bar Icon"),
-                        isOn: menuBarIconVisibleBinding
-                    )
-                }
-
-                // The rail is for what gets a glance between other things.
-                // A tab used once a month is not banned from it, but it lives
-                // there only as long as whoever never uses it can take it off —
-                // and off means quiet too: its background stops with the icon.
-                section(localized("Show in Panel")) {
-                    ForEach(NotchViewModel.Tab.leftRail + NotchViewModel.Tab.rightRail) { tab in
-                        if tab.canHide {
-                            toggleRow(symbol: tab.symbol, title: tab.title, isOn: visibilityBinding(tab))
-                        }
-                    }
-                }
-
-                section(localized("Displays")) {
-                    toggleRow(
-                        symbol: "display.2",
-                        title: localized("Show on All Displays"),
-                        isOn: allDisplaysBinding
-                    )
-                    toggleRow(
-                        symbol: "rectangle.topthird.inset.filled",
-                        title: localized("Full-Height Notch Without a Cutout"),
-                        isOn: fullSizeNotchBinding
-                    )
-                    // Both steer a physical notch only, so without one the
-                    // row would move nothing.
-                    if NotchGeometry.hasPhysicalNotch { notchOpensRow }
-                }
-
-                section(localized("Screenshots")) {
-                    toggleRow(
-                        symbol: "photo.on.rectangle",
-                        title: localized("Save Clipboard Screenshots"),
-                        isOn: saveClipboardImagesBinding
-                    )
-                    toggleRow(
-                        symbol: "eye",
-                        title: localized("Watch Screenshots Folder"),
-                        isOn: watchScreenshotFolderBinding
-                    )
-                    actionRow(symbol: "folder", title: localized("Show Screenshots Folder")) {
-                        ScreenshotVault.reveal()
-                    }
-                    actionRow(
-                        symbol: "trash",
-                        title: clearTitle,
-                        disabled: screenshotUsage.files == 0
-                    ) {
-                        ScreenshotVault.clear()
-                        shelf.load()
-                        // The files were just deleted, so the cards have to go
-                        // with them. Safe to look here: the vault lives in the
-                        // app's own folder, which macOS does not guard.
-                        shelf.refreshFromDisk()
-                        refreshUsage()
-                    }
-                }
-
-                section(localized("Snippets")) {
-                    actionRow(symbol: "doc.text", title: localized("Show Snippets File")) {
-                        vm.snippets.reveal()
-                    }
-                }
-
-                // Shown with the tab hidden too: the entry in Claude's settings is removed from here.
-                section(localized("Claude")) { claudeRows }
-
-                // What lives in this file is documented in #67: everything
-                // above that makes sense on another Mac, in one place instead
-                // of five.
-                section(localized("Configuration")) {
-                    if config.fileBroken { configBrokenNotice }
-                    actionRow(symbol: "gearshape", title: localized("Show Config File")) {
-                        ConfigStore.reveal()
-                    }
-                }
-
-                // The one door left once the menu bar icon is gone (#5): a
-                // status item is not required to hide it any more, so quitting
-                // must not require one either. Last on purpose — leaving is
-                // not something to meet on the way to a switch.
-                section(localized("Cyclop")) {
-                    actionRow(symbol: "power", title: localized("Quit Cyclop")) {
-                        NSApp.terminate(nil)
-                    }
-                }
-            }
-            .padding(.top, 2)
-            .padding(.trailing, 4)
+        VStack(spacing: 10) {
+            pageSwitch
+            page
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         // Live state, not a snapshot taken once at launch: System Settings can
         // flip Launch at Login from outside, and the folder can empty or fill
         // between visits to this tab (#11 taught the same lesson for the menu
@@ -145,12 +42,145 @@ struct SettingsPane: View {
             allDisplays = NotchGeometry.showsOnAllDisplays
             fullSizeNotch = NotchGeometry.drawsFullSizeNotch
             openPanelForRequests = ConfigStore.shared.openPanelForRequests
+            planDefaults = PlanChoice(ConfigStore.shared.planApproval)
             notchDepth = NotchGeometry.notchDepth
             notchDwell = NotchGeometry.notchDwell
             watchScreenshotFolder = screenshots.isEnabled
             refreshUsage()
             vm.claude.refreshConnection()
         }
+    }
+
+    private var pageSwitch: some View {
+        NotchSegmented(
+            selection: $vm.settingsPage,
+            options: NotchViewModel.SettingsPage.allCases,
+            label: { $0 == .cyclop ? localized("Cyclop") : localized("Tabs") }
+        )
+        .frame(maxWidth: 220)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var page: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 14) {
+                if vm.settingsPage == .cyclop {
+                    section(localized("General")) {
+                        toggleRow(
+                            symbol: "arrow.forward.to.line",
+                            title: localized("Launch at Login"),
+                            isOn: launchAtLoginBinding
+                        )
+                        // Off means the same thing a ⌘-drag off the bar does —
+                        // both go through `AppDelegate.isMenuBarIconVisible`, so
+                        // whichever one somebody used, this switch shows it (#5).
+                        toggleRow(
+                            symbol: "eye.fill",
+                            title: localized("Show Menu Bar Icon"),
+                            isOn: menuBarIconVisibleBinding
+                        )
+                    }
+
+                    // The rail is for what gets a glance between other things.
+                    // A tab used once a month is not banned from it, but it lives
+                    // there only as long as whoever never uses it can take it off —
+                    // and off means quiet too: its background stops with the icon.
+                    // Listed in the rails' own order, so moving an icon there moves it here.
+                    section(localized("Show in Panel")) {
+                        ForEach(vm.rails.left + vm.rails.right) { tab in
+                            if tab.canHide {
+                                toggleRow(symbol: tab.symbol, title: tab.title, isOn: visibilityBinding(tab))
+                            }
+                        }
+                        iconSizeRow
+                        actionRow(
+                            symbol: "arrow.uturn.backward",
+                            title: localized("Restore Default Order"),
+                            disabled: vm.rails == NotchViewModel.Tab.defaultRails
+                        ) {
+                            withAnimation(Theme.contentAnimation) { vm.resetRails() }
+                        }
+                    }
+
+                    section(localized("Displays")) {
+                        toggleRow(
+                            symbol: "display.2",
+                            title: localized("Show on All Displays"),
+                            isOn: allDisplaysBinding
+                        )
+                        toggleRow(
+                            symbol: "rectangle.topthird.inset.filled",
+                            title: localized("Full-Height Notch Without a Cutout"),
+                            isOn: fullSizeNotchBinding
+                        )
+                        // Both steer a physical notch only, so without one the
+                        // row would move nothing.
+                        if NotchGeometry.hasPhysicalNotch { notchOpensRow }
+                    }
+
+                    // What lives in this file is documented in #67: everything
+                    // above that makes sense on another Mac, in one place instead
+                    // of five.
+                    section(localized("Configuration")) {
+                        if config.fileBroken { configBrokenNotice }
+                        actionRow(symbol: "gearshape", title: localized("Show Config File")) {
+                            ConfigStore.reveal()
+                        }
+                    }
+
+                    // The one door left once the menu bar icon is gone (#5): a
+                    // status item is not required to hide it any more, so quitting
+                    // must not require one either. Last on purpose — leaving is
+                    // not something to meet on the way to a switch.
+                    section(nil) {
+                        actionRow(symbol: "power", title: localized("Quit Cyclop")) {
+                            NSApp.terminate(nil)
+                        }
+                    }
+                } else {
+                    section(localized("Screenshots")) {
+                        toggleRow(
+                            symbol: "photo.on.rectangle",
+                            title: localized("Save Clipboard Screenshots"),
+                            isOn: saveClipboardImagesBinding
+                        )
+                        toggleRow(
+                            symbol: "eye",
+                            title: localized("Watch Screenshots Folder"),
+                            isOn: watchScreenshotFolderBinding
+                        )
+                        actionRow(symbol: "folder", title: localized("Show Screenshots Folder")) {
+                            ScreenshotVault.reveal()
+                        }
+                        actionRow(
+                            symbol: "trash",
+                            title: clearTitle,
+                            disabled: screenshotUsage.files == 0
+                        ) {
+                            ScreenshotVault.clear()
+                            shelf.load()
+                            // The files were just deleted, so the cards have to go
+                            // with them. Safe to look here: the vault lives in the
+                            // app's own folder, which macOS does not guard.
+                            shelf.refreshFromDisk()
+                            refreshUsage()
+                        }
+                    }
+
+                    section(localized("Snippets")) {
+                        actionRow(symbol: "doc.text", title: localized("Show Snippets File")) {
+                            vm.snippets.reveal()
+                        }
+                    }
+
+                    // Shown with the tab hidden too: the entry in Claude's settings is removed from here.
+                    section(localized("Claude")) { claudeRows }
+                }
+            }
+            .padding(.top, 2)
+            .padding(.trailing, 4)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     // MARK: - Claude
@@ -196,6 +226,64 @@ struct SettingsPane: View {
             title: localized("Open Panel for Requests"),
             isOn: openPanelForRequestsBinding
         )
+        planDefaultRows
+    }
+
+    /// What a plan card starts from; the card changes it per plan.
+    @ViewBuilder
+    private var planDefaultRows: some View {
+        Text(localized("Approving a Plan").uppercased())
+            .font(.system(size: 9, weight: .semibold))
+            .tracking(0.6)
+            .foregroundStyle(Theme.tertiary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 8)
+            .padding(.top, 8)
+            .padding(.bottom, 2)
+        planDefaultRow(localized("Context")) {
+            NotchSegmented(
+                selection: planDefault(\.context), options: PlanChoice.Context.allCases, label: { $0.label },
+                track: Self.cardTrack)
+        }
+        planDefaultRow(localized("Model")) {
+            NotchSegmented(
+                selection: planDefault(\.model), options: PlanChoice.ModelChoice.allCases,
+                label: { $0.label(sessionModel: nil) }, track: Self.cardTrack)
+        }
+        planDefaultRow(localized("Effort")) {
+            NotchSegmented(
+                selection: planDefault(\.effort), options: PlanChoice.Effort.allCases, label: { $0.rawValue },
+                track: Self.cardTrack)
+        }
+        planDefaultRow(localized("Mode")) {
+            NotchSegmented(
+                selection: planDefault(\.mode), options: PlanChoice.Mode.allCases, label: { $0.label },
+                track: Self.cardTrack)
+        }
+        claudeNote(
+            localized(
+                "A new session is started for compact, clear or another model: in the terminal it ran in, or prepared and opened in Claude or the editor."
+            ),
+            color: Theme.tertiary
+        )
+    }
+
+    /// The segmented track on the Settings card, which is `Theme.surface` itself.
+    private static let cardTrack = Color.black.opacity(0.25)
+
+    private func planDefaultRow<Control: View>(_ title: String, @ViewBuilder control: @escaping () -> Control) -> some View {
+        PlanChoiceRow(title: title, inSettings: true, control: control)
+            .padding(.horizontal, 8)
+            .frame(height: 26)
+    }
+
+    private func planDefault<Value>(_ keyPath: WritableKeyPath<PlanChoice, Value>) -> Binding<Value> {
+        Binding(
+            get: { planDefaults[keyPath: keyPath] },
+            set: {
+                planDefaults[keyPath: keyPath] = $0
+                ConfigStore.shared.planApproval = planDefaults.config
+            })
     }
 
     private var openPanelForRequestsBinding: Binding<Bool> {
@@ -333,13 +421,15 @@ struct SettingsPane: View {
     // MARK: - Rows
 
     @ViewBuilder
-    private func section<Rows: View>(_ title: String, @ViewBuilder rows: () -> Rows) -> some View {
+    private func section<Rows: View>(_ title: String?, @ViewBuilder rows: () -> Rows) -> some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(title.uppercased())
-                .font(.system(size: 9, weight: .semibold))
-                .tracking(0.6)
-                .foregroundStyle(Theme.tertiary)
-                .padding(.leading, 8)
+            if let title {
+                Text(title.uppercased())
+                    .font(.system(size: 9, weight: .semibold))
+                    .tracking(0.6)
+                    .foregroundStyle(Theme.tertiary)
+                    .padding(.leading, 8)
+            }
             VStack(spacing: 1) {
                 rows()
             }
@@ -397,6 +487,33 @@ struct SettingsPane: View {
                 ),
                 in: NotchGeometry.dwellRange
             )
+        }
+        .padding(.horizontal, 8)
+        .frame(height: 26)
+    }
+
+    /// The icons keep this size on every rail; a rail that no longer fits
+    /// makes the panel taller. The hint says how the order is changed.
+    private var iconSizeRow: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "square.resize")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Theme.secondary)
+                .frame(width: 16)
+            Text(localized("Icon Size"))
+                .font(.system(size: 11.5, weight: .medium))
+                .foregroundStyle(.white)
+            Text(localized("Hold an icon to move it"))
+                .font(.system(size: 10))
+                .foregroundStyle(Theme.tertiary)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            Slider(value: $vm.railIconSize, in: NotchGeometry.railIconSizeRange, step: 1) { editing in
+                if !editing { ConfigStore.shared.flush() }
+            }
+            .controlSize(.mini)
+            .tint(.white.opacity(0.7))
+            .frame(width: 96)
         }
         .padding(.horizontal, 8)
         .frame(height: 26)

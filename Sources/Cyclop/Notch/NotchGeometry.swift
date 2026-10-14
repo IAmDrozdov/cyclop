@@ -14,19 +14,19 @@ struct NotchGeometry {
     /// collapsed, the way it used to. Off by default — see `collapsedDepth`.
     let drawsFullSize: Bool
 
-    /// Metrics of the tab rail that do not depend on the notch. `railIconHeight`
-    /// is not among them — see below.
+    /// Metrics of the tab rail that do not depend on the notch.
     static let railSpacing: CGFloat = 4
+    /// Icon size the Settings slider offers, in points.
+    static let railIconSizeRange: ClosedRange<Double> = 20...32
     /// Gap between the rail and the bottom edge of the body.
     static let bodyBottomPadding: CGFloat = 14
 
-    /// Size of the fully expanded panel body. Held constant across every Mac:
+    /// Smallest fully expanded panel body. Held constant across every Mac:
     /// letting it follow the header made two people on the very same model
     /// see two different heights, just from different display-scaling
-    /// settings — 38 pt against 32 for the same physical notch, an 11 pt
-    /// spread from one slider (#27). What differs between Macs lives in
-    /// `railIconHeight` instead, which is the one thing in the body actually
-    /// free to give.
+    /// settings — 38 pt against 32 for the same physical notch (#27). Only a
+    /// rail too long for it makes the body taller (`standardBodyHeight`),
+    /// because icons keep the size chosen in Settings.
     let expandedSize = CGSize(width: 620, height: 208)
 
     /// Body for the teleprompter, the one tab that asks for more.
@@ -37,39 +37,24 @@ struct NotchGeometry {
     /// without focusing: below this the tab shows the current line and the next
     /// one, which is a countdown, not a script.
     static let tallBodyHeight: CGFloat = 400
-    var tallExpandedSize: CGSize {
-        CGSize(width: expandedSize.width, height: Self.tallBodyHeight)
-    }
     /// Tallest body any tab can ask for. The window is cut to this once and
     /// never resized: it is transparent outside the visible panel, and what is
     /// clickable is decided separately by the active rect.
-    var maxBodyHeight: CGFloat { max(expandedSize.height, Self.tallBodyHeight) }
-
-    /// What the body has left for content on an ordinary tab, once the header
-    /// and the padding beneath are taken out.
-    ///
-    /// The rails are held to this even on the tab that is taller, so the icons
-    /// stay at the same height on every tab. Centred in the body instead, they
-    /// slid down by half the difference — 96 pt — the moment the teleprompter
-    /// opened, which put the icon just clicked well below the pointer that had
-    /// clicked it.
-    var standardContentHeight: CGFloat {
-        expandedSize.height - notchSize.height - Self.bodyBottomPadding
+    /// Every tab on one rail at the largest icon size counts as well.
+    var maxBodyHeight: CGFloat {
+        let longest = standardBodyHeight(
+            railIcons: NotchViewModel.Tab.allCases.count,
+            iconSize: Self.railIconSizeRange.upperBound
+        )
+        return max(longest, Self.tallBodyHeight)
     }
 
-    /// Height each rail icon gets. A ceiling, not a constant: the body only
-    /// has `expandedSize.height − notchSize.height − bodyBottomPadding` left
-    /// to give the rail once the header — the notch itself — and the padding
-    /// beneath are taken out of the fixed 208, and a rail whose icons at the
-    /// full 24 pt plus the 4 pt gaps between them ask for more than that
-    /// shrinks every icon to fit. Rounded down rather than to the nearest
-    /// point: a rail that asks for more than it is given should visibly
-    /// yield, not overflow by a fraction that clips it.
-    var railIconHeight: CGFloat {
-        let icons = CGFloat(NotchViewModel.Tab.leftRail.count)
-        let available = expandedSize.height - notchSize.height - Self.bodyBottomPadding
-        let ceiling = (available - (icons - 1) * Self.railSpacing) / icons
-        return min(24, ceiling).rounded(.down)
+    /// Body of an ordinary tab: the standard 208, or taller when a rail of
+    /// `railIcons` icons at `iconSize` plus the header and padding needs more.
+    func standardBodyHeight(railIcons: Int, iconSize: Double) -> CGFloat {
+        let icons = CGFloat(max(railIcons, 1))
+        let rail = icons * iconSize + (icons - 1) * Self.railSpacing
+        return max(expandedSize.height, notchSize.height + rail + Self.bodyBottomPadding)
     }
 
     /// Slack around the panel so the concave shoulders and shadow are not clipped.

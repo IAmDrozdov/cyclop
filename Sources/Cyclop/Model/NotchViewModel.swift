@@ -57,14 +57,15 @@ final class NotchViewModel: ObservableObject {
         /// live on: with Settings gone there would be no way back.
         var canHide: Bool { self != .settings }
 
-        /// Which rail the icon sits on. The left one holds the tabs glanced at
-        /// most often, so they sit where the pointer lands first (#43). The
-        /// rarely used tabs and Settings go to the right one, Settings last:
-        /// it is not something to hover past on the way to a tab people
-        /// actually rest on. Icon height is a ceiling derived from the left
-        /// rail's length alone, so a shorter or longer rail resizes itself.
-        static let leftRail: [Tab] = [.claude, .shelf, .clipboard, .snippets, .translate, .caffeine]
-        static let rightRail: [Tab] = [.currency, .teleprompter, .meetings, .settings]
+        /// The rails before anyone rearranges them. The left one holds the tabs
+        /// glanced at most often, so they sit where the pointer lands first
+        /// (#43). The rarely used tabs and Settings go to the right one,
+        /// Settings last: it is not something to hover past on the way to a
+        /// tab people actually rest on. Holding an icon moves it (`rails`).
+        static let defaultRails = RailOrder(
+            left: [.claude, .shelf, .clipboard, .snippets, .translate, .caffeine],
+            right: [.currency, .teleprompter, .meetings, .settings]
+        )
     }
 
     /// What every screen's panel adds up to, kept by `NotchController`: this
@@ -98,8 +99,8 @@ final class NotchViewModel: ObservableObject {
     func isVisible(_ tab: Tab) -> Bool { !hiddenTabs.contains(tab) }
 
     /// The rails as they stand with the switches applied.
-    var leftRail: [Tab] { Tab.leftRail.filter(isVisible) }
-    var rightRail: [Tab] { Tab.rightRail.filter(isVisible) }
+    var leftRail: [Tab] { rails.left.filter(isVisible) }
+    var rightRail: [Tab] { rails.right.filter(isVisible) }
 
     /// Where to land when the tab on screen is the one being taken away.
     private var firstVisibleTab: Tab { leftRail.first ?? rightRail.first ?? .settings }
@@ -118,6 +119,39 @@ final class NotchViewModel: ObservableObject {
             if tab == target { tab = firstVisibleTab }
         }
         ConfigStore.shared.hiddenTabs = hiddenTabs.map(\.rawValue).sorted()
+    }
+
+    // MARK: - Rail order and icon size
+
+    /// The order the owner arranged by holding an icon and dragging it, hidden
+    /// tabs kept in their places. Saved on every step of the drag, so a panel
+    /// closing mid-gesture loses nothing.
+    @Published private(set) var rails: RailOrder = {
+        let saved = ConfigStore.shared.rails
+        return RailOrder.normalized(left: saved.left, right: saved.right)
+    }()
+
+    func moveTab(_ target: Tab, toRight: Bool, before: Tab?) {
+        let moved = rails.moving(target, toRight: toRight, before: before)
+        guard moved != rails else { return }
+        rails = moved
+        saveRails()
+    }
+
+    func resetRails() {
+        guard rails != Tab.defaultRails else { return }
+        rails = Tab.defaultRails
+        saveRails()
+    }
+
+    private func saveRails() {
+        ConfigStore.shared.rails = .init(left: rails.left.map(\.rawValue), right: rails.right.map(\.rawValue))
+    }
+
+    /// Points per rail icon. Constant on every tab and every rail length: a
+    /// rail that does not fit makes the body taller instead (`PanelState`).
+    @Published var railIconSize: Double = ConfigStore.shared.railIconSize {
+        didSet { ConfigStore.shared.railIconSize = railIconSize }
     }
 
     /// What a tab keeps running while nobody is looking at it. Only a few have
@@ -237,6 +271,10 @@ final class NotchViewModel: ObservableObject {
             || (tab == .claude && claude.fieldShown)
     }
 
+    /// The two pages of Settings; not saved, so Settings opens on Cyclop.
+    enum SettingsPage: CaseIterable { case cyclop, tabs }
+    @Published var settingsPage: SettingsPage = .cyclop
+
     @Published var tab: Tab = .claude {
         didSet {
             // The snippets file is edited from outside the app, so it is read
@@ -303,7 +341,7 @@ final class NotchViewModel: ObservableObject {
         self.snippets = SnippetStore()
         self.teleprompter = TeleprompterStore()
         self.meetings = MeetingStore()
-        self.claude = ClaudeStore()
+        self.claude = ClaudeStore(defaultPlanChoice: { PlanChoice(ConfigStore.shared.planApproval) })
         self.caffeine = CaffeineStore(
             minutes: ConfigStore.shared.caffeineMinutes,
             lidClosedMode: ConfigStore.shared.caffeineLidClosed,

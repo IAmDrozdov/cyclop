@@ -66,6 +66,45 @@ final class ConfigStore: ObservableObject {
         }
     }
 
+    /// Rail order by `Tab.rawValue`. Empty on both sides means the default
+    /// order; `RailOrder.normalized` makes any saved one whole.
+    struct Rails: Codable, Equatable {
+        var left: [String] = []
+        var right: [String] = []
+
+        init(left: [String] = [], right: [String] = []) {
+            self.left = left
+            self.right = right
+        }
+
+        /// Same reason as `File.init(from:)`: a hand edit may keep one key.
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            left = try c.decodeIfPresent([String].self, forKey: .left) ?? []
+            right = try c.decodeIfPresent([String].self, forKey: .right) ?? []
+        }
+    }
+
+    /// What a plan card starts from, as `PlanChoice`'s raw values. One a newer or older build does not know reads as the default.
+    struct PlanApproval: Codable, Equatable {
+        var context = "clear"
+        var model = "sonnet"
+        var effort = "medium"
+        var mode = "bypassPermissions"
+
+        init() {}
+
+        /// Same reason as `File.init(from:)`: a hand edit may keep one key.
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            let d = PlanApproval()
+            context = try c.decodeIfPresent(String.self, forKey: .context) ?? d.context
+            model = try c.decodeIfPresent(String.self, forKey: .model) ?? d.model
+            effort = try c.decodeIfPresent(String.self, forKey: .effort) ?? d.effort
+            mode = try c.decodeIfPresent(String.self, forKey: .mode) ?? d.mode
+        }
+    }
+
     private struct File: Codable, Equatable {
         var showOnAllDisplays = true
         var saveClipboardImages = true
@@ -76,6 +115,9 @@ final class ConfigStore: ObservableObject {
         var notch = Notch()
         var caffeine = Caffeine()
         var openPanelForRequests = true
+        var rails = Rails()
+        var railIconSize: Double = 24
+        var planApproval = PlanApproval()
 
         init() {}
 
@@ -96,6 +138,9 @@ final class ConfigStore: ObservableObject {
             notch = try c.decodeIfPresent(Notch.self, forKey: .notch) ?? d.notch
             caffeine = try c.decodeIfPresent(Caffeine.self, forKey: .caffeine) ?? d.caffeine
             openPanelForRequests = try c.decodeIfPresent(Bool.self, forKey: .openPanelForRequests) ?? d.openPanelForRequests
+            rails = try c.decodeIfPresent(Rails.self, forKey: .rails) ?? d.rails
+            railIconSize = try c.decodeIfPresent(Double.self, forKey: .railIconSize) ?? d.railIconSize
+            planApproval = try c.decodeIfPresent(PlanApproval.self, forKey: .planApproval) ?? d.planApproval
         }
     }
 
@@ -215,6 +260,24 @@ final class ConfigStore: ObservableObject {
     var hiddenTabs: [String] {
         get { value.hiddenTabs }
         set { value.hiddenTabs = newValue; persist() }
+    }
+
+    /// Rail order the owner arranged by dragging icons.
+    var rails: Rails {
+        get { value.rails }
+        set { value.rails = newValue; persist() }
+    }
+
+    /// Set by a slider: written by `flush()`. Read clamped: the file is edited by hand.
+    var railIconSize: Double {
+        get { min(max(value.railIconSize, NotchGeometry.railIconSizeRange.lowerBound), NotchGeometry.railIconSizeRange.upperBound) }
+        set { value.railIconSize = newValue; isDirty = true }
+    }
+
+    /// The Claude tab's plan card starts from these.
+    var planApproval: PlanApproval {
+        get { value.planApproval }
+        set { value.planApproval = newValue; persist() }
     }
 
     // MARK: - Migration

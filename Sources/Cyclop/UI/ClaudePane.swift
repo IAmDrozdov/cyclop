@@ -20,7 +20,7 @@ struct ClaudePane: View {
             )
             // Each request starts with its own state: the field closed and empty.
             .id(request.id)
-        } else if store.sessions.isEmpty {
+        } else if store.sessions.isEmpty && store.handoffs.isEmpty {
             Text("No Claude sessions")
                 .font(.system(size: 11))
                 .foregroundStyle(Theme.tertiary)
@@ -35,6 +35,7 @@ struct ClaudePane: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 4)
                     }
+                    ForEach(store.handoffs) { HandoffRow(status: $0, store: store, privacy: privacy) }
                     ForEach(store.sessions) { row($0) }
                 }
                 .padding(.vertical, 4)
@@ -63,6 +64,140 @@ struct ClaudePane: View {
                 }
             }
         )
+    }
+}
+
+/// One plan handed off to a new session: under way, opened (it leaves by itself), or failed.
+private struct HandoffRow: View {
+    let status: ClaudeHandoffStatus
+    let store: ClaudeStore
+    @ObservedObject var privacy: PrivacyMode
+    @State private var hovering = false
+
+    private var key: String { "claude.handoff.\(status.id)" }
+    private var hidden: Bool { privacy.hides(.claude, key) }
+    private var seed: UInt64 { UInt64(bitPattern: Int64(status.id.uuidString.hashValue)) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 7) {
+                icon
+                    .frame(width: 12)
+                line
+                Spacer(minLength: 6)
+                // Only where something is covered: the session's name while preparing, the reason and the buttons after a failure.
+                if hovering, privacy.covers(.claude), status.phase != .opened {
+                    RevealEye(hidden: hidden) { privacy.toggle(key) }
+                }
+            }
+            if case .failed = status.phase {
+                HStack(spacing: 4) {
+                    Spacer(minLength: 0)
+                    if status.command != nil {
+                        HandoffButton(title: localized("Copy Command")) { store.copyCommand(of: status.id) }
+                            .allowsHitTesting(!hidden)
+                    }
+                    HandoffButton(title: localized("Dismiss")) { store.dismissHandoff(status.id) }
+                        .allowsHitTesting(!hidden)
+                }
+            }
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Theme.surface))
+        .onHover { hovering = $0 }
+        .animation(Theme.contentAnimation, value: hovering)
+    }
+
+    @ViewBuilder
+    private var icon: some View {
+        switch status.phase {
+        case .preparing:
+            ProgressView().controlSize(.mini).scaleEffect(0.7)
+        case .opened:
+            Image(systemName: "checkmark").font(.system(size: 9, weight: .semibold)).foregroundStyle(Color.green)
+        case .failed:
+            Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(Color.yellow.opacity(0.85))
+        }
+    }
+
+    @ViewBuilder
+    private var line: some View {
+        switch status.phase {
+        case .preparing:
+            covered(
+                status.place == .terminal
+                    ? localized("Opening a terminal for «%@»…") : localized("Preparing a session for «%@»…"),
+                status.sessionName, color: .white, lines: 1)
+        case .opened:
+            Text(verbatim: openedText).font(.system(size: 10.5)).foregroundStyle(.white)
+        case .failed(let failure):
+            covered(
+                localized("Could not hand the plan off: %@"), Self.reason(failure), color: Color.yellow.opacity(0.85), lines: 3)
+        }
+    }
+
+    /// The localized format with a value in it (the session's name, a failure's reason), which Hide Contents covers.
+    @ViewBuilder
+    private func covered(_ format: String, _ value: String, color: Color, lines: Int) -> some View {
+        if hidden {
+            let parts = format.components(separatedBy: "%@")
+            HStack(spacing: 3) {
+                Text(verbatim: parts.first ?? "").font(.system(size: 10.5)).foregroundStyle(color)
+                SpoilerField(seed: seed)
+                    .frame(width: 56, height: 10)
+                    .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+                    .accessibilityLabel(Text(localized("Hidden")))
+                Text(verbatim: parts.last ?? "").font(.system(size: 10.5)).foregroundStyle(color)
+            }
+        } else {
+            Text(verbatim: String(format: format, value))
+                .font(.system(size: 10.5))
+                .foregroundStyle(color)
+                .lineLimit(lines)
+                .truncationMode(.middle)
+                .fixedSize(horizontal: false, vertical: lines > 1)
+        }
+    }
+
+    private var openedText: String {
+        switch status.place {
+        case .app: return localized("Opened in Claude. Choose the mode there and type go to start.")
+        case .editor: return localized("Opened in the editor. Choose the mode there and type go to start.")
+        case .terminal: return localized("Started in the terminal.")
+        }
+    }
+
+    private static func reason(_ failure: ClaudeHandoffFailure) -> String {
+        switch failure {
+        case .automationDenied: return localized("Automation is not allowed")
+        case .terminalFailed: return localized("The terminal did not run the command")
+        case .noLink: return localized("The session was made but cannot be opened from here")
+        case .noExecutable: return localized("No claude executable found")
+        case .timedOut: return localized("It took too long")
+        case .step(let text): return text
+        case .exitStatus(let code): return localized("claude exited with status %d", Int(code))
+        }
+    }
+}
+
+private struct HandoffButton: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(verbatim: title)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .frame(height: 20)
+                .background(Capsule().fill(Theme.surfaceHover))
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -539,15 +674,17 @@ private struct PermissionCard: View {
     }
 }
 
-/// A plan: enough of it to recognise, and the three answers. Reading it is for Claude's window.
+/// A plan: enough of it to recognise, the three answers, and under them how it goes on. Reading it is for Claude's window.
 private struct PlanCard: View {
     let request: ClaudeRequest
-    let store: ClaudeStore
+    @ObservedObject var store: ClaudeStore
     let hidden: Bool
     let seed: UInt64
     @Binding var wantsKeyboard: Bool
     let open: () -> Void
     @State private var remarking: Bool
+    /// The choice rows are open; they stand in for the plan's beginning.
+    @State private var expanded: Bool
 
     init(
         request: ClaudeRequest, store: ClaudeStore, hidden: Bool, seed: UInt64, wantsKeyboard: Binding<Bool>,
@@ -560,13 +697,17 @@ private struct PlanCard: View {
         _wantsKeyboard = wantsKeyboard
         self.open = open
         _remarking = State(initialValue: store.draft(of: request.id) != nil)
+        _expanded = State(initialValue: store.choiceExpanded(of: request.id))
     }
 
     var body: some View {
         CoverableText(
             text: request.planTitle.isEmpty ? localized("Plan") : request.planTitle, hidden: hidden,
             font: .system(size: 12, weight: .medium), height: 14, lineLimit: 2, seed: seed)
-        if !request.planBeginning.isEmpty {
+        if expanded {
+            PlanChoiceRows(id: request.id, store: store)
+                .allowsHitTesting(!hidden)
+        } else if !request.planBeginning.isEmpty {
             CoverableText(
                 text: request.planBeginning, hidden: hidden, font: .system(size: 10), color: Theme.secondary,
                 height: 56, lineLimit: 8, seed: seed &+ 1)
@@ -586,6 +727,218 @@ private struct PlanCard: View {
             }
         }
         .allowsHitTesting(!hidden)
+        PlanSummaryLine(id: request.id, store: store, expanded: expanded) {
+            expanded.toggle()
+            store.setChoiceExpanded(expanded, of: request.id)
+        }
+        .allowsHitTesting(!hidden)
+    }
+}
+
+/// How the plan will go on, in one line; pressing it opens the choice rows.
+private struct PlanSummaryLine: View {
+    let id: UUID
+    @ObservedObject var store: ClaudeStore
+    let expanded: Bool
+    let toggle: () -> Void
+
+    private var summary: String {
+        let choice = store.planChoice(of: id)
+        var parts: [String]
+        if store.planRoute(of: id) == .inPlace {
+            parts = [localized("In this session")]
+        } else {
+            let model: String
+            switch choice.model {
+            case .sonnet: model = "Sonnet"
+            case .same: model = PlanChoiceLabels.shortModel(store.sessionModel(of: id)) ?? localized("Same")
+            }
+            parts = [choice.context.label, model]
+            // Claude and the editor ask for the effort and the mode themselves when the session opens.
+            if store.preparedHandoffPlace(of: id) == nil { parts.append(choice.effort.rawValue) }
+        }
+        if store.preparedHandoffPlace(of: id) == nil { parts.append(choice.mode.title) }
+        return parts.joined(separator: " · ")
+    }
+
+    var body: some View {
+        Button(action: toggle) {
+            HStack(spacing: 6) {
+                Text(verbatim: summary)
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(Theme.tertiary)
+                    .rotationEffect(.degrees(expanded ? 180 : 0))
+                Spacer(minLength: 0)
+            }
+            .frame(height: 18)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .animation(Theme.contentAnimation, value: expanded)
+    }
+}
+
+/// The four choices of a plan request, for this request only.
+private struct PlanChoiceRows: View {
+    let id: UUID
+    @ObservedObject var store: ClaudeStore
+
+    private func binding<Value>(_ keyPath: WritableKeyPath<PlanChoice, Value>) -> Binding<Value> {
+        Binding(
+            get: { store.planChoice(of: id)[keyPath: keyPath] },
+            set: {
+                var choice = store.planChoice(of: id)
+                choice[keyPath: keyPath] = $0
+                store.setPlanChoice(choice, of: id)
+            })
+    }
+
+    var body: some View {
+        let route = store.planRoute(of: id)
+        let unavailable = store.handoffUnavailable(of: id)
+        let offered = unavailable == nil
+        let model = store.sessionModel(of: id)
+        let bypassOff = route == .inPlace && !store.bypassAllowed(of: id)
+        let prepared = store.preparedHandoffPlace(of: id)
+        VStack(alignment: .leading, spacing: 3) {
+            PlanChoiceRow(title: localized("Context")) {
+                NotchSegmented(
+                    selection: binding(\.context), options: PlanChoice.Context.allCases, label: { $0.label },
+                    disabled: offered ? [] : Set(PlanChoice.Context.allCases))
+            }
+            if !ClaudeHandoff.isSonnet(model) {
+                PlanChoiceRow(title: localized("Model")) {
+                    NotchSegmented(
+                        selection: binding(\.model), options: PlanChoice.ModelChoice.allCases,
+                        label: { $0.label(sessionModel: model) },
+                        disabled: offered ? [] : Set(PlanChoice.ModelChoice.allCases))
+                }
+            }
+            if let unavailable {
+                PlanChoiceNote(
+                    text: unavailable == .noExecutable
+                        ? localized("No claude executable found") : localized("Only in this session here"))
+            }
+            if let prepared {
+                PlanChoiceNote(
+                    text: prepared == .app
+                        ? localized("Effort and mode are chosen in Claude when the session opens")
+                        : localized("Effort and mode are chosen in the editor when the session opens"))
+            } else {
+                if route == .handoff {
+                    PlanChoiceRow(title: localized("Effort")) {
+                        NotchSegmented(
+                            selection: binding(\.effort), options: PlanChoice.Effort.allCases, label: { $0.rawValue })
+                    }
+                }
+                PlanChoiceRow(title: localized("Mode")) {
+                    NotchSegmented(
+                        selection: binding(\.mode), options: PlanChoice.Mode.allCases, label: { $0.label },
+                        disabled: bypassOff ? [.bypassPermissions] : [])
+                }
+                if bypassOff {
+                    PlanChoiceNote(text: localized("Not allowed in this session"))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// A caption on the left and the control on the right; the Settings page draws the same rows larger.
+struct PlanChoiceRow<Control: View>: View {
+    let title: String
+    var inSettings = false
+    @ViewBuilder let control: () -> Control
+
+    var body: some View {
+        HStack(spacing: inSettings ? 8 : 6) {
+            // The icon column of the other rows of the Settings card.
+            if inSettings { Color.clear.frame(width: 16, height: 1) }
+            Text(title)
+                .font(.system(size: inSettings ? 11.5 : 10, weight: inSettings ? .medium : .regular))
+                .foregroundStyle(inSettings ? Color.white : Theme.secondary)
+                .lineLimit(1)
+                .frame(width: inSettings ? nil : 56, alignment: .leading)
+            if inSettings { Spacer(minLength: 8) }
+            control()
+                .frame(maxWidth: inSettings ? 330 : .infinity)
+        }
+    }
+}
+
+private struct PlanChoiceNote: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 9))
+            .foregroundStyle(Theme.tertiary)
+            .padding(.leading, 62)
+    }
+}
+
+/// The words of the plan choice; the case names themselves are Claude Code's.
+extension PlanChoice.Context {
+    var label: String {
+        switch self {
+        case .keep: return localized("Keep")
+        case .compact: return localized("Compact")
+        case .clear: return localized("Clear")
+        }
+    }
+}
+
+extension PlanChoice.ModelChoice {
+    /// "Same" with the session's model in brackets when the transcript named one.
+    func label(sessionModel: String?) -> String {
+        switch self {
+        case .sonnet: return "Sonnet"
+        case .same:
+            guard let name = PlanChoiceLabels.shortModel(sessionModel) else { return localized("Same") }
+            return localized("Same (%@)", name)
+        }
+    }
+}
+
+extension PlanChoice.Mode {
+    /// For a segment.
+    var label: String {
+        switch self {
+        case .bypassPermissions: return localized("Bypass")
+        case .auto: return localized("Auto")
+        case .acceptEdits: return localized("Edits")
+        case .default: return localized("Ask")
+        }
+    }
+
+    /// For the summary line.
+    var title: String {
+        switch self {
+        case .bypassPermissions: return localized("Bypass permissions")
+        case .auto: return localized("Auto")
+        case .acceptEdits: return localized("Accept edits")
+        case .default: return localized("Ask")
+        }
+    }
+}
+
+enum PlanChoiceLabels {
+    /// `claude-sonnet-5-5` is `Sonnet 5.5`; nil when the id has no family name.
+    static func shortModel(_ id: String?) -> String? {
+        guard var id = id?.lowercased() else { return nil }
+        if let bracket = id.firstIndex(of: "[") { id = String(id[..<bracket]) }
+        if id.hasPrefix("claude-") { id.removeFirst("claude-".count) }
+        let parts = id.split(separator: "-").map(String.init).filter { !($0.count == 8 && $0.allSatisfy(\.isNumber)) }
+        let family = parts.filter { $0.contains { $0.isLetter } }.map { $0.prefix(1).uppercased() + $0.dropFirst() }
+        let version = parts.filter { $0.allSatisfy(\.isNumber) }
+        guard !family.isEmpty else { return nil }
+        return (family + (version.isEmpty ? [] : [version.joined(separator: ".")])).joined(separator: " ")
     }
 }
 

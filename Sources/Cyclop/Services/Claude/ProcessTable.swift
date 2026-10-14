@@ -39,11 +39,33 @@ enum ProcessTable {
         return "/dev/" + name
     }
 
+    /// The process's command line (`argv`, program name first); nil when the kernel does not give it.
+    static func arguments(of pid: Int) -> [String]? {
+        var mib: [Int32] = [CTL_KERN, KERN_PROCARGS2, Int32(pid)]
+        var size = 0
+        guard sysctl(&mib, UInt32(mib.count), nil, &size, nil, 0) == 0, size > MemoryLayout<Int32>.size else { return nil }
+        var buffer = [UInt8](repeating: 0, count: size)
+        guard sysctl(&mib, UInt32(mib.count), &buffer, &size, nil, 0) == 0, size > MemoryLayout<Int32>.size else { return nil }
+        // argc, the executable's path, NUL padding, then argc strings; the environment follows.
+        let count = Int(buffer.withUnsafeBytes { $0.loadUnaligned(as: Int32.self) })
+        var index = MemoryLayout<Int32>.size
+        while index < size, buffer[index] != 0 { index += 1 }
+        while index < size, buffer[index] == 0 { index += 1 }
+        var arguments: [String] = []
+        while arguments.count < count, index < size {
+            var end = index
+            while end < size, buffer[end] != 0 { end += 1 }
+            arguments.append(String(decoding: buffer[index..<end], as: UTF8.self))
+            index = end + 1
+        }
+        return arguments.count == count ? arguments : nil
+    }
+
     private static func parent(of pid: Int) -> Int? {
         info(of: pid).map { Int($0.kp_eproc.e_ppid) }
     }
 
-    private static func executablePath(of pid: Int) -> String? {
+    static func executablePath(of pid: Int) -> String? {
         var buffer = [UInt8](repeating: 0, count: 4 * Int(MAXPATHLEN))
         guard proc_pidpath(Int32(pid), &buffer, UInt32(buffer.count)) > 0 else { return nil }
         return String(decoding: buffer.prefix { $0 != 0 }, as: UTF8.self)

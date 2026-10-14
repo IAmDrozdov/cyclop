@@ -32,6 +32,8 @@ final class ClaudeStore: ObservableObject {
     @Published private(set) var connectionFailure: ClaudeSettingsFile.Failure?
     /// The socket could not be opened, so the tab works as a list.
     @Published private(set) var listenFailed = false
+    /// What the owner sees of each hand-off of an approved plan, oldest first. In memory only.
+    @Published private(set) var handoffs: [ClaudeHandoffStatus] = []
 
     var waitingCount: Int { sessions.filter { $0.state == .waiting }.count }
 
@@ -46,6 +48,14 @@ final class ClaudeStore: ObservableObject {
     private let command: String
     private let listener: any ClaudeListening
     private let now: () -> Date
+    private let runner: any ClaudeRunning
+    private let defaultPlanChoice: () -> PlanChoice
+    private let transcriptModel: (URL) -> String?
+    private let processArguments: (Int) -> [String]?
+    private let executable: (Int) -> URL?
+    private let newSessionID: () -> String
+    private let waitForIdle: TimeInterval
+    private let handoffLinger: TimeInterval
     private var watcher: DispatchSourceFileSystemObject?
     private var timer: Timer?
     private var running = false
@@ -65,6 +75,27 @@ final class ClaudeStore: ObservableObject {
     /// Whether a field of a request is on screen; read when a click asks whether to take the keyboard.
     /// Cleared by the store when no draft is left, so a field that goes with its request cannot leave it set.
     private(set) var fieldShown = false
+    /// The choice of each plan request, as set; `planChoice(of:)` is what it comes to.
+    @Published private var choices: [UUID: PlanChoice] = [:]
+    /// The plan requests whose choice rows are open on the card; not published, the card keeps its own copy.
+    private var choiceOpen: Set<UUID> = []
+    /// What was known of each plan request's session when it arrived.
+    private var facts: [UUID: PlanFacts] = [:]
+    private var handoffTasks: [UUID: Task<Void, Never>] = [:]
+    private var lingerTasks: [UUID: Task<Void, Never>] = [:]
+
+    private struct PlanFacts {
+        var sessionModel: String?
+        var bypassAllowed: Bool
+        var unavailable: HandoffUnavailable?
+        var place: ClaudeSession.Place
+        var host: ClaudeHostApp?
+        /// The `claude` that prepares a Claude app or editor session; nil for a terminal and where none was found.
+        var executable: URL?
+        var sessionName: String
+        var folder: String
+        var transcript: String
+    }
 
     init(
         folder: URL = ClaudeStore.defaultFolder,
@@ -74,7 +105,15 @@ final class ClaudeStore: ObservableObject {
         command: String = ClaudeSettingsEdit.command(
             forExecutable: Bundle.main.executablePath ?? CommandLine.arguments[0]),
         listener: any ClaudeListening = SocketListening(),
-        now: @escaping () -> Date = Date.init
+        now: @escaping () -> Date = Date.init,
+        runner: any ClaudeRunning = SystemClaudeRunner(),
+        defaultPlanChoice: @escaping () -> PlanChoice = { PlanChoice() },
+        transcriptModel: @escaping (URL) -> String? = { ClaudeHandoff.lastModel(ofFile: $0) },
+        processArguments: @escaping (Int) -> [String]? = { ProcessTable.arguments(of: $0) },
+        executable: @escaping (Int) -> URL? = ClaudeStore.claudeExecutable(ofProcess:),
+        newSessionID: @escaping () -> String = { UUID().uuidString.lowercased() },
+        waitForIdle: TimeInterval = 5,
+        handoffLinger: TimeInterval = 8
     ) {
         self.folder = folder
         self.isAlive = isAlive
@@ -83,6 +122,22 @@ final class ClaudeStore: ObservableObject {
         self.command = command
         self.listener = listener
         self.now = now
+        self.runner = runner
+        self.defaultPlanChoice = defaultPlanChoice
+        self.transcriptModel = transcriptModel
+        self.processArguments = processArguments
+        self.executable = executable
+        self.newSessionID = newSessionID
+        self.waitForIdle = waitForIdle
+        self.handoffLinger = handoffLinger
+    }
+
+    /// The `claude` to run for a session: its own process's when that is one, else a usual place.
+    nonisolated static func claudeExecutable(ofProcess pid: Int) -> URL? {
+        ClaudeHandoff.executable(
+            processPath: ProcessTable.executablePath(of: pid),
+            home: FileManager.default.homeDirectoryForCurrentUser.path,
+            exists: { FileManager.default.isExecutableFile(atPath: $0) })
     }
 
     // MARK: - Tab background
@@ -229,6 +284,10 @@ final class ClaudeStore: ObservableObject {
             return
         }
         connections[request.id] = relay
+        if request.kind == .plan {
+            choices[request.id] = defaultPlanChoice()
+            facts[request.id] = planFacts(of: request, session: known.first { $0.pid == request.pid })
+        }
         requests.append(request)
         let id = request.id
         unseen.insert(id)
@@ -274,10 +333,20 @@ final class ClaudeStore: ObservableObject {
         send(.deny(message: localized("Denied from Cyclop")), for: id)
     }
 
-    /// Approves a plan: the reply repeats the tool's input.
+    /// Approves a plan the way its choice says: in its session, with the mode, or by a hand-off.
     func approve(_ id: UUID) {
-        guard let request = waiting(id), request.kind == .plan else { return }
-        send(.approve(plan: request), for: id)
+        guard let request = waiting(id), request.kind == .plan, let known = facts[id] else { return }
+        let choice = planChoice(of: id)
+        guard planRoute(of: id) == .handoff else {
+            send(.approve(plan: request, mode: choice.mode), for: id)
+            return
+        }
+        let handoff = ClaudeHandoff(
+            choice: choice, sessionModel: known.sessionModel, folder: known.folder, sessionID: request.sessionID,
+            newSessionID: newSessionID(), planFile: request.planFilePath ?? "", transcript: known.transcript)
+        let name = session(for: request)?.name ?? known.sessionName
+        send(.interrupt(message: ClaudeHandoff.interruptMessage), for: id)
+        startHandoff(handoff, of: name, facts: known, pid: request.pid)
     }
 
     /// Sends a plan back; Claude revises it and asks again, which arrives as a new request.
@@ -286,6 +355,76 @@ final class ClaudeStore: ObservableObject {
             !remarks.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         else { return }
         send(.deny(message: remarks), for: id)
+    }
+
+    // MARK: - Plan choice
+
+    /// What Approve does with this plan: the choice as set, but with the context and the model left alone where a
+    /// hand-off is not offered, and bypass turned into accept edits where the session cannot take it.
+    func planChoice(of id: UUID) -> PlanChoice {
+        guard var choice = choices[id], let known = facts[id] else { return defaultPlanChoice() }
+        if known.unavailable != nil {
+            choice.context = .keep
+            choice.model = .same
+        }
+        if choice.route(sessionModel: known.sessionModel) == .inPlace, choice.mode == .bypassPermissions, !known.bypassAllowed {
+            choice.mode = .acceptEdits
+        }
+        return choice
+    }
+
+    /// Changes the choice of a plan request. A mode left as `planChoice(of:)` showed it keeps the one set.
+    func setPlanChoice(_ choice: PlanChoice, of id: UUID) {
+        guard let set = choices[id] else { return }
+        var updated = choice
+        if choice.mode == planChoice(of: id).mode { updated.mode = set.mode }
+        choices[id] = updated
+    }
+
+    /// Whether the card shows the choice rows; kept here so a collapse of the panel does not close them.
+    func choiceExpanded(of id: UUID) -> Bool { choiceOpen.contains(id) }
+
+    func setChoiceExpanded(_ expanded: Bool, of id: UUID) {
+        if expanded { choiceOpen.insert(id) } else { choiceOpen.remove(id) }
+    }
+
+    func planRoute(of id: UUID) -> PlanRoute {
+        facts[id].map { planChoice(of: id).route(sessionModel: $0.sessionModel) } ?? .inPlace
+    }
+
+    /// Claude or the editor when Approve hands the plan off to a session prepared for it, where the effort and
+    /// the mode are chosen when the session opens; nil otherwise.
+    func preparedHandoffPlace(of id: UUID) -> ClaudeSession.Place? {
+        guard planRoute(of: id) == .handoff, let place = facts[id]?.place, place != .terminal else { return nil }
+        return place
+    }
+
+    /// Nil when a hand-off is offered for this plan; else why not.
+    func handoffUnavailable(of id: UUID) -> HandoffUnavailable? { facts[id]?.unavailable }
+
+    /// The session's model id as the transcript's tail names it; nil when unknown.
+    func sessionModel(of id: UUID) -> String? { facts[id]?.sessionModel }
+
+    /// Whether the session can be switched into bypass permissions.
+    func bypassAllowed(of id: UUID) -> Bool { facts[id]?.bypassAllowed ?? false }
+
+    private func planFacts(of request: ClaudeRequest, session: ClaudeSession?) -> PlanFacts {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let folder = request.cwd ?? session?.folder ?? ""
+        let place = session?.place ?? .terminal
+        let host = opener.hostApp(ofProcess: request.pid)
+        let transcript = request.transcriptPath.map { ($0 as NSString).expandingTildeInPath }
+            ?? ClaudeHandoff.transcriptPath(folder: folder, sessionID: request.sessionID, home: home)
+        let claude = place == .terminal ? nil : executable(request.pid)
+        return PlanFacts(
+            sessionModel: transcriptModel(URL(fileURLWithPath: transcript)),
+            bypassAllowed: processArguments(request.pid).map { ClaudeHandoff.allowsBypass(arguments: $0) } ?? false,
+            unavailable: ClaudeHandoff.unavailable(
+                planFile: request.planFilePath, agentID: request.agentID, folder: folder, place: place,
+                hostBundleID: host?.bundleID, hostURLScheme: host?.urlScheme,
+                typed: [request.sessionID, transcript], hasExecutable: place == .terminal || claude != nil),
+            place: place, host: host, executable: claude, sessionName: session?.name ?? "Claude", folder: folder,
+            transcript: transcript)
     }
 
     private func waiting(_ id: UUID) -> ClaudeRequest? { requests.first { $0.id == id } }
@@ -336,6 +475,9 @@ final class ClaudeStore: ObservableObject {
     /// The request is over, answered or not. Nothing is left of its text.
     private func drop(_ id: UUID) {
         connections[id] = nil
+        choices[id] = nil
+        choiceOpen.remove(id)
+        facts[id] = nil
         missing.remove(id)
         discardDraft(id)
         requests.removeAll { $0.id == id }
@@ -374,12 +516,116 @@ final class ClaudeStore: ObservableObject {
     private func closeRequests() {
         let open = Array(connections.values)
         connections = [:]
+        choices = [:]
+        choiceOpen = []
+        facts = [:]
         missing = []
         drafts = [:]
         fieldShown = false
         requests = []
         markSeen()
         open.forEach { $0.close() }
+    }
+
+    // MARK: - Hand-off
+
+    /// Removes a hand-off row: a failed one the owner dismissed, or any other.
+    func dismissHandoff(_ id: UUID) {
+        lingerTasks[id]?.cancel()
+        lingerTasks[id] = nil
+        handoffs.removeAll { $0.id == id }
+    }
+
+    /// Puts the terminal hand-off's command on the pasteboard.
+    func copyCommand(of id: UUID) {
+        guard let command = handoffs.first(where: { $0.id == id })?.command else { return }
+        opener.copyToPasteboard(command)
+    }
+
+    /// Resolves once every hand-off under way has ended; for tests.
+    func waitForHandoffs() async {
+        for task in Array(handoffTasks.values) { await task.value }
+    }
+
+    private func startHandoff(_ handoff: ClaudeHandoff, of name: String, facts: PlanFacts, pid: Int) {
+        let terminal = facts.place == .terminal
+        let status = ClaudeHandoffStatus(
+            sessionName: name, place: facts.place, phase: .preparing, command: terminal ? handoff.shellCommand : nil)
+        handoffs.append(status)
+        let id = status.id
+        handoffTasks[id] = Task { [weak self] in
+            await self?.perform(handoff, status: id, facts: facts, pid: pid)
+            self?.handoffTasks[id] = nil
+        }
+    }
+
+    private func perform(_ handoff: ClaudeHandoff, status id: UUID, facts: PlanFacts, pid: Int) async {
+        await waitUntilNotWaiting(pid)
+        switch facts.place {
+        case .terminal:
+            guard let host = facts.host else { return finish(id, .failed(.terminalFailed)) }
+            switch await opener.runInTerminal(handoff.shellCommand, besideProcess: pid, in: host) {
+            case .done: break
+            case .automationDenied: return finish(id, .failed(.automationDenied))
+            case .failed: return finish(id, .failed(.terminalFailed))
+            }
+        case .app, .editor:
+            if let failure = await prepare(handoff, facts: facts) { return finish(id, .failed(failure)) }
+            guard let link = Self.sessionLink(for: handoff.newSessionID, place: facts.place, host: facts.host) else {
+                return finish(id, .failed(.noLink))
+            }
+            opener.open(link)
+        }
+        finish(id, .opened)
+    }
+
+    /// Runs the steps that make the new session; the first failure, if any.
+    private func prepare(_ handoff: ClaudeHandoff, facts: PlanFacts) async -> ClaudeHandoffFailure? {
+        // A hand-off is offered only with an executable (unavailable otherwise); this is a guard.
+        guard let executable = facts.executable else { return .noExecutable }
+        let environment = ClaudeHandoff.scrubbedEnvironment(ProcessInfo.processInfo.environment)
+        for arguments in handoff.headlessSteps {
+            let run = await runner.run(
+                executable: executable, arguments: arguments, folder: URL(fileURLWithPath: handoff.folder, isDirectory: true),
+                environment: environment, timeout: 600)
+            if run.timedOut { return .timedOut }
+            if run.status != 0 {
+                let reason = ClaudeHandoff.reason(ofStandardError: run.standardError)
+                return reason.isEmpty ? .exitStatus(run.status) : .step(reason)
+            }
+        }
+        return nil
+    }
+
+    /// The hook has been answered; the session's file may still say it waits.
+    private func waitUntilNotWaiting(_ pid: Int) async {
+        guard running else { return }
+        let deadline = Date().addingTimeInterval(waitForIdle)
+        while true {
+            reload()
+            if sessions.first(where: { $0.pid == pid })?.state != .waiting || Date() >= deadline { return }
+            try? await Task.sleep(for: .milliseconds(200))
+        }
+    }
+
+    private func finish(_ id: UUID, _ phase: ClaudeHandoffStatus.Phase) {
+        guard let index = handoffs.firstIndex(where: { $0.id == id }) else { return }
+        handoffs[index].phase = phase
+        guard phase == .opened else { return }
+        lingerTasks[id] = Task { [weak self, handoffLinger] in
+            try? await Task.sleep(for: .seconds(handoffLinger))
+            guard !Task.isCancelled else { return }
+            self?.dismissHandoff(id)
+        }
+    }
+
+    /// Where the prepared session opens: the Claude app, or the editor's own link.
+    private static func sessionLink(for id: String, place: ClaudeSession.Place, host: ClaudeHostApp?) -> URL? {
+        switch place {
+        case .app: return link(scheme: "claude", host: "resume", path: "", session: id)
+        case .editor: return host?.urlScheme.flatMap { link(scheme: $0, host: "anthropic.claude-code", path: "/open", session: id) }
+        case .terminal: return nil
+        }
     }
 
     // MARK: - Open in Claude
@@ -413,6 +659,8 @@ final class ClaudeStore: ObservableObject {
     }
 
     private static func link(scheme: String, host: String, path: String, session: String) -> URL? {
+        // URLComponents traps on a scheme that is not one.
+        guard scheme.wholeMatch(of: /[A-Za-z][A-Za-z0-9+.-]*/) != nil else { return nil }
         var components = URLComponents()
         components.scheme = scheme
         components.host = host

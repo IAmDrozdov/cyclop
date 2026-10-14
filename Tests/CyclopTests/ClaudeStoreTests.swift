@@ -19,6 +19,11 @@ struct ClaudeStoreTests {
         private(set) var focused: [Int] = []
         /// Находит ли терминал вкладку процесса (в жизни: разрешена ли автоматизация).
         var tabFound = false
+        /// Что напечатали в терминалах: команда и процесс, рядом с которым открыли вкладку.
+        private(set) var typed: [(command: String, pid: Int)] = []
+        /// Чем кончился скрипт терминала (в жизни: разрешена ли автоматизация).
+        var typingResult = ClaudeTerminalResult.done
+        private(set) var copied: [String] = []
 
         func hostApp(ofProcess pid: Int) -> ClaudeHostApp? { hosts[pid] }
         func open(_ url: URL) { opened.append(url) }
@@ -26,6 +31,40 @@ struct ClaudeStoreTests {
         func focusTab(ofProcess pid: Int, in app: ClaudeHostApp) -> Bool {
             focused.append(pid)
             return tabFound
+        }
+        func runInTerminal(_ command: String, besideProcess pid: Int, in app: ClaudeHostApp) async -> ClaudeTerminalResult {
+            typed.append((command, pid))
+            return typingResult
+        }
+        func copyToPasteboard(_ text: String) { copied.append(text) }
+    }
+
+    /// Подделка `claude -p`: запоминает запуски и отвечает по очереди; без очереди — успехом.
+    final class FakeRunner: ClaudeRunning, @unchecked Sendable {
+        struct Call: Equatable {
+            var executable: URL
+            var arguments: [String]
+            var folder: URL
+        }
+
+        private let lock = NSLock()
+        private var made: [Call] = []
+        private var queue: [ClaudeRun] = []
+        private var lastEnvironment: [String: String] = [:]
+
+        var calls: [Call] { lock.withLock { made } }
+        var environment: [String: String] { lock.withLock { lastEnvironment } }
+        /// Ответы на следующие запуски по порядку.
+        func answer(_ runs: ClaudeRun...) { lock.withLock { queue = runs } }
+
+        func run(
+            executable: URL, arguments: [String], folder: URL, environment: [String: String], timeout: TimeInterval
+        ) async -> ClaudeRun {
+            lock.withLock {
+                made.append(Call(executable: executable, arguments: arguments, folder: folder))
+                lastEnvironment = environment
+                return queue.isEmpty ? ClaudeRun(status: 0, standardError: "") : queue.removeFirst()
+            }
         }
     }
 
@@ -83,6 +122,19 @@ struct ClaudeStoreTests {
         var moment = ClaudeStoreTests.t0
         let opener = FakeOpener()
         let listener = FakeListener()
+        let runner = FakeRunner()
+        /// Что «знает» стор о планах: настройки по умолчанию, модель из хвоста расшифровки, командная строка
+        /// процесса сессии (по умолчанию с флагом bypass), `claude` для запуска и id новой сессии.
+        var planDefaults = PlanChoice()
+        var transcriptModel: String?
+        var processArguments: [String]? = ["claude", "--allow-dangerously-skip-permissions"]
+        var claude: URL? = URL(fileURLWithPath: "/opt/homebrew/bin/claude")
+        var newSessionID = "new-session"
+        /// Сколько «Открыто» висит в строке передачи.
+        var linger: TimeInterval = 8
+        /// Сколько стор ждёт, пока сессия перестанет «ждать», после ответа хука.
+        var idleWait: TimeInterval = 0
+        private(set) var transcriptReads: [URL] = []
         /// Файл настроек и папка копий: временные, настоящий `~/.claude/settings.json` сюда не попадает.
         let settingsFolder: URL
         let backups: URL
@@ -92,7 +144,14 @@ struct ClaudeStoreTests {
             folder: folder, isAlive: { [unowned self] pid, _ in alive.contains(pid) },
             opener: opener,
             settings: ClaudeSettingsFile(url: settingsURL, backups: { [backups] in backups }),
-            command: Rig.command, listener: listener, now: { [unowned self] in moment }
+            command: Rig.command, listener: listener, now: { [unowned self] in moment },
+            runner: runner, defaultPlanChoice: { [unowned self] in planDefaults },
+            transcriptModel: { [unowned self] url in
+                transcriptReads.append(url)
+                return transcriptModel
+            },
+            processArguments: { [unowned self] _ in processArguments }, executable: { [unowned self] _ in claude },
+            newSessionID: { [unowned self] in newSessionID }, waitForIdle: idleWait, handoffLinger: linger
         )
 
         init() throws {

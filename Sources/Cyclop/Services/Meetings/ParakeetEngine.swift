@@ -22,23 +22,25 @@ actor ParakeetEngine: SpeechEngine {
     func downloadModels(progress: @escaping @Sendable (Double) -> Void) async throws {
         ModelHub.offlineMode = false
         defer { ModelHub.offlineMode = true }
-        // Recognition is nearly all of the size; the separator takes the last tenth.
-        _ = try await AsrModels.download(version: .v3) { progress($0.fractionCompleted * 0.9) }
-        try await OfflineDiarizerManager().prepareModels()
+        // Recognition is about two thirds of the size, the separator the rest.
+        _ = try await AsrModels.download(version: .v3) { progress($0.fractionCompleted * 0.65) }
+        _ = try await SortformerModels.loadFromHuggingFace(config: SpeechModels.separationConfig) {
+            progress(0.65 + $0.fractionCompleted * 0.35)
+        }
         progress(1)
     }
 
     func voiceTurns(in audio: URL) async throws -> [VoiceTurn] {
         guard SpeechModels.isSeparationReady else { throw EngineError.modelsMissing }
-        var config = OfflineDiarizerConfig.default
-        config.clustering.threshold = 0.6
-        config.postProcessing.exclusiveSegments = false
-        let diarizer = OfflineDiarizerManager(config: config)
-        try await diarizer.prepareModels()
-        let result = try await diarizer.process(audio)
-        return result.segments.map {
-            VoiceTurn(voice: $0.speakerId, start: Double($0.startTimeSeconds), end: Double($0.endTimeSeconds))
-        }
+        let config = SpeechModels.separationConfig
+        let models = try await SortformerModels.loadFromHuggingFace(config: config)
+        let diarizer = SortformerDiarizer(config: config)
+        diarizer.initialize(models: models)
+        let timeline = try diarizer.processComplete(audioFileURL: audio)
+        return timeline.speakers.values
+            .flatMap(\.finalizedSegments)
+            .map { VoiceTurn(voice: "S\($0.speakerIndex)", start: Double($0.startTime), end: Double($0.endTime)) }
+            .sorted { $0.start < $1.start }
     }
 
     /// The model settles on one language per window, so a short sentence that shares a window with

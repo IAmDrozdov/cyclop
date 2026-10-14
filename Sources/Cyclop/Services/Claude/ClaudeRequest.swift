@@ -50,6 +50,14 @@ struct ClaudeRequest: Identifiable, Equatable {
     /// The plan's first heading (its first line when it has none), and the lines after it.
     let planTitle: String
     let planBeginning: String
+    /// The payload's session facts, nil when absent or empty: the folder, the transcript file, the effort
+    /// level, and the subagent's id when a subagent asks.
+    let cwd: String?
+    let transcriptPath: String?
+    let effort: String?
+    let agentID: String?
+    /// `tool_input.planFilePath` of a plan; nil for any other request.
+    let planFilePath: String?
 
     /// Nil for what is not a request of a listed session: the body is not a hook's input,
     /// or `pidOf` knows no session with that id.
@@ -72,8 +80,15 @@ struct ClaudeRequest: Identifiable, Equatable {
         rules = kind == .permission
             ? (tree["permission_suggestions"]?.items ?? []).filter { $0["type"]?.text == "addRules" } : []
         rule = Self.oneLine(rules)
+        cwd = Self.present(tree["cwd"]?.text)
+        transcriptPath = Self.present(tree["transcript_path"]?.text)
+        effort = Self.present(tree["effort"]?["level"]?.text)
+        agentID = Self.present(tree["agent_id"]?.text)
+        planFilePath = kind == .plan ? Self.present(input["planFilePath"]?.text) : nil
         (planTitle, planBeginning) = kind == .plan ? Self.excerpt(ofPlan: input["plan"]?.text ?? "") : ("", "")
     }
+
+    private static func present(_ text: String?) -> String? { text?.isEmpty == false ? text : nil }
 
     /// What the tool is asked to touch: the command, the file, the address; else the input itself.
     var detail: String {
@@ -130,8 +145,11 @@ enum ClaudeReply {
     case alwaysAllow(of: ClaudeRequest)
     /// Refuse; Claude receives the text as the tool's error.
     case deny(message: String)
-    /// Approve a plan: only a reply that repeats the tool's input is taken, a bare allow is ignored.
-    case approve(plan: ClaudeRequest)
+    /// Approve a plan in its session, in the given mode: only a reply that repeats the tool's input is taken,
+    /// a bare allow is ignored.
+    case approve(plan: ClaudeRequest, mode: PlanChoice.Mode)
+    /// Refuse and end the turn at once, with no retry; the session stays where it was.
+    case interrupt(message: String)
 
     var data: Data {
         switch self {
@@ -143,8 +161,21 @@ enum ClaudeReply {
             ])
         case .deny(let message):
             return Self.decision([.init("behavior", .string("deny")), .init("message", .string(message))])
-        case .approve(let plan):
-            return Self.allow(updatedInput: plan.input)
+        case .approve(let plan, let mode):
+            // The destination must be the session: any other writes `permissions.defaultMode` into a settings file.
+            let setMode = JSONTree.object([
+                .init("type", .string("setMode")), .init("mode", .string(mode.rawValue)),
+                .init("destination", .string("session")),
+            ])
+            return Self.decision([
+                .init("behavior", .string("allow")), .init("updatedInput", plan.input),
+                .init("updatedPermissions", .array([setMode])),
+            ])
+        case .interrupt(let message):
+            return Self.decision([
+                .init("behavior", .string("deny")), .init("message", .string(message)),
+                .init("interrupt", .scalar("true")),
+            ])
         case .answers(let request):
             let given = zip(request.questions, request.answers).map { JSONTree.Member($0.text, .string($1)) }
             var input = request.input.members ?? []

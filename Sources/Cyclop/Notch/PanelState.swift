@@ -46,7 +46,23 @@ final class PanelState: ObservableObject {
     /// Asked of the tab rather than naming the teleprompter, so that a tab
     /// added for the same reason needs nothing here.
     var openBodySize: CGSize {
-        vm.tab.wantsTallBody ? geometry.tallExpandedSize : geometry.expandedSize
+        let height = vm.tab.wantsTallBody ? max(NotchGeometry.tallBodyHeight, standardBodyHeight) : standardBodyHeight
+        return CGSize(width: geometry.expandedSize.width, height: height)
+    }
+
+    /// Body of an ordinary tab, grown when the longer rail does not fit.
+    var standardBodyHeight: CGFloat {
+        geometry.standardBodyHeight(
+            railIcons: max(vm.leftRail.count, vm.rightRail.count),
+            iconSize: vm.railIconSize
+        )
+    }
+
+    /// Height the rails are laid out in. Held to the ordinary tab's body even
+    /// on a taller one, so the icons stay put when the teleprompter opens: centred
+    /// in its body instead, they slid 96 pt down from under the pointer.
+    var railContentHeight: CGFloat {
+        standardBodyHeight - geometry.notchSize.height - NotchGeometry.bodyBottomPadding
     }
 
     /// Size of the visible body for the current state.

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct NotchContentView: View {
@@ -5,6 +6,11 @@ struct NotchContentView: View {
     /// This screen's share of the panel. Everything the pointer decides is
     /// here; everything shown is in `vm`, the same on every display.
     @ObservedObject var panel: PanelState
+
+    /// The rail icon being pressed, shared by both rails so it can cross over.
+    @State private var hold: RailHold?
+    /// Each rail's icon column in `Rail.space`, keyed by whether it is the right one.
+    @State private var railFrames: [Bool: CGRect] = [:]
 
     private var isOpen: Bool { panel.isActive }
     private var size: CGSize { panel.bodySize }
@@ -65,6 +71,7 @@ struct NotchContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(Theme.openAnimation, value: isOpen)
         .animation(Theme.paneAnimation, value: vm.tab)
+        .animation(Theme.contentAnimation, value: panel.standardBodyHeight)
     }
 
     // MARK: - Header
@@ -149,10 +156,11 @@ struct NotchContentView: View {
 
     private var content: some View {
         HStack(spacing: 14) {
-            Rail(vm: vm, panel: panel, tabs: vm.leftRail)
+            Rail(vm: vm, panel: panel, tabs: vm.leftRail, isRight: false, hold: $hold, frames: $railFrames)
             panes
-            Rail(vm: vm, panel: panel, tabs: vm.rightRail)
+            Rail(vm: vm, panel: panel, tabs: vm.rightRail, isRight: true, hold: $hold, frames: $railFrames)
         }
+        .coordinateSpace(name: Rail.space)
         .padding(.horizontal, 14)
         // The body's height is measured from this same number, so the two
         // cannot drift apart into a rail that does not fit.
@@ -183,7 +191,7 @@ struct NotchContentView: View {
     private var pane: some View {
         switch vm.tab {
         case .claude:
-            ClaudePane(store: vm.claude, privacy: vm.privacy, wantsKeyboard: $panel.wantsKeyboard, showSettings: { vm.tab = .settings })
+            ClaudePane(store: vm.claude, privacy: vm.privacy, wantsKeyboard: $panel.wantsKeyboard, showSettings: { vm.settingsPage = .tabs; vm.tab = .settings })
         case .shelf:
             ShelfPane(shelf: vm.shelf, isTargeted: panel.isDropTargeted)
         case .clipboard:
@@ -221,6 +229,14 @@ private struct CurrencyRateDate: View {
     }
 }
 
+/// A rail icon held down: a click until it is lifted, a drag after.
+private struct RailHold: Equatable {
+    let tab: NotchViewModel.Tab
+    var lifted = false
+    /// The pointer wandered before the icon lifted: no lift any more.
+    var moved = false
+}
+
 /// Tab switcher.
 ///
 /// Hovering switches tabs, but only after the pointer has stopped: a pointer
@@ -228,67 +244,194 @@ private struct CurrencyRateDate: View {
 /// milliseconds, while one that came to choose stays put. The same dwell
 /// threshold is what separates "the mouse was flung across the top of the
 /// screen" from "the mouse came to the notch" in `PointerWatcher`.
+///
+/// Holding an icon for `liftDelay`, or pressing it hard on a Force Touch
+/// trackpad, lifts it; dragging then moves it along this rail or onto the
+/// other one. The press is the rail's gesture, not the icon's: an icon moved
+/// to the other rail is a new view, and a gesture on it would end there.
 private struct Rail: View {
+    static let space = "rails"
+
     @ObservedObject var vm: NotchViewModel
     @ObservedObject var panel: PanelState
-    /// Which icons this rail carries — there are two rails now, one per side.
+    /// Which icons this rail carries — there are two rails, one per side.
     let tabs: [NotchViewModel.Tab]
+    let isRight: Bool
+    @Binding var hold: RailHold?
+    @Binding var frames: [Bool: CGRect]
 
     @State private var hovered: NotchViewModel.Tab?
+    @State private var liftTask: Task<Void, Never>?
+    @State private var pressureMonitor: Any?
+    @GestureState private var pressing = false
 
     /// Long enough to swallow a pass-through, short enough that a deliberate
     /// hover still feels like it answered instantly.
     private let dwell = Duration.milliseconds(150)
+    private let liftDelay = Duration.milliseconds(400)
+    /// How far a press may wander and still be a click.
+    private let slop: CGFloat = 4
+
+    private var iconSize: CGFloat { vm.railIconSize }
+    private var width: CGFloat { max(30, iconSize + 6) }
+    private var step: CGFloat { iconSize + NotchGeometry.railSpacing }
 
     var body: some View {
         VStack(spacing: NotchGeometry.railSpacing) {
             ForEach(tabs) { tab in
-                Button {
-                    panel.select(tab)
-                } label: {
-                    Image(systemName: tab.symbol)
-                        .font(.system(size: 12, weight: .medium))
-                        .frame(width: 30, height: panel.geometry.railIconHeight)
-                        .background(
-                            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                .fill(fill(for: tab))
-                        )
-                        .foregroundStyle(tint(for: tab))
-                        .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                        // A render-time transform. Growing the frame instead
-                        // would re-lay out the rail on every hover, and layout
-                        // that runs on pointer movement is exactly the kind
-                        // that shows up as a stutter.
-                        .scaleEffect(hovered == tab ? 1.15 : 1)
-                }
-                .buttonStyle(.plain)
-                .onHover { inside in
-                    if inside {
-                        hovered = tab
-                    } else if hovered == tab {
-                        hovered = nil
-                    }
-                }
+                icon(tab)
             }
         }
-        .frame(width: 30)
+        .frame(width: width)
+        .contentShape(Rectangle())
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.space)) } action: { frames[isRight] = $0 }
+        .gesture(press)
         // Centred in the height an ordinary tab has, then that block pinned to
         // the top of whatever height this tab actually got. On a normal
         // tab the two are the same and nothing moves; on the teleprompter the
-        // extra 192 pt goes to the script below, and the icons stay put.
-        .frame(height: panel.geometry.standardContentHeight, alignment: .center)
+        // extra height goes to the script below, and the icons stay put.
+        .frame(height: panel.railContentHeight, alignment: .center)
         .frame(maxHeight: .infinity, alignment: .top)
         .animation(Theme.contentAnimation, value: hovered)
+        .animation(Theme.contentAnimation, value: hold)
+        // A gesture cut short never reaches `onEnded`, but its state still
+        // resets; a panel closing under it takes the rail away instead.
+        .onChange(of: pressing) { _, now in
+            if !now { DispatchQueue.main.async { endHold() } }
+        }
+        .onDisappear { endHold() }
+        // An icon that left for the other rail never reports the pointer leaving it.
+        .onChange(of: tabs) { _, now in
+            if let hovered, !now.contains(hovered) { self.hovered = nil }
+        }
         // Moving to another icon cancels the pending switch along with the
         // task, so only the icon actually rested on ever wins.
         .task(id: hovered) {
-            guard let hovered, hovered != vm.tab else { return }
+            guard let hovered, hovered != vm.tab, hold == nil else { return }
             try? await Task.sleep(for: dwell)
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, hold == nil else { return }
             panel.select(hovered)
         }
     }
 
+    private func icon(_ tab: NotchViewModel.Tab) -> some View {
+        let lifted = hold?.tab == tab && hold?.lifted == true
+        return Image(systemName: tab.symbol)
+            .font(.system(size: iconSize * 0.5, weight: .medium))
+            .frame(width: width, height: iconSize)
+            .background(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(lifted ? Theme.surfaceHover : fill(for: tab))
+            )
+            .foregroundStyle(tint(for: tab))
+            .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+            // A render-time transform. Growing the frame instead would re-lay
+            // out the rail on every hover, and layout that runs on pointer
+            // movement is exactly the kind that shows up as a stutter.
+            .scaleEffect(lifted ? 1.2 : hovered == tab ? 1.15 : 1)
+            .shadow(color: .black.opacity(lifted ? 0.6 : 0), radius: 6, y: 2)
+            .zIndex(lifted ? 1 : 0)
+            .onHover { inside in
+                if inside {
+                    hovered = tab
+                } else if hovered == tab {
+                    hovered = nil
+                }
+            }
+            .accessibilityElement()
+            .accessibilityLabel(tab.title)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { panel.select(tab) }
+    }
+
+    // MARK: - Press, lift, drag
+
+    private var press: some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(Self.space))
+            .updating($pressing) { _, state, _ in state = true }
+            .onChanged { value in
+                guard var current = hold else {
+                    if let tab = tab(at: value.startLocation) { begin(tab) }
+                    return
+                }
+                if current.lifted {
+                    drop(current.tab, at: value.location)
+                } else if !current.moved, hypot(value.translation.width, value.translation.height) > slop {
+                    current.moved = true
+                    hold = current
+                    stopWaiting()
+                }
+            }
+            // Released on the icon it pressed, short of a lift, is a click,
+            // however much the pointer wobbled on the way.
+            .onEnded { value in
+                if let current = hold, !current.lifted, tab(at: value.location) == current.tab {
+                    panel.select(current.tab)
+                }
+                endHold()
+            }
+    }
+
+    /// The icon under a point of this rail, gaps included.
+    private func tab(at point: CGPoint) -> NotchViewModel.Tab? {
+        guard let frame = frames[isRight], frame.insetBy(dx: -slop, dy: -slop).contains(point) else { return nil }
+        let index = Int(((point.y - frame.minY) / step).rounded(.down))
+        return tabs.indices.contains(index) ? tabs[index] : nil
+    }
+
+    private func begin(_ tab: NotchViewModel.Tab) {
+        hold = RailHold(tab: tab)
+        liftTask = Task {
+            try? await Task.sleep(for: liftDelay)
+            guard !Task.isCancelled else { return }
+            lift()
+        }
+        // Force Touch: the second stage of a press is a deliberate hard click.
+        pressureMonitor = NSEvent.addLocalMonitorForEvents(matching: .pressure) { event in
+            if event.stage >= 2 { MainActor.assumeIsolated { lift() } }
+            return event
+        }
+    }
+
+    private func lift() {
+        guard var current = hold, !current.lifted, !current.moved else { return }
+        current.lifted = true
+        hold = current
+        stopWaiting()
+        NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+    }
+
+    /// Puts the lifted tab into the slot under the pointer, on whichever rail
+    /// is nearer. Slots are counted from the rail's centre, which stays put
+    /// as the rail gains or loses the icon: counted from its top, the slot
+    /// would shift by half an icon the moment the tab arrived.
+    private func drop(_ tab: NotchViewModel.Tab, at point: CGPoint) {
+        var toRight = isRight
+        if let left = frames[false], let right = frames[true] {
+            toRight = abs(point.x - right.midX) < abs(point.x - left.midX)
+        }
+        guard let frame = frames[toRight] else { return }
+        let others = (toRight ? vm.rightRail : vm.leftRail).filter { $0 != tab }
+        let slots = CGFloat(others.count + 1)
+        let top = frame.midY - (slots * step - NotchGeometry.railSpacing) / 2
+        let slot = min(max(Int(((point.y - top) / step).rounded(.down)), 0), others.count)
+        let before = slot < others.count ? others[slot] : nil
+        withAnimation(Theme.contentAnimation) {
+            vm.moveTab(tab, toRight: toRight, before: before)
+        }
+    }
+
+    private func stopWaiting() {
+        liftTask?.cancel()
+        liftTask = nil
+        if let pressureMonitor { NSEvent.removeMonitor(pressureMonitor) }
+        pressureMonitor = nil
+    }
+
+    private func endHold() {
+        stopWaiting()
+        if hold != nil { hold = nil }
+    }
     /// A running caffeine session tints its icon on every tab.
     private func tint(for tab: NotchViewModel.Tab) -> Color {
         if tab == .caffeine, vm.caffeine.isRunning { return .accentColor }

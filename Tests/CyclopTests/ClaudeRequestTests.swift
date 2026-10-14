@@ -715,16 +715,113 @@ struct ClaudeRequestTests {
         body(session: 7, tool: "ExitPlanMode", input: #"{"plan":\#(JSONTree.quote(text))}"#)
     }
 
-    @Test func approvingAPlanRepeatsTheToolsInput() throws {
+    /// Что хук кладёт в ответ при утверждении плана в той же сессии: режим уходит `setMode` на сессию.
+    private static func setMode(_ mode: String) -> String {
+        #""updatedPermissions":[{"type":"setMode","mode":"\#(mode)","destination":"session"}]"#
+    }
+
+    private static let editorPlan = ##"{"plan":"# План\n\nСделать","allowedPrompts":[{"tool":"Bash","prompt":"run tests"}]}"##
+
+    @Test func approvingAPlanRepeatsTheToolsInputAndSetsTheMode() throws {
         let rig = try ready()
-        let input = ##"{"plan":"# План\n\nСделать","allowedPrompts":[{"tool":"Bash","prompt":"run tests"}]}"##
+        let input = Self.editorPlan
         let relay = rig.listener.arrive(Self.body(session: 7, tool: "ExitPlanMode", input: input))
         let id = try #require(rig.store.requests.first?.id)
 
         rig.store.approve(id)
 
-        #expect(relay.replies == [Self.decision(#""behavior":"allow","updatedInput":\#(input)"#)])
+        // Без файла плана передачи нет: план утверждается в этой сессии, в режиме из настроек.
+        #expect(
+            relay.replies == [Self.decision(#""behavior":"allow","updatedInput":\#(input),\#(Self.setMode("bypassPermissions"))"#)])
         #expect(rig.store.requests.isEmpty)
+    }
+
+    @Test func eachModeIsSentAsASessionSetMode() throws {
+        for mode in PlanChoice.Mode.allCases {
+            let rig = try ready()
+            let relay = rig.listener.arrive(Self.body(session: 7, tool: "ExitPlanMode", input: Self.editorPlan))
+            let id = try #require(rig.store.requests.first?.id)
+            rig.store.setPlanChoice(PlanChoice(context: .keep, model: .same, effort: .medium, mode: mode), of: id)
+
+            rig.store.approve(id)
+
+            #expect(
+                relay.replies
+                    == [Self.decision(#""behavior":"allow","updatedInput":\#(Self.editorPlan),\#(Self.setMode(mode.rawValue))"#)])
+        }
+    }
+
+    @Test func bypassFallsBackToAcceptEditsWhenTheProcessHasNoBypassFlag() throws {
+        let rig = try ready()
+        rig.processArguments = ["claude", "--model", "opus"]
+        let relay = rig.listener.arrive(Self.body(session: 7, tool: "ExitPlanMode", input: Self.editorPlan))
+        let id = try #require(rig.store.requests.first?.id)
+        rig.store.setPlanChoice(PlanChoice(context: .keep, model: .same, effort: .medium, mode: .bypassPermissions), of: id)
+
+        #expect(rig.store.bypassAllowed(of: id) == false)
+        #expect(rig.store.planChoice(of: id).mode == .acceptEdits)
+        rig.store.approve(id)
+
+        #expect(
+            relay.replies
+                == [Self.decision(#""behavior":"allow","updatedInput":\#(Self.editorPlan),\#(Self.setMode("acceptEdits"))"#)])
+    }
+
+    /// План приложения Claude со всеми полями, которые кладёт хук.
+    private static func appPlan(
+        planFile: String? = "~/.claude/plans/idea.md", agent: String? = nil, transcript: String? = "/tmp/t.jsonl"
+    ) -> String {
+        let file = planFile.map { #","planFilePath":"\#($0)""# } ?? ""
+        let agentID = agent.map { #","agent_id":"\#($0)""# } ?? ""
+        let path = transcript.map { #","transcript_path":"\#($0)""# } ?? ""
+        return ##"{"session_id":"session-7","hook_event_name":"PermissionRequest","tool_name":"ExitPlanMode","cwd":"/Users/sato/work","permission_mode":"plan","effort":{"level":"high"}\##(path)\##(agentID),"tool_input":{"plan":"# План\n\nСделать"\##(file)}}"##
+    }
+
+    private func readyApp() throws -> Rig {
+        let rig = try ready()
+        try rig.write(7, status: "waiting", entrypoint: "claude-desktop")
+        return rig
+    }
+
+    @Test func aHandoffDeniesWithAnInterruptAndNoRetry() throws {
+        let rig = try readyApp()
+        let relay = rig.listener.arrive(Self.appPlan())
+        let id = try #require(rig.store.requests.first?.id)
+        #expect(rig.store.planRoute(of: id) == .handoff)
+
+        rig.store.approve(id)
+
+        #expect(
+            relay.replies
+                == [
+                    Self.decision(
+                        #""behavior":"deny","message":"Approved in Cyclop; the plan goes on in a new session.","interrupt":true"#)
+                ])
+        #expect(rig.store.requests.isEmpty)
+    }
+
+    @Test func aPlanKeepsThePayloadsSessionFactsAndItsPlanFile() throws {
+        let rig = try readyApp()
+        rig.listener.arrive(Self.appPlan(agent: "agent-9"))
+
+        let request = try #require(rig.store.requests.first)
+        #expect(request.planFilePath == "~/.claude/plans/idea.md")
+        #expect(request.transcriptPath == "/tmp/t.jsonl")
+        #expect(request.cwd == "/Users/sato/work")
+        #expect(request.effort == "high")
+        #expect(request.agentID == "agent-9")
+    }
+
+    @Test func aRequestWithoutThoseFieldsKeepsNilsAndOnlyAPlanHasAPlanFile() throws {
+        let rig = try ready()
+        rig.listener.arrive(Self.plan("# План"))
+        rig.listener.arrive(Self.body(session: 7, tool: "Bash", input: #"{"command":"ls","planFilePath":"x"}"#))
+
+        let plan = try #require(rig.store.requests.first { $0.kind == .plan })
+        let command = try #require(rig.store.requests.first { $0.kind == .permission })
+        #expect(plan.planFilePath == nil && plan.transcriptPath == nil && plan.cwd == nil)
+        #expect(plan.effort == nil && plan.agentID == nil)
+        #expect(command.planFilePath == nil)
     }
 
     @Test func sendingAPlanBackDeniesWithTheRemarks() throws {

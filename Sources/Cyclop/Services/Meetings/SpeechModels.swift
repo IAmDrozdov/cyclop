@@ -7,14 +7,16 @@ enum SpeechModels {
 
     static var isRecognitionReady: Bool { AsrModels.modelsExist(at: recognitionFolder) }
 
-    static var separationFolder: URL { MLModelConfigurationUtils.defaultModelsDirectory(for: .diarizer) }
+    /// Sortformer's balanced set: on call-quality audio of two to six real voices it told voices apart
+    /// far better than the offline clustering, which merged them (docs/architecture.md, Meetings).
+    static let separationConfig = SortformerConfig.balancedV2_1
 
-    /// Each required file is somewhere under the separator's folder; the layout inside is FluidAudio's own.
+    static var separationFolder: URL { MLModelConfigurationUtils.defaultModelsDirectory(for: .sortformer) }
+
     static var isSeparationReady: Bool {
-        guard let walker = FileManager.default.enumerator(atPath: separationFolder.path) else { return false }
-        var found: Set<String> = []
-        for case let path as String in walker { found.insert((path as NSString).lastPathComponent) }
-        return ModelNames.OfflineDiarizer.requiredModels.isSubset(of: found)
+        guard let bundle = ModelNames.Sortformer.bundle(for: separationConfig) else { return false }
+        let model = separationFolder.appendingPathComponent(bundle, isDirectory: true)
+        return FileManager.default.fileExists(atPath: model.appendingPathComponent("coremldata.bin").path)
     }
 
     static var isReady: Bool { isRecognitionReady && isSeparationReady }

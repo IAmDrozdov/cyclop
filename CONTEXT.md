@@ -35,7 +35,7 @@ The strip of the open panel level with the notch: the tab's title and a small pe
 _Avoid_: title bar
 
 **Rail**:
-A column of tab icons beside the pane. The panel has a left rail and a right rail.
+A column of tab icons beside the pane. The panel has a left rail and a right rail. The owner arranges both by holding an icon and dragging it, across rails too.
 _Avoid_: sidebar, tab bar, column
 
 **Tab** «Вкладка»:
@@ -182,8 +182,20 @@ _Avoid_: hook (how it is made), integration, «соединение» (a network
 Going to a Claude session in the app it runs in; in a terminal, to the session's own tab when macOS allows Automation, else only the terminal is brought forward.
 _Avoid_: jump, focus
 
+**Plan choice** «Как продолжить план»:
+What the owner picks on a plan request: context (keep, compact, clear), model (the same or Sonnet), effort and mode. Copied from the defaults in Settings when the request arrives, changed on the card, kept in memory with the request.
+_Avoid_: plan options, approval settings
+
+**Hand-off** «Передача плана»:
+Approving a plan by starting a new session, where the plan was made, instead of answering in the old one: when the plan choice clears or compacts the context, or changes the model. The old session stays idle in plan mode. Approving in the same session is not a hand-off.
+_Avoid_: restart, fork (that is one way it is made), migration
+
 **Settings** «Настройки»:
 The tab that cannot be hidden.
+
+**Settings pages** «Cyclop» and «Вкладки»:
+Settings has two pages behind a switch at the top: Cyclop, for the app's own settings (General, Show in Panel, Displays, Configuration, Quit), and Tabs, for what belongs to one tab (Screenshots, Snippets, Claude). The page is not saved: Settings starts on Cyclop after launch and otherwise shows the page last chosen.
+_Avoid_: section (that belongs to Hide Contents), tab (the page switch is not a tab)
 
 ### Across tabs
 

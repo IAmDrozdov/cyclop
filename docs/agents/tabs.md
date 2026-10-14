@@ -7,7 +7,7 @@ A tab is a case of `NotchViewModel.Tab`, a pane view in `Sources/Cyclop/UI/<Name
 In `Sources/Cyclop/Model/NotchViewModel.swift`:
 
 - `Tab`: `symbol` (an SF Symbol), `title`, `needsKeyboard` (typing tab), `wantsTallBody`, `canHide`.
-- `Tab.leftRail` / `Tab.rightRail`: the order on screen. A tab in neither rail never appears, not even in Settings → Show in Panel.
+- `Tab.defaultRails`: the order before the owner rearranges it. A new tab goes on one of its rails; `RailOrder.normalized` then appends it to that rail for owners whose `config.json` already has a saved order (`rails`).
 - The store property and its line in `init`.
 - `startBackground(of:)` and `stopBackground(of:)`, which list every tab, no-op ones included.
 - `setPanelActive(_:)`, for what follows the panel opening: the flag the header's forwarding reads, and the shelf's first refresh from disk.
@@ -20,6 +20,7 @@ In `Sources/Cyclop/Model/NotchViewModel.swift`:
 Elsewhere:
 
 - `NotchContentView` in `Sources/Cyclop/UI/NotchContentView.swift`: `trailing` (the header badge) and `pane`.
+- `SettingsPane` in `Sources/Cyclop/UI/SettingsPane.swift`: a tab's own settings go on the Tabs page (`NotchViewModel.SettingsPage`), as a section with the tab's name; the Cyclop page is for the app's. A tab that needs to send the owner there sets `settingsPage = .tabs` first, as Claude's `showSettings` does.
 - `PrivacyMode.Section` in `Sources/Cyclop/Model/PrivacyMode.swift`, for a tab whose contents Hide Contents covers. The menu bar submenu builds itself from it.
 
 ## What the compiler catches
@@ -34,7 +35,7 @@ Elsewhere:
 - **Saved settings.** `config.json` stores `hiddenTabs` and `privacy` by raw value, and loading drops values it does not know. After a removal that is harmless. A rename keeps the old raw value (`case history = "clipboard"`), or a hidden tab comes back and a covered section is shown uncovered. `ConfigStore.migrated()` also spells out the section names. The `privacy` list names sections and has no marker for "all", so a section added later (Claude was the third) starts uncovered even for an owner who covered everything: tell them to tick it once.
 - **The tab's own data.** A removed tab's file in `~/Library/Application Support/Cyclop/` (such as `notes.json`) stays on disk unread. The code leaves it alone; tell the owner it is there and let them decide what to do with it.
 - **Permissions.** Info.plist usage strings live in `Scripts/bundle.sh`. The app has no entitlements: a new one means recreating `Resources/Cyclop.entitlements` and passing it to signing again (`--entitlements` in `bundle.sh`).
-- **Rail geometry.** `NotchGeometry.railIconHeight` sizes every icon by the static `Tab.leftRail.count`. Keep the left rail at least as long as the right one, or the right rail overflows.
+- **Rail geometry.** Icons keep the size set in Settings; a longer rail makes the body taller (`NotchGeometry.standardBodyHeight`), and `maxBodyHeight` cuts the window for every tab on one rail, so a new tab grows that worst case by itself.
 - **Comments** that name the tab.
 - **Docs.**
   - `README.md` and `README.ru.md`: the tab table and the layout tree.
@@ -59,4 +60,4 @@ Elsewhere:
 
 - `./Scripts/bundle.sh`, `./Scripts/test.sh` and `./Scripts/check-strings.py` pass.
 - A search for every name of the tab finds only the hits you meant to keep. Join the case, the English and Russian titles, the type names and the words the prose uses for its parts: for Translate, `/usr/bin/grep -rniIE 'translat|перевод' Sources Tests Resources Scripts .github docs .claude Package.swift *.md`. Hits in `docs/releases/` are history and stay. Words like "notes" also match release notes.
-- In the running app (the `run-cyclop` skill) the rails show the intended icons in the intended order.
+- In the running app (the `run-cyclop` skill) the rails show the intended icons in the intended order (with a saved order, the new tab at the end of its rail).

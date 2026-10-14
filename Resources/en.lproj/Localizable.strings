@@ -22,6 +22,9 @@
 "Launch at Login" = "Launch at Login";
 "Show Menu Bar Icon" = "Show Menu Bar Icon";
 "Show in Panel" = "Show in Panel";
+"Icon Size" = "Icon Size";
+"Hold an icon to move it" = "Hold an icon to move it";
+"Restore Default Order" = "Restore Default Order";
 "Displays" = "Displays";
 "Show on All Displays" = "Show on All Displays";
 "Full-Height Notch Without a Cutout" = "Full-Height Notch Without a Cutout";
@@ -45,6 +48,7 @@
 "config.json is broken — click to open; nothing is overwritten" = "config.json is broken — click to open; nothing is overwritten";
 
 "Cyclop" = "Cyclop";
+"Tabs" = "Tabs";
 "Quit Cyclop" = "Quit Cyclop";
 
 /* Shelf */
@@ -109,7 +113,7 @@
 "Open Settings" = "Open Settings";
 "Recording could not start" = "Recording could not start";
 "No meetings yet" = "No meetings yet";
-"Speech models are needed, 600 MB" = "Speech models are needed, 600 MB";
+"Speech models are needed, 700 MB" = "Speech models are needed, 700 MB";
 "Download Models" = "Download Models";
 "Downloading %d%%" = "Downloading %d%%";
 "Download failed" = "Download failed";
@@ -159,3 +163,38 @@
 "Claude's settings file could not be read; nothing was changed" = "Claude's settings file could not be read; nothing was changed";
 "Claude's settings file could not be changed; try again" = "Claude's settings file could not be changed; try again";
 "Adds one hook to Claude's settings so that requests reach the panel, after keeping a copy of the file. Sessions already running pick it up without a restart. Disconnect before deleting Cyclop." = "Adds one hook to Claude's settings so that requests reach the panel, after keeping a copy of the file. Sessions already running pick it up without a restart. Disconnect before deleting Cyclop.";
+"Context" = "Context";
+"Keep" = "Keep";
+"Compact" = "Compact";
+"Model" = "Model";
+"Same" = "Same";
+"Same (%@)" = "Same (%@)";
+"Effort" = "Effort";
+"Mode" = "Mode";
+"Bypass" = "Bypass";
+"Auto" = "Auto";
+"Edits" = "Edits";
+"Ask" = "Ask";
+"Bypass permissions" = "Bypass permissions";
+"Accept edits" = "Accept edits";
+"In this session" = "In this session";
+"Only in this session here" = "Only in this session here";
+"Not allowed in this session" = "Not allowed in this session";
+"Approving a Plan" = "Approving a Plan";
+"A new session is started for compact, clear or another model: in the terminal it ran in, or prepared and opened in Claude or the editor." = "A new session is started for compact, clear or another model: in the terminal it ran in, or prepared and opened in Claude or the editor.";
+"Preparing a session for «%@»…" = "Preparing a session for «%@»…";
+"Opening a terminal for «%@»…" = "Opening a terminal for «%@»…";
+"Opened in Claude. Choose the mode there and type go to start." = "Opened in Claude. Choose the mode there and type go to start.";
+"Opened in the editor. Choose the mode there and type go to start." = "Opened in the editor. Choose the mode there and type go to start.";
+"Effort and mode are chosen in Claude when the session opens" = "Effort and mode are chosen in Claude when the session opens";
+"Effort and mode are chosen in the editor when the session opens" = "Effort and mode are chosen in the editor when the session opens";
+"Started in the terminal." = "Started in the terminal.";
+"Could not hand the plan off: %@" = "Could not hand the plan off: %@";
+"Dismiss" = "Dismiss";
+"Copy Command" = "Copy Command";
+"Automation is not allowed" = "Automation is not allowed";
+"The terminal did not run the command" = "The terminal did not run the command";
+"The session was made but cannot be opened from here" = "The session was made but cannot be opened from here";
+"No claude executable found" = "No claude executable found";
+"It took too long" = "It took too long";
+"claude exited with status %d" = "claude exited with status %d";

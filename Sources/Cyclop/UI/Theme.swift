@@ -71,3 +71,41 @@ struct NotchToggleStyle: ToggleStyle {
         .animation(.easeOut(duration: 0.15), value: configuration.isOn)
     }
 }
+
+/// Drawn rather than a segmented `Picker`: in the never-key panel the system one shows a grey, accent-less selection.
+struct NotchSegmented<Value: Hashable>: View {
+    @Binding var selection: Value
+    let options: [Value]
+    let label: (Value) -> String
+    var disabled: Set<Value> = []
+    /// The track's fill; a stronger one where the control sits on a card of `Theme.surface`.
+    var track: Color = Theme.surface
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(options, id: \.self) { option in
+                let selected = option == selection
+                let off = disabled.contains(option)
+                Button {
+                    selection = option
+                } label: {
+                    Text(label(option))
+                        .font(.system(size: 10.5, weight: .medium))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .foregroundStyle(selected ? Color.black : Theme.secondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 20)
+                        .background(Capsule().fill(selected ? Color.white : Color.clear))
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .disabled(off)
+                .opacity(off ? 0.35 : 1)
+            }
+        }
+        .padding(2)
+        .background(Capsule().fill(track))
+        .animation(.easeOut(duration: 0.15), value: selection)
+    }
+}

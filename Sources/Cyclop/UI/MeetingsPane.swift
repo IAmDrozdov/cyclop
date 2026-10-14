@@ -69,7 +69,7 @@ struct MeetingsPane: View {
             }
         case .missing, .failed:
             notice(
-                store.models == .failed ? "Download failed" : "Speech models are needed, 600 MB",
+                store.models == .failed ? "Download failed" : "Speech models are needed, 700 MB",
                 action: "Download Models"
             ) { store.downloadModels() }
         case .ready:
