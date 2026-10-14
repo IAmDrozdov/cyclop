@@ -13,7 +13,7 @@ In `Sources/Cyclop/Model/NotchViewModel.swift`:
 - `setPanelActive(_:)`, for what follows the panel opening: the flag the header's forwarding reads, and the shelf's first refresh from disk.
 - The `tab` property's `didSet`, for arriving at and leaving a tab.
 - `stop()`, for flushing on quit.
-- The default `tab = .shelf`, the head of the left rail.
+- The default `tab = .claude`, the head of the left rail.
 - The `objectWillChange` forwarding list, which repaints header badges and deliberately leaves out stores that change on every keystroke.
 - Only if the tab can ask for the panel (today Claude): `unseenRequestChanged()`, which switches the tab while every panel is collapsed, and its calls in `setPanelActive(_:)` and the `tab` property's `didSet`. A request also slides the panel out by itself (`requestArrived()`, `RequestOpening`, `NotchScreenPanel.openForRequest()`), unless Settings says no; see the Claude note in `docs/architecture.md`.
 
@@ -34,12 +34,12 @@ Elsewhere:
 - **Views outside the pane file** that only this tab uses: header badges at the bottom of `NotchContentView.swift`. An unused type still compiles.
 - **Saved settings.** `config.json` stores `hiddenTabs` and `privacy` by raw value, and loading drops values it does not know. After a removal that is harmless. A rename keeps the old raw value (`case history = "clipboard"`), or a hidden tab comes back and a covered section is shown uncovered. `ConfigStore.migrated()` also spells out the section names. The `privacy` list names sections and has no marker for "all", so a section added later (Claude was the third) starts uncovered even for an owner who covered everything: tell them to tick it once.
 - **The tab's own data.** A removed tab's file in `~/Library/Application Support/Cyclop/` (such as `notes.json`) stays on disk unread. The code leaves it alone; tell the owner it is there and let them decide what to do with it.
-- **Permissions.** Info.plist usage strings live in `Scripts/bundle.sh`. The app has no entitlements: a new one means recreating `Resources/Cyclop.entitlements` and passing it to signing again (`--entitlements` in `bundle.sh`).
+- **Permissions.** Info.plist usage strings live in `Scripts/bundle.sh`; entitlements live in `Resources/Cyclop.entitlements`, which `bundle.sh` passes (`--entitlements`) when it signs with a Developer ID (`docs/signing.md`).
 - **Rail geometry.** Icons keep the size set in Settings; a longer rail makes the body taller (`NotchGeometry.standardBodyHeight`), and `maxBodyHeight` cuts the window for every tab on one rail, so a new tab grows that worst case by itself.
 - **Comments** that name the tab.
 - **Docs.**
-  - `README.md` and `README.ru.md`: the tab table and the layout tree.
-  - `docs/architecture.md` and `.ru.md`: the tab's note. Both READMEs count the notes («sixteen notes»); update the count.
+  - `README.md` and `README.ru.md`: the tab's section in «A tour of the panel» / «Обзор панели», with its picture. The picture comes from the demo build, so the tab also gets a seed in `Sources/Cyclop/App/Demo.swift`, a scene in `.claude/skills/update-readme/shoot.sh` and entries in its `map.json` (a removed tab takes them with it); `/update-readme` walks through it.
+  - `docs/architecture.md` and `.ru.md`: the tab's note.
   - `SECURITY.md` (data, permissions, network), the promises in `CONTRIBUTING.md`, and `CONTEXT.md`.
   - The site: `docs/index.html`, `docs/ru/index.html`, `docs/llms.txt`.
   - The agent docs: `CLAUDE.md` (its line naming what has tests: a tab with a store gets `Tests/CyclopTests/<Name>StoreTests.swift` and a mention there), this file and `.claude/skills/run-cyclop/`.

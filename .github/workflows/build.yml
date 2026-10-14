@@ -134,3 +134,16 @@ jobs:
             head -c 4000 "$f"
           done
           exit 1
+
+      - name: Демо-сборка собирается, а в релизную не попадает
+        # Код под `#if CYCLOP_DEMO` обычная сборка не видит и без этого шага ломался бы молча, до следующей съёмки README.
+        run: |
+          ./Scripts/bundle.sh demo
+          # «Cyclop Demo:» начинает каждое сообщение защиты в Demo.swift; без Demo.swift остальные #if не собрались бы.
+          strings "build/Cyclop Demo.app/Contents/MacOS/Cyclop" > "$RUNNER_TEMP/demo-strings.txt"
+          strings build/Cyclop.app/Contents/MacOS/Cyclop > "$RUNNER_TEMP/release-strings.txt"
+          grep -q "Cyclop Demo:" "$RUNNER_TEMP/demo-strings.txt"
+          if grep -q "Cyclop Demo:" "$RUNNER_TEMP/release-strings.txt"; then
+            echo "::error::демо-код попал в релизную сборку"
+            exit 1
+          fi

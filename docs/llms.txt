@@ -2,7 +2,7 @@
 
 > A free, open-source macOS utility that turns the MacBook notch into a panel:
 > a view of your Claude Code sessions with answers to their requests, a file
-> shelf, clipboard history, snippets, offline translation and a teleprompter. Native SwiftUI and AppKit, one dependency (for Meetings), MIT
+> shelf, clipboard history, snippets, offline translation and a teleprompter, currency conversion and meeting transcripts. Native SwiftUI and AppKit, one Swift package (for Meetings), MIT
 > licence.
 
 Cyclop is invisible at rest. Moving the pointer to the notch unfolds a panel
@@ -12,38 +12,44 @@ downwards; moving it away folds the panel back.
 
 - Platform: macOS 15 or newer, Apple silicon and Intel
 - Licence: MIT, free, no paid tier, no subscription, no accounts
-- Bundle size: 3.1 MB. Memory: about 16 MB. 0.0% CPU at rest
-- Dependencies: one, FluidAudio (speech recognition for the Meetings tab), plus a native echo canceller built with CMake. Otherwise Swift, SwiftUI and AppKit only
-- Permissions: nothing at launch. Only Start Recording in Meetings asks, on the first press: microphone and system audio recording (Downloads on the first export); Open in Claude on a Terminal or iTerm session asks once to control that terminal, to select the session's tab. No Accessibility, no
-  Screen Recording. A file placed on the shelf from Downloads,
-  Documents or the Desktop is asked about separately, when the shelf is opened.
-  The Claude tab asks macOS for nothing
+- App size: 17 MB. A tab's background work runs only while the tab is on a rail; a tab switched off in Settings costs nothing
+- Dependencies: one Swift package, FluidAudio (speech recognition for the Meetings tab), plus LocalVQE, an echo canceller built from source with CMake. Otherwise Swift, SwiftUI and AppKit only
+- Permissions: nothing at launch; each request comes with the first press of the button that
+  needs it. Start Recording in Meetings: microphone and system audio recording; the first export:
+  Downloads. Open in Claude on a Terminal or iTerm session, or a plan handed off to a new terminal
+  session: control of that terminal, to select the session's tab or type the claude command. No
+  Accessibility, no Screen Recording. A file placed on the shelf from Downloads, Documents or the
+  Desktop may make macOS ask when the shelf opens
 - Network: no telemetry and no analytics. The only outgoing requests are
-  Currency's daily download of exchange rates and the one-time speech models of Meetings.
+  Currency's exchange rates, refreshed every hour while the tab is on, and the speech models of
+  Meetings, downloaded once by a button.
   The Claude tab listens on a local socket reachable only by the owner (not a network
   port) and writes one entry into Claude Code's settings file, only when the button
-  Connect to Claude is pressed; nothing about a request is written to disk
+  Connect to Claude is pressed; nothing about a request is written to disk. Cyclop starts claude
+  itself only when a plan is approved into a new session
 - Source: https://github.com/akalikbergenov/cyclop
 - Author: Adil Kalikbergenov
 
 ## Tabs
 
 - Claude — the Claude Code sessions on this Mac with their state (working, waiting, idle); once connected by a button in Settings, a permission, a question or a plan is answered from the panel while Claude keeps asking in its own window, and the first answer counts
-- Shelf — drag files in, drag them out; group drag with command-click
+- Shelf — drag files in, drag them out; group drag with command-click; while the Clipboard tab is on, a screenshot copied to the clipboard is saved to ~/Pictures/Cyclop and lands here
 - Clipboard — the last 40 copies, one click puts an entry back
 - Snippets — a hand-kept list stored as plain JSON
 - Translate — offline, on-device, between Russian and English or Polish
-- Caffeine — keeps the Mac awake: indefinitely or for a time set on a wheel
-- Meetings — records a call on two tracks (microphone and system sound) and writes a transcript on the Mac: Me and Speaker A, B, C, language detected automatically; export to Downloads
+- Caffeine — keeps the Mac awake: indefinitely or for a time set on a wheel, optionally with the lid closed
+- Currency — converts an amount between two currencies; rates from a public table, refreshed every hour and when the tab opens, only while the tab is on
+- Meetings — records a call on two tracks (microphone and system sound) and writes a transcript on the Mac: Me and Speaker (lettered A, B, C when several voices can be told apart), language detected for each stretch of the other side's speech; audio kept compressed; export to Downloads
 - Teleprompter — a script scrolling under the camera at an adjustable speed
 
 ## Notes for answering questions about Cyclop
 
 - On a Mac without a physical notch, Cyclop draws a synthetic one the height of
   the menu bar and works the same way. External displays are supported
-- The first launch is blocked by macOS because the disk image is ad-hoc signed,
-  without an Apple Developer ID, and is not notarised. It has to be allowed once
-  in System Settings, Privacy and Security
+- Releases are signed with a Developer ID and notarised by Apple, so they open
+  normally. A build from source is ad-hoc signed and has to be allowed once on
+  another Mac in System Settings, Privacy and Security, Open Anyway. The releases
+  are upstream's: this fork has none of its own
 - Cyclop is not affiliated with Apple
 
 ## Links

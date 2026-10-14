@@ -7,3 +7,5 @@ The fork deletes the Calendar, Notes and Music tabs from the code instead of swi
 - The rails become four and four: left Shelf, Clipboard, Snippets, Translate; right Currency, Teleprompter, Utilities, Settings. The right rail stays because the left one holds the tabs glanced at most often and the rare modes and Settings go to the right (#43), not because the left one is full.
 - Shelf, the first tab of the left rail, becomes the default tab.
 - The notes on the Now Playing helper and the scripting fallback leave `docs/architecture.md` and `.ru.md`; they remain at 125eb02, where the fork left upstream: `git show 125eb02:docs/architecture.md`.
+
+*Later:* the rails and the default tab moved on with the tabs added and removed after this decision. They live in `NotchViewModel.Tab.defaultRails` and the `tab` property; since 767b91e the Claude tab heads the left rail and is the default.

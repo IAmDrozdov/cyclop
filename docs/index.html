@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyclop — free open-source notch app for MacBook</title>
-<meta name="description" content="Turn the MacBook notch into a panel: Claude sessions, file shelf, clipboard history, snippets and offline translation. Native SwiftUI, one dependency, nothing asked at launch. Free, MIT.">
+<meta name="description" content="Turn the MacBook notch into a panel: Claude sessions, file shelf, clipboard history, snippets and offline translation. Native SwiftUI, nothing asked at launch. Free, MIT.">
 <link rel="canonical" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="en" href="https://akalikbergenov.github.io/cyclop/">
 <link rel="alternate" hreflang="ru" href="https://akalikbergenov.github.io/cyclop/ru/">
@@ -13,16 +13,16 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Cyclop">
 <meta property="og:title" content="Cyclop — free open-source notch app for MacBook">
-<meta property="og:description" content="The MacBook notch as a working tool: file shelf, clipboard, snippets and offline translation. Native, 3.1 MB, one dependency, nothing asked at launch.">
+<meta property="og:description" content="The MacBook notch as a working tool: Claude sessions, file shelf, clipboard, snippets, offline translation and meeting transcripts. Native, nothing asked at launch.">
 <meta property="og:url" content="https://akalikbergenov.github.io/cyclop/">
 <meta property="og:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
-<meta property="og:image:width" content="1400">
-<meta property="og:image:height" content="504">
+<meta property="og:image:width" content="1288">
+<meta property="og:image:height" content="420">
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="ru_RU">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Cyclop — free open-source notch app for MacBook">
-<meta name="twitter:description" content="The MacBook notch as a working tool. Native SwiftUI, one dependency, nothing asked at launch. Free, MIT.">
+<meta name="twitter:description" content="The MacBook notch as a working tool. Native SwiftUI, nothing asked at launch. Free, MIT.">
 <meta name="twitter:image" content="https://akalikbergenov.github.io/cyclop/panel.png">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23111'/><rect x='26' y='18' width='48' height='16' rx='7' fill='%23fff'/><circle cx='50' cy='62' r='13' fill='%23fff'/></svg>">
@@ -38,12 +38,12 @@
       "applicationCategory": "UtilitiesApplication",
       "applicationSubCategory": "Menu bar utility",
       "operatingSystem": "macOS 15 or newer",
-      "description": "A macOS utility that turns the MacBook notch into a panel with your Claude sessions, a file shelf, clipboard history, snippets and offline translation. Native SwiftUI and AppKit, one dependency for Meetings.",
+      "description": "A macOS utility that turns the MacBook notch into a panel with your Claude sessions, a file shelf, clipboard history, snippets, offline translation, currency conversion, a teleprompter and meeting transcripts. Native SwiftUI and AppKit, plus one package for Meetings.",
       "url": "https://akalikbergenov.github.io/cyclop/",
       "downloadUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
       "installUrl": "https://github.com/akalikbergenov/cyclop/releases/latest",
       "softwareVersion": "0.8.3",
-      "fileSize": "3.1 MB",
+      "fileSize": "17 MB",
       "license": "https://opensource.org/licenses/MIT",
       "isAccessibleForFree": true,
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -56,7 +56,9 @@
         "Snippets",
         "Offline translation between Russian and English or Polish",
         "Caffeine: keeps the Mac from sleeping, indefinitely or on a timer",
-        "Teleprompter that scrolls a script under the camera"
+        "Currency conversion from a public rate table, refreshed hourly",
+        "Teleprompter that scrolls a script under the camera",
+        "Meetings: records a call on two tracks and transcribes it on the Mac"
       ],
       "author": { "@type": "Person", "name": "Adil Kalikbergenov", "url": "https://github.com/akalikbergenov" }
     },
@@ -72,7 +74,7 @@
         {
           "@type": "Question",
           "name": "What permissions does Cyclop need?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Nothing is asked at launch. Only the Meetings tab asks, on the first Start Recording: for the microphone and for system audio recording (and for Downloads on the first export). Cyclop asks for no Accessibility and no Screen Recording. A file placed on the shelf from Downloads, Documents or the Desktop is the one thing macOS asks about separately, and only when the shelf is opened. The Claude tab asks macOS for nothing." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Nothing is asked at launch; each request comes with the first press of the button that needs it. Start Recording in Meetings asks for the microphone and system audio recording, and the first Export for Downloads. Open in Claude on a session in Terminal or iTerm, or a plan handed off to a new terminal session, asks once to control that terminal. A file placed on the shelf from Downloads, Documents or the Desktop may make macOS ask when the shelf opens. Cyclop asks for no Accessibility and no Screen Recording." }
         },
         {
           "@type": "Question",
@@ -82,17 +84,17 @@
         {
           "@type": "Question",
           "name": "Why does macOS say Cyclop cannot be verified on first launch?",
-          "acceptedAnswer": { "@type": "Answer", "text": "The disk image is ad-hoc signed, without an Apple Developer ID, and is not notarised. It has to be allowed once through System Settings, Privacy and Security, after which it opens normally." }
+          "acceptedAnswer": { "@type": "Answer", "text": "A release does not do this: it is signed with a Developer ID and notarised by Apple. A build made from source is ad-hoc signed, so on another Mac it has to be allowed once in System Settings, Privacy and Security, Open Anyway." }
         },
         {
           "@type": "Question",
           "name": "Does Cyclop send anything over the network?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No telemetry and no analytics. Everything stays on the machine. The only outgoing requests are Currency's daily download of exchange rates and, once and by a button, the speech models of Meetings. The Claude tab listens on a local socket that only you can reach, and writes one entry into Claude Code's settings file only when you press a button; neither is a network connection." }
+          "acceptedAnswer": { "@type": "Answer", "text": "No telemetry and no analytics. Everything stays on the machine. The only outgoing requests are Currency's exchange rates, refreshed every hour while the tab is on, and, once and by a button, the speech models of Meetings. The Claude tab listens on a local socket that only you can reach, and writes one entry into Claude Code's settings file only when you press a button; neither is a network connection. Only when you approve a plan into a new session does Cyclop start claude itself." }
         },
         {
           "@type": "Question",
-          "name": "How much memory and CPU does Cyclop use?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Around 16 MB and 0.0 percent CPU at rest. The application bundle is 3.1 MB. A tab's background work runs while the tab is on a rail." }
+          "name": "What does Cyclop cost in memory and battery?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A tab's background work, a poll, an observer or a timer, runs only while the tab is on a rail, so a tab switched off in Settings costs nothing. The Claude tab re-reads Claude Code's session files every five seconds while it is on. The application bundle is 17 MB." }
         }
       ]
     }
@@ -189,15 +191,15 @@ footer a{color:var(--dim)}
 </header>
 
 <figure class="shot">
-  <img src="panel.png" width="1400" height="504" alt="The Cyclop panel open under the MacBook notch, showing the Shelf tab with file cards and a tab rail on each side" loading="eager">
+  <img src="panel.png" width="1288" height="420" alt="The Cyclop panel on the Shelf tab: five file cards with previews and a rail of tab icons on each side" loading="eager">
 </figure>
 
 <div class="facts">
-  <div class="fact"><b>3.1 MB</b><span>bundle</span></div>
-  <div class="fact"><b>0.0 %</b><span>CPU at rest</span></div>
-  <div class="fact"><b>≈16 MB</b><span>memory</span></div>
-  <div class="fact"><b>1</b><span>dependency, for Meetings</span></div>
+  <div class="fact"><b>17 MB</b><span>app</span></div>
+  <div class="fact"><b>9</b><span>tabs</span></div>
+  <div class="fact"><b>1</b><span>package, for Meetings</span></div>
   <div class="fact"><b>0</b><span>permissions at launch</span></div>
+  <div class="fact"><b>0</b><span>accounts, no telemetry</span></div>
   <div class="fact"><b>MIT</b><span>licence</span></div>
 </div>
 
@@ -210,12 +212,15 @@ footer a{color:var(--dim)}
     <div class="tab"><h3>Claude</h3><p>Your Claude Code sessions on this Mac, the ones that wait
       first: working, waiting or idle, and where each runs. When a session asks for a permission,
       puts a question or proposes a plan, the request appears in the panel and can be answered there,
-      while Claude keeps asking in its own window and the first answer counts. The panel opens on this
-      tab the first time after a request has arrived. Connecting is one button in Settings.</p></div>
+      while Claude keeps asking in its own window and the first answer counts. A request slides the
+      panel out by itself unless Open Panel for Requests is off in Settings, and a click on a session
+      opens it where it runs. Connecting is one button
+      in Settings.</p></div>
     <div class="tab"><h3>Shelf</h3><p>Drag files into the notch and they wait there. Drag a card out
       and the file goes wherever it is dropped. ⌘-click selects several and drags them as a group.
-      A screenshot copied to the clipboard is saved and lands here too — including one taken on an
-      iPhone.</p></div>
+      While the Clipboard tab is on, a screenshot copied to the clipboard is saved to
+      <code>~/Pictures/Cyclop</code> and lands here too, one copied on an iPhone included; a switch in
+      Settings turns this off.</p></div>
     <div class="tab"><h3>Clipboard</h3><p>The last 40 copies. A click puts an entry back on the
       clipboard.</p></div>
     <div class="tab"><h3>Snippets</h3><p>A hand-kept list of what you are tired of retyping: an
@@ -226,12 +231,15 @@ footer a{color:var(--dim)}
       Russian and back; the direction is taken from the script the text is written in.</p></div>
     <div class="tab"><h3>Caffeine</h3><p>Keeps the Mac from falling asleep: one button for no end,
       or a timer on an hour-and-minute wheel. Only the system stays awake; the screen still turns
-      off and locks on its own.</p></div>
+      off and locks on its own. A switch keeps the Mac working with the lid closed.</p></div>
+    <div class="tab"><h3>Currency</h3><p>An amount on one side, the other currency on the other;
+      type into either. The rates come from a public table, refreshed every hour and whenever the
+      tab opens, and only while the tab is on.</p></div>
     <div class="tab"><h3>Meetings</h3><p>Records a call on two tracks, the microphone and everything the
       Mac plays, and writes the transcript on this Mac, with nothing sent anywhere. Your lines are
-      Me, the other side is Speaker A, B, C, and the language is detected by itself, so Russian,
-      Ukrainian and English can share a call. Export puts the transcript and the audio into
-      Downloads.</p></div>
+      Me, the other side is Speaker, lettered A, B, C when several voices can be told apart, and the
+      language is detected for each stretch of the other side's speech. The audio is kept compressed,
+      and Export puts the transcript and the audio into Downloads.</p></div>
     <div class="tab"><h3>Teleprompter</h3><p>A script that scrolls under the camera at a speed you
       set. The notch is the one place on the screen a teleprompter belongs: the eyes stay on the
       lens instead of travelling to a window below it.</p></div>
@@ -245,16 +253,19 @@ footer a{color:var(--dim)}
 
   <div class="scroll">
   <table>
-    <tr><th>One dependency</th><td>Swift, SwiftUI and AppKit, plus one package, FluidAudio, for the speech recognition of Meetings. No
-      vendored frameworks. The whole thing is about 7 000 lines you can read in an afternoon.</td></tr>
-    <tr><th>Nothing asked at launch</th><td>Only Start Recording in Meetings asks, once: for the microphone and for system audio. No
-      Accessibility, no Screen Recording. The Claude tab asks macOS for nothing.</td></tr>
+    <tr><th>One package</th><td>Swift, SwiftUI and AppKit, plus one package, FluidAudio, for the speech
+      recognition of Meetings, and LocalVQE, an echo canceller built from source with CMake. About
+      14 000 lines of Swift.</td></tr>
+    <tr><th>Nothing asked at launch</th><td>Each request comes with the first press of the button that
+      needs it: the microphone and system audio with Start Recording, control of Terminal or iTerm
+      with Open in Claude on a terminal session. No Accessibility, no Screen Recording.</td></tr>
     <tr><th>Offline translation</th><td>Translation runs on the device through macOS's own
       framework. No API key, no account, nothing leaves the machine.</td></tr>
     <tr><th>Nothing collected</th><td>No telemetry, no analytics, no crash reporting. Two
-      outgoing requests in the whole app: Currency's daily download of exchange rates and the one-time speech models of Meetings.</td></tr>
-    <tr><th>Actually small</th><td>3.1 MB on disk, around 16 MB of memory, 0.0 % CPU while the panel
-      is closed.</td></tr>
+      kinds of outgoing request in the whole app: Currency's exchange rates, hourly while the tab
+      is on, and the speech models of Meetings, downloaded once by a button.</td></tr>
+    <tr><th>Off means off</th><td>A tab switched off in Settings stops its poll, observer or timer
+      and costs nothing. The app is 17 MB on disk.</td></tr>
   </table>
   </div>
 </section>
@@ -264,16 +275,17 @@ footer a{color:var(--dim)}
   <ol>
     <li><b>Download</b> the latest <code>.dmg</code> from
       <a href="https://github.com/akalikbergenov/cyclop/releases/latest">the releases page</a>,
-      open it and drag Cyclop into Applications.</li>
-    <li><b>The first launch will not work</b> — macOS will say the app cannot be verified. That is
-      expected: the image is ad-hoc signed, without an Apple Developer ID, and is not notarised.</li>
-    <li><b>Allow it once</b> in System Settings → Privacy &amp; Security → “Open Anyway”. After that
-      it opens normally, and updates do not ask again.</li>
-    <li><b>Or build it yourself</b> — the whole thing is one command, and no Xcode project is
-      involved:</li>
+      open it and drag Cyclop into Applications. This link and the clone command below are
+      upstream's: this fork has no releases of its own.</li>
+    <li><b>Open it</b> like any downloaded app: releases are signed with a Developer ID and notarised
+      by Apple.</li>
+    <li><b>Or build it yourself</b> — one command, and no Xcode project is involved; CMake builds the
+      Meetings echo canceller (<code>brew install cmake</code>):</li>
   </ol>
   <pre><code>git clone https://github.com/akalikbergenov/cyclop.git
 cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
+  <p>A build of your own is ad-hoc signed, so on another Mac it is allowed once in System Settings →
+  Privacy &amp; Security → “Open Anyway”.</p>
 </section>
 
 <section id="faq">
@@ -284,12 +296,15 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
     menu bar and behaves the same way. It works on external displays too.</p></details>
 
   <details><summary>What permissions does Cyclop need?</summary>
-    <p>Nothing is asked at launch. Only Start Recording in the Meetings tab asks, the first time: for
-    the microphone and for system audio recording. Cyclop requests no Accessibility and
-    no Screen Recording. The Claude tab asks only once more: when you press Open in Claude on a session
-    that runs in Terminal or iTerm, macOS asks whether Cyclop may control that terminal, to select the
-    session's tab. Only the tabs' device names are compared, no text is read, and a refusal only brings the terminal forward.</p>
-    <p>*Besides that, a file placed on the shelf from Downloads, Documents or the Desktop is
+    <p>Nothing is asked at launch; each request comes with the first press of the button that needs
+    it. Start Recording in the Meetings tab asks for the microphone and for system audio recording,
+    and the first Export for Downloads. Cyclop requests no Accessibility and no Screen Recording.
+    The Claude tab asks once more: when you press Open in Claude on a session that runs in Terminal
+    or iTerm, or hand an approved plan off to a new terminal session, macOS asks whether Cyclop may
+    control that terminal, to select the session's tab or type the <code>claude</code> command.
+    Refused, Open in Claude only brings the terminal forward, and a hand-off stops with “Automation
+    is not allowed” and a Copy Command button.</p>
+    <p>Besides that, a file placed on the shelf from Downloads, Documents or the Desktop is
     something macOS asks about separately, and only at the moment the shelf is opened.</p></details>
 
   <details><summary>Is Cyclop free? Is there a paid version?</summary>
@@ -298,21 +313,23 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
 
   <details><summary>Does it send anything anywhere?</summary>
     <p>No telemetry and no analytics of any kind. The only outgoing requests in the whole app are Currency's
-    daily download of exchange rates and the one-time download of the Meetings speech models, and everything else — clipboard, files,
+    exchange rates, refreshed every hour while the tab is on, and the one-time download of the Meetings speech models, and everything else — clipboard, files,
     snippets, scripts — stays on the machine.</p>
     <p>The Claude tab is not a network connection: it listens on a local socket that only you can
     reach, and writes one entry into Claude Code's settings file, only when you press Connect to
     Claude and with a copy of the file kept. SECURITY.md in the repository says what is left behind
-    if the app is deleted while connected.</p></details>
+    if the app is deleted while connected. Only when you approve a plan into a new session does
+    Cyclop start <code>claude</code> itself, which spends your Claude tokens like any session.</p></details>
 
   <details><summary>Why does macOS say the app cannot be verified?</summary>
-    <p>Because the disk image is ad-hoc signed, without an Apple Developer ID, and is not notarised.
-    Allowing it once in System Settings → Privacy &amp; Security is enough, and later updates do not
-    ask again. The source is public if you would rather build it yourself.</p></details>
+    <p>A release should not: it is signed with a Developer ID and notarised by Apple. A build of your
+    own is ad-hoc signed, so on another Mac it is allowed once in System Settings → Privacy &amp;
+    Security → “Open Anyway”.</p></details>
 
   <details><summary>What does it cost in memory and battery?</summary>
-    <p>About 16 MB and 0.0 % CPU while the panel is closed. A tab's background work runs only while
-    the tab is on a rail.</p></details>
+    <p>A tab's background work, a poll, an observer or a timer, runs only while the tab is on a rail,
+    so a tab switched off in Settings costs nothing. The Claude tab re-reads Claude Code's session
+    files every five seconds while it is on.</p></details>
 
   <details><summary>Which macOS versions are supported?</summary>
     <p>macOS 15 and newer, on both Apple silicon and Intel. The floor comes from the translation

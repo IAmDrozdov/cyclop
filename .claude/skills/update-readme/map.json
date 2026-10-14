@@ -2,6 +2,7 @@
   "synced": "6c46a7e",
   "seen": {},
   "pending": [],
+  "copies": {"docs/panel.png": "shelf.png"},
   "vars": {
     "src": "Sources/Cyclop",
     "ui": "Sources/Cyclop/UI",

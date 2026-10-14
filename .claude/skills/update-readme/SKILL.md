@@ -48,7 +48,9 @@ permission stops it with the name of the app to grant it to: grant it, do not wo
 `Read` every new PNG against this checklist before keeping it: only demo data (no real name, path
 under the owner's home, clipboard text, session, meeting, token or signing identity), no other
 window, wallpaper or menu bar, nothing cut off, same size as the other pictures of its kind. Copy the
-kept ones to `docs/images/readme/`.
+kept ones to `docs/images/readme/`, and each picture named in `copies` in `map.json` to its other
+path too (the site's `docs/panel.png` is `shelf.png`; a new size goes into its `<img>` and
+`og:image` sizes in both `docs/index.html` and `docs/ru/index.html`).
 
 **Done when:** every stale picture is re-shot and checked, or kept with a reason.
 

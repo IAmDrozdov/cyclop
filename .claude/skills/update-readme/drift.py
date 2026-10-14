@@ -60,11 +60,12 @@ def known(ref: str) -> bool:
 
 
 def changed(raw: dict[str, Any], stamped: bool) -> list[str]:
-    """Watched paths that differ from the stamp, committed or not, minus the uncommitted state `stamp` saw.
+    """Watched paths whose content differs from what the README was last checked against.
 
-    A file back at its stamped content drops out of the diff, so a revert is not reported."""
+    That is the stamped commit for a clean file and its `seen` digest for one uncommitted at the stamp,
+    so a file back at that content is not reported, and one reverted from it is."""
     names = lines("diff", "--name-only", "--no-renames", raw["synced"]) if stamped else lines("ls-files")
-    names |= lines("ls-files", "--others", "--exclude-standard")
+    names |= lines("ls-files", "--others", "--exclude-standard") | set(raw["seen"])
     return sorted(p for p in names if relevant(raw, p) and digest(p) != raw["seen"].get(p))
 
 
@@ -135,6 +136,26 @@ def readme_problems(name: str, path: Path, raw: dict[str, Any]) -> tuple[list[st
     return problems, srcs
 
 
+def site_size_problems(name: str, size: tuple[int, int]) -> list[str]:
+    """The site's `<img>` and `og:image` sizes for a picture named `name` in any folder."""
+    problems: list[str] = []
+    named = rf'(?:^|/){re.escape(name)}$'
+    for page in sorted((ROOT / "docs").rglob("*.html")):
+        text, where = page.read_text(), page.relative_to(ROOT)
+        for tag in re.findall(r"<img\b[^>]*>", text):
+            src = re.search(r'\bsrc="([^"]*)"', tag)
+            if src and re.search(named, src.group(1)):
+                got = tuple(int(m.group(1)) if (m := re.search(rf'\b{a}="(\d+)"', tag)) else 0 for a in ("width", "height"))
+                if got != size:
+                    problems.append(f"{where}: <img> of {name} is {got[0]}x{got[1]}, not {size[0]}x{size[1]}")
+        og = re.search(r'property="og:image" content="([^"]*)"', text)
+        if og and re.search(named, og.group(1)):
+            got = tuple(int(m.group(1)) if (m := re.search(rf'property="og:image:{a}" content="(\d+)"', text)) else 0 for a in ("width", "height"))
+            if got != size:
+                problems.append(f"{where}: og:image of {name} is {got[0]}x{got[1]}, not {size[0]}x{size[1]}")
+    return problems
+
+
 def check(raw: dict[str, Any]) -> list[str]:
     """Both READMEs resolve and show the same pictures, the pictures folder matches the map, every mapped path exists."""
     problems: list[str] = []
@@ -169,6 +190,16 @@ def check(raw: dict[str, Any]) -> list[str]:
             problems.append(f"{name} is in map.json, not pending, and missing")
     for name in sorted(used["en"] - set(pictures)):
         problems.append(f"README.md shows {name}, which map.json does not list")
+    for copy, name in raw["copies"].items():
+        source = IMAGES / name
+        if name not in pictures:
+            problems.append(f"`copies` names {name}, which `pictures` does not list")
+        if not source.is_file():
+            continue  # a listed picture that is missing is reported above, a pending one is allowed
+        if not (ROOT / copy).is_file() or (ROOT / copy).read_bytes() != source.read_bytes():
+            problems.append(f"{copy} is not a copy of {name}")
+        if size := png_size(source):
+            problems += site_size_problems(Path(copy).name, size)
 
     mapped = [*raw["watch"], *raw["ignore"], *raw["frame"]]
     mapped += [p for key in ("sections", "pictures") for e in raw[key] for p in e["paths"]]

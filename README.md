@@ -38,8 +38,8 @@ Claude (**Hide Contents**) and quits.
 The Claude Code sessions running on this Mac, waiting ones first: working,
 waiting or idle, where each runs (the Claude app, an editor, a terminal) and for
 how long. A click opens the session where it runs. After **Connect to Claude** in
-Settings, a request (a permission, a question, a plan) slides the panel out and is
-answered right there, as in the picture at the top; Claude keeps asking in its
+Settings, a request (a permission, a question, a plan) slides the panel out (unless
+**Open Panel for Requests** is off) and is answered right there, as in the picture at the top; Claude keeps asking in its
 own window too, and the first answer counts. An approved plan can go on in a new
 session with a cleared or compacted context ([ADR 0005](docs/adr/0005-an-approved-plan-can-go-on-in-a-new-session.md)).
 
@@ -129,8 +129,9 @@ button that needs it.
 - **Microphone and system audio**: the first **Start Recording** in Meetings.
 - **Control of Terminal or iTerm**: the first **Open in Claude** on a terminal
   session, or a plan handed off to a new terminal session, so the session's own
-  tab can be selected or a `claude` command typed. Refused, the terminal is only
-  brought forward.
+  tab can be selected or a `claude` command typed. Refused, **Open in Claude** only
+  brings the terminal forward, and a hand-off stops with *Automation is not allowed*
+  and a **Copy Command** button.
 - **Downloads**: the first **Export** of a meeting.
 - **Files in protected folders**: a file put on the shelf from Downloads,
   Documents or the Desktop may make macOS ask when the shelf opens. Refused, the
