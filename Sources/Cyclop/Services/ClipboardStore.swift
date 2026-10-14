@@ -63,6 +63,7 @@ final class ClipboardStore: ObservableObject {
 
     func start() {
         stop()
+        #if !CYCLOP_DEMO  // the demo shows its own history and never reads the real pasteboard
         let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.poll() }
         }
@@ -72,6 +73,7 @@ final class ClipboardStore: ObservableObject {
         timer.tolerance = 0.2
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+        #endif
     }
 
     func stop() {
@@ -82,6 +84,12 @@ final class ClipboardStore: ObservableObject {
     func clear() {
         items.removeAll()
     }
+
+    #if CYCLOP_DEMO
+    func demoRecord(_ payload: ClipItem.Payload, date: Date) {
+        record(ClipItem(payload: payload, date: date))
+    }
+    #endif
 
     func remove(_ item: ClipItem) {
         items.removeAll { $0.id == item.id }

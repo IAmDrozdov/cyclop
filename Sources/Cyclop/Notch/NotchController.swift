@@ -13,6 +13,9 @@ final class NotchController {
     private var cancellables = Set<AnyCancellable>()
 
     func install() {
+        #if CYCLOP_DEMO
+        Demo.seedFiles()
+        #endif
         let vm = NotchViewModel()
         self.vm = vm
         vm.start()
@@ -39,6 +42,9 @@ final class NotchController {
         // away folds every panel that came out for it.
         vm.onOpenForRequest = { [weak self] in self?.target()?.openForRequest() }
         vm.claude.onRequestsGone = { [weak self] in self?.panels.values.forEach { $0.requestsEnded() } }
+        #if CYCLOP_DEMO
+        Demo.present(vm: vm) { [weak self] in self?.target() }
+        #endif
 
         vm.teleprompter.$isRunning
             .removeDuplicates()

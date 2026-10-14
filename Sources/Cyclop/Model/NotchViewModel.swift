@@ -340,6 +340,11 @@ final class NotchViewModel: ObservableObject {
         self.currencies = CurrencyStore()
         self.snippets = SnippetStore()
         self.teleprompter = TeleprompterStore()
+        #if CYCLOP_DEMO
+        self.meetings = Demo.makeMeetings()
+        self.claude = Demo.makeClaude()
+        self.caffeine = Demo.makeCaffeine()
+        #else
         self.meetings = MeetingStore()
         self.claude = ClaudeStore(defaultPlanChoice: { PlanChoice(ConfigStore.shared.planApproval) })
         self.caffeine = CaffeineStore(
@@ -348,6 +353,7 @@ final class NotchViewModel: ObservableObject {
             onMinutesChange: { ConfigStore.shared.caffeineMinutes = $0 },
             onLidClosedModeChange: { ConfigStore.shared.caffeineLidClosed = $0 }
         )
+        #endif
 
         // The panel header reads through to the stores — the counters. Nested
         // ObservableObjects do not propagate on their own, so those would only

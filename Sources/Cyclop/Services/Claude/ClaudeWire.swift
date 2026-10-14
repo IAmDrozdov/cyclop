@@ -12,8 +12,12 @@ enum ClaudeWire {
     /// In Cyclop's support folder. Built without creating the folder: the relay
     /// runs whether or not Cyclop ever has.
     static var defaultSocketPath: String {
+        #if CYCLOP_DEMO
+        Demo.support.appendingPathComponent("claude.sock").path
+        #else
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Cyclop/claude.sock").path
+        #endif
     }
 
     static func frame(_ request: Data) -> Data {

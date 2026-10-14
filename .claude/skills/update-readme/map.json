@@ -1,0 +1,49 @@
+{
+  "synced": "1918377",
+  "seen": {},
+  "pending": [],
+  "vars": {
+    "src": "Sources/Cyclop",
+    "ui": "Sources/Cyclop/UI",
+    "svc": "Sources/Cyclop/Services",
+    "demo": "Sources/Cyclop/App/Demo.swift",
+    "skill": ".claude/skills/update-readme"
+  },
+  "watch": ["Sources/", "Scripts/", "Resources/", "Package.swift", "Package.resolved", "SECURITY.md", "CONTEXT.md", "CONTRIBUTING.md", "LICENSE", "docs/architecture.md", "docs/architecture.ru.md", "docs/adr/", ".github/", "{skill}/shoot.sh"],
+  "ignore": ["Resources/AppIcon.icns", "Scripts/make-icon.swift", ".github/ISSUE_TEMPLATE/", ".github/PULL_REQUEST_TEMPLATE.md", ".github/dependabot.yml", ".github/workflows/stale.yml", "Resources/ru.lproj/"],
+  "frame": ["{src}/Notch/", "{ui}/NotchContentView.swift", "{ui}/NotchShape.swift", "{ui}/Theme.swift", "{ui}/SpoilerField.swift", "{src}/Model/NotchViewModel.swift", "{src}/Model/RailOrder.swift", "Resources/en.lproj/", "{demo}", "{skill}/shoot.sh", "Scripts/bundle.sh"],
+  "sections": [
+    {"heading": "Cyclop", "heading_ru": "Cyclop", "paths": ["Scripts/version", "Package.swift", ".github/workflows/build.yml"]},
+    {"heading": "A tour of the panel", "heading_ru": "Обзор панели", "paths": ["{src}/Notch/", "{src}/Model/NotchViewModel.swift", "{src}/Model/RailOrder.swift", "{src}/Model/PrivacyMode.swift", "{ui}/NotchContentView.swift", "{ui}/SettingsPane.swift", "{ui}/Confirmation.swift", "{src}/App/AppDelegate.swift", "{src}/App/Strings.swift", "{src}/main.swift", "{svc}/ConfigStore.swift"]},
+    {"heading": "Claude", "heading_ru": "Claude", "paths": ["{svc}/Claude/", "{ui}/ClaudePane.swift", "{src}/Model/RequestOpening.swift"]},
+    {"heading": "Shelf", "heading_ru": "Полка", "paths": ["{svc}/ShelfStore.swift", "{ui}/ShelfPane.swift", "{ui}/ShelfDragSource.swift", "{svc}/ScreenshotVault.swift", "{svc}/ScreenshotFolderWatcher.swift"]},
+    {"heading": "Clipboard", "heading_ru": "Буфер", "paths": ["{svc}/ClipboardStore.swift", "{ui}/ClipboardPane.swift"]},
+    {"heading": "Snippets", "heading_ru": "Заготовки", "paths": ["{svc}/SnippetStore.swift", "{ui}/SnippetsPane.swift"]},
+    {"heading": "Translate", "heading_ru": "Перевод", "paths": ["{svc}/Translator.swift", "{ui}/TranslatePane.swift"]},
+    {"heading": "Caffeine", "heading_ru": "Кофеин", "paths": ["{svc}/CaffeineStore.swift", "{ui}/CaffeinePane.swift"]},
+    {"heading": "Currency", "heading_ru": "Валюта", "paths": ["{svc}/CurrencyStore.swift", "{ui}/CurrencyPane.swift"]},
+    {"heading": "Teleprompter", "heading_ru": "Телесуфлёр", "paths": ["{svc}/TeleprompterStore.swift", "{ui}/TeleprompterPane.swift", "{svc}/DebouncedWrite.swift"]},
+    {"heading": "Meetings", "heading_ru": "Встречи", "paths": ["{svc}/Meetings/", "{ui}/MeetingsPane.swift", "Scripts/build-localvqe.sh"]},
+    {"heading": "Permissions", "heading_ru": "Разрешения", "paths": ["Scripts/bundle.sh", "Resources/Cyclop.entitlements", "SECURITY.md", "{svc}/Claude/ClaudeOpener.swift", "{svc}/Claude/ClaudeSettingsEdit.swift", "{svc}/Claude/ClaudeSettingsFile.swift", "{svc}/Meetings/MeetingRecorder.swift", "{svc}/Meetings/MeetingStore.swift", "{svc}/ShelfStore.swift"]},
+    {"heading": "What stays on this Mac", "heading_ru": "Что остаётся на этом Mac", "paths": ["{svc}/Support.swift", "{svc}/ConfigStore.swift", "{svc}/ScreenshotVault.swift", "{svc}/CurrencyStore.swift", "{svc}/Meetings/ParakeetEngine.swift", "{svc}/Meetings/SpeechModels.swift", "{svc}/Claude/ClaudeListener.swift", "SECURITY.md"]},
+    {"heading": "Install", "heading_ru": "Установка", "paths": [".github/workflows/release.yml", "Scripts/notarize.sh"]},
+    {"heading": "Build from source", "heading_ru": "Сборка из исходников", "paths": ["Scripts/bundle.sh", "Scripts/sdk.sh", "Scripts/build-localvqe.sh", "Scripts/test.sh", "Scripts/check-strings.py", "Package.swift", "Package.resolved"]},
+    {"heading": "Images and releases", "heading_ru": "Образы и релизы", "paths": ["Scripts/dmg.sh", "Scripts/release.sh", "Scripts/version"]},
+    {"heading": "How it works", "heading_ru": "Как это устроено", "paths": ["docs/architecture.md", "docs/architecture.ru.md", "CONTEXT.md", "docs/adr/", "{skill}/shoot.sh"]},
+    {"heading": "Contributing", "heading_ru": "Участие", "paths": ["CONTRIBUTING.md", "SECURITY.md"]},
+    {"heading": "Thanks", "heading_ru": "Спасибо", "paths": [".github/FUNDING.yml"]},
+    {"heading": "Licence", "heading_ru": "Лицензия", "paths": ["LICENSE"]}
+  ],
+  "pictures": [
+    {"file": "claude-request.png", "kind": "tall", "scene": "claude-request", "paths": ["{ui}/ClaudePane.swift", "{svc}/Claude/ClaudeRequest.swift", "{svc}/Claude/ClaudeStore.swift", "{svc}/Claude/ClaudeListener.swift", "{svc}/Claude/ClaudeRelay.swift"]},
+    {"file": "claude.png", "kind": "tall", "scene": "claude", "paths": ["{ui}/ClaudePane.swift", "{svc}/Claude/ClaudeSession.swift", "{svc}/Claude/ClaudeStore.swift"]},
+    {"file": "shelf.png", "kind": "short", "scene": "shelf", "paths": ["{ui}/ShelfPane.swift", "{ui}/ShelfDragSource.swift", "{svc}/ShelfStore.swift"]},
+    {"file": "clipboard.png", "kind": "short", "scene": "clipboard", "paths": ["{ui}/ClipboardPane.swift", "{svc}/ClipboardStore.swift"]},
+    {"file": "snippets.png", "kind": "short", "scene": "snippets", "paths": ["{ui}/SnippetsPane.swift", "{svc}/SnippetStore.swift"]},
+    {"file": "translate.png", "kind": "short", "scene": "translate", "paths": ["{ui}/TranslatePane.swift", "{svc}/Translator.swift"]},
+    {"file": "caffeine.png", "kind": "short", "scene": "caffeine", "paths": ["{ui}/CaffeinePane.swift", "{svc}/CaffeineStore.swift"]},
+    {"file": "currency.png", "kind": "short", "scene": "currency", "paths": ["{ui}/CurrencyPane.swift", "{svc}/CurrencyStore.swift"]},
+    {"file": "teleprompter.png", "kind": "tall", "scene": "teleprompter", "paths": ["{ui}/TeleprompterPane.swift", "{svc}/TeleprompterStore.swift"]},
+    {"file": "meetings.png", "kind": "short", "scene": "meetings", "paths": ["{ui}/MeetingsPane.swift", "{svc}/Meetings/"]}
+  ]
+}

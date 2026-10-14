@@ -250,6 +250,9 @@ final class CurrencyStore: ObservableObject {
     /// Tries the jsDelivr CDN first, then the Cloudflare Pages mirror the
     /// upstream README asks every client to keep as a fallback.
     private func fetch(_ endpoint: String) async throws -> Data {
+        #if CYCLOP_DEMO
+        return try Demo.currencyResponse(endpoint)
+        #else
         var lastError: Error?
         for host in [Self.primaryHost, Self.fallbackHost] {
             guard let url = URL(string: "\(host)/\(endpoint)") else { continue }
@@ -268,6 +271,7 @@ final class CurrencyStore: ObservableObject {
             }
         }
         throw lastError ?? URLError(.cannotConnectToHost)
+        #endif
     }
 
     // MARK: - Conversion

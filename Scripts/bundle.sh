@@ -7,6 +7,24 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG="${1:-release}"
 APP="$ROOT/build/Cyclop.app"
+BUNDLE_ID="com.cyclop.app"
+DISPLAY_NAME="Cyclop"
+SWIFT_FLAGS=(--package-path "$ROOT")
+
+# Демо-сборка для картинок README (.claude/skills/update-readme): свой бандл, свой
+# домен настроек, код под #if CYCLOP_DEMO, без эхоподавителя и с ad-hoc-подписью.
+# В релизную сборку из демо-кода не попадает ничего.
+DEMO=0
+if [ "$CONFIG" = "demo" ]; then
+    DEMO=1
+    CONFIG=release
+    APP="$ROOT/build/Cyclop Demo.app"
+    BUNDLE_ID="com.cyclop.app.demo"
+    DISPLAY_NAME="Cyclop Demo"
+    SWIFT_FLAGS+=(--scratch-path "$ROOT/.build/demo" -Xswiftc -DCYCLOP_DEMO)
+    CYCLOP_SKIP_LOCALVQE=1
+    CODESIGN_IDENTITY="-"
+fi
 source "$ROOT/Scripts/sdk.sh"
 VERSION="$(sed -n 's/^VERSION=//p' "$ROOT/Scripts/version" 2>/dev/null || echo 0.1.0)"
 
@@ -19,8 +37,8 @@ if [ "${CYCLOP_SKIP_LOCALVQE:-}" != "1" ]; then
 fi
 
 echo "==> swift build -c $CONFIG"
-swift build -c "$CONFIG" --package-path "$ROOT"
-BIN="$(swift build -c "$CONFIG" --package-path "$ROOT" --show-bin-path)/Cyclop"
+swift build -c "$CONFIG" "${SWIFT_FLAGS[@]}"
+BIN="$(swift build -c "$CONFIG" "${SWIFT_FLAGS[@]}" --show-bin-path)/Cyclop"
 
 echo "==> assembling $APP"
 rm -rf "$APP"
@@ -32,12 +50,12 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleName</key><string>Cyclop</string>
+    <key>CFBundleName</key><string>$DISPLAY_NAME</string>
     <key>CFBundleDevelopmentRegion</key><string>en</string>
     <key>CFBundleLocalizations</key>
     <array><string>en</string><string>ru</string></array>
-    <key>CFBundleDisplayName</key><string>Cyclop</string>
-    <key>CFBundleIdentifier</key><string>com.cyclop.app</string>
+    <key>CFBundleDisplayName</key><string>$DISPLAY_NAME</string>
+    <key>CFBundleIdentifier</key><string>$BUNDLE_ID</string>
     <key>CFBundleExecutable</key><string>Cyclop</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
     <key>CFBundlePackageType</key><string>APPL</string>

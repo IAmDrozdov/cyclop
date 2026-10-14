@@ -2,223 +2,220 @@
 
 *English · [Русский](README.ru.md)*
 
-The MacBook notch as a working tool. A native SwiftUI/AppKit app: invisible at
-rest, and on hover it unfolds downwards into a panel with a shelf for files,
-clipboard history and offline translation.
+The MacBook notch as a working tool. Cyclop is invisible at rest; bring the
+pointer to the notch and it unfolds into a panel of tabs: your Claude Code
+sessions and their requests, a shelf for files, clipboard history, snippets,
+offline translation, a keep-awake timer, currency, a teleprompter and meeting
+transcripts. A native SwiftUI/AppKit app for macOS 15 and newer.
 
 [![build](https://github.com/akalikbergenov/cyclop/actions/workflows/build.yml/badge.svg)](https://github.com/akalikbergenov/cyclop/actions/workflows/build.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-%E2%98%95-FFDD00?style=flat-square&labelColor=000000)](https://buymeacoffee.com/akalikbergenov)
 
-![The Cyclop panel](docs/panel.png)
+<img src="docs/images/readme/claude-request.png" alt="The Cyclop panel open from the notch on the Claude tab: a Claude Code session asks to run npm test, with Allow, Always Allow and Deny buttons" width="644">
 
-**[Download the latest version](https://github.com/akalikbergenov/cyclop/releases/latest)** —
-macOS 15 or newer. Signed and notarised, so it opens on the first try.
+This is a personal fork of [akalikbergenov/cyclop](https://github.com/akalikbergenov/cyclop),
+which no longer merges upstream ([ADR 0001](docs/adr/0001-fork-diverges-from-upstream.md)).
+The badges, the download link and the clone command below still point at upstream.
 
-```
-0.0 % CPU at rest  ·  ≈16 MB  ·  3.1 MB bundle  ·  nothing asked at launch
-```
+## A tour of the panel
 
-## What it does
-
-| Tab | What it does |
-|---|---|
-| **Claude** | The Claude Code sessions on this Mac, the ones that wait first: working, waiting or idle, where each runs (the Claude app, an editor, a terminal) and for how long; the header counts the waiting ones, and a press on a row opens that session in Claude (in a terminal, its tab is selected, if macOS allows it). Press *Connect to Claude* once in Settings and a request (a permission, a question, a plan) shows up in the panel to be answered there: allow or deny, pick an option or type your own answer, approve a plan or send it back with remarks. A plan is approved the way you choose: keep the context with the same model and go on in the same session; whenever the context is compacted or cleared, or the model changes to Sonnet, Cyclop starts a new session where the plan was made (a terminal window or tab, the Claude app or the editor) and the old one stays in plan mode. Effort and permission mode are chosen on the card for a terminal session or an in-place approval, and the defaults (clear, Sonnet, medium, bypass permissions) are in Settings; a session handed off to the Claude app carries the mode (the app opens bypass as accept edits) but not the effort, which is chosen in Claude when the session opens; the editor carries neither, so the card hides both rows there (type go to start). The new session spends your Claude tokens like any other. Claude keeps asking in its own window too, and whichever answer comes first counts. When a request arrives the panel slides out on this tab by itself, with the buttons, and folds when the request is answered or gone; if you move the pointer into it and out again it folds as usual and the request waits in the tab. A switch in Settings turns this off. There is no sound and no notification. The connection is one entry in Claude's settings file, written only by that button and removed by its twin (see SECURITY.md). Hide Contents can cover session names and the text of requests |
-| **Shelf** | Drag files into the notch and they stay there until needed; drag a card out and the file goes wherever it is dropped. A click selects a card, ⌘-click selects several, and then the whole group is dragged. A screenshot taken to the clipboard is saved as a file and lands here too — including one taken on an iPhone, if you copy it there |
-| **Clipboard** | The last 40 copies; a click puts an entry back on the clipboard |
-| **Snippets** | A hand-kept list of what you are tired of retyping: an address, a phone number, an email. Added with a button in the panel, removed with the cross on a card; a click puts the text on the clipboard. The same list lives in `~/Library/Application Support/Cyclop/snippets.json` and can be edited there instead |
-| **Translate** | Type on the left, the translation appears on the right — by itself, offline, using macOS's own facilities. English or Polish goes to Russian, Russian goes back; a click on the language's column title switches between English and Polish, and the direction comes from the script the text is written in. macOS does not preinstall language packs, so the first time you have to download one: System Settings → General → Language & Region → "Translation Languages…" |
-| **Caffeine** | Keeps the Mac from falling asleep: one button for no end, or a timer on an hour-and-minute wheel. Only the system stays awake — the screen still turns off and locks on its own schedule. The tab's icon is tinted while a session runs, and the header shows the time left. A session ends when you stop it, when the tab is switched off, or when Cyclop quits. A separate switch, Stay Awake with the Lid Closed, keeps the Mac awake with the lid shut, so that agents keep working while you are away |
-| **Currency** | An amount on one side, the other currency on the other; type into either. Rates come over the network — a public table of daily rates, fetched once an hour, and only while the tab is on (the other download is the one-time speech models of Meetings) |
-| **Meetings** | A *Start Recording* button records a call on two tracks: the microphone and everything the Mac plays. After *Stop* the meeting becomes a transcript on this Mac, nothing leaves it: your lines are *Me*, the other side is *Speaker*, with a letter (A, B, C) when several voices can be told apart, and the language is detected by itself, so Russian, Ukrainian and English may share a call. The journal keeps every meeting; *Export* puts a folder with the transcript and the audio into Downloads. The speech models (about 700 MB) are downloaded once, by a button, and the first Start asks macOS for the microphone and system audio |
-| **Teleprompter** | A script that scrolls under the camera at a speed you set. The notch is the one place on the screen a teleprompter belongs: reading happens right beside the lens, so on the recording the eyes stay on the camera instead of travelling to a window below it. The panel holds itself open while the text is moving — reading a script means not touching the trackpad |
-
-The panel opens when the pointer reaches the notch and collapses when it leaves.
-Tabs switch on hover as well — but only if the pointer has come to rest on the
-icon: one passing through switches nothing. During a file drag the panel opens by
-itself and goes straight to the shelf. The menu bar icon toggles the panel,
-hides every tab's contents at once, and quits. The icon itself can be
-removed — ⌘-drag it off the bar, or flip the switch in Settings — and
-relaunching Cyclop brings it back.
-
-Any tab can be switched off in **Settings → Cyclop → Show in Panel**. Off means two
-things: the icon leaves the rail, and the tab's background work stops with
-it — the clipboard poll and the
-rate fetch. The rail is for what gets a glance between other things; a mode
-used once a month may live there, but only as long as the people who never
-use it can take it off.
+The panel opens when the pointer reaches the notch and folds when it leaves.
+Tabs sit on two rails, left and right of the content; a tab switches when the
+pointer rests on its icon, so passing over one switches nothing. During a file
+drag the panel opens by itself on the shelf. On a Mac without a notch the panel
+draws one at the top centre of the screen.
 
 Hold an icon (or press it hard on a Force Touch trackpad) to lift it, then drag
-it along its rail or onto the other one. The icon size is set in the same
-Settings section; a long rail makes the panel taller instead of shrinking icons.
+it along its rail or onto the other one. **Settings → Cyclop → Show in Panel**
+switches any tab off: its icon leaves the rail and its background work stops. The
+menu bar icon opens the panel, covers the contents of Clipboard, Snippets and
+Claude (**Hide Contents**) and quits.
 
-## Requirements
+### Claude
 
-- macOS 15 or newer (the Translate tab runs on Translation.framework)
-- Swift 6 toolchain (the full Xcode is not needed, Command Line Tools are enough)
-- CMake (`brew install cmake`), for the echo canceller of the Meetings tab; `CYCLOP_SKIP_LOCALVQE=1` builds without it
+<img src="docs/images/readme/claude.png" alt="The Claude tab listing four Claude Code sessions: one waiting in a terminal, two working in the Claude app and an editor, one idle, each with its folder and how long it has been in that state" width="644">
 
-The app works on Macs without a notch too: the panel then treats a 180 × 24 pt
-area at the top centre of the screen as one.
+The Claude Code sessions running on this Mac, waiting ones first: working,
+waiting or idle, where each runs (the Claude app, an editor, a terminal) and for
+how long. A click opens the session where it runs. After **Connect to Claude** in
+Settings, a request (a permission, a question, a plan) slides the panel out and is
+answered right there, as in the picture at the top; Claude keeps asking in its
+own window too, and the first answer counts. An approved plan can go on in a new
+session with a cleared or compacted context ([ADR 0005](docs/adr/0005-an-approved-plan-can-go-on-in-a-new-session.md)).
 
-## Building
+### Shelf
+
+<img src="docs/images/readme/shelf.png" alt="The Shelf tab holding five file cards with previews: two PDFs, two images and a Markdown file" width="644">
+
+Drop files on the notch and they wait here; drag a card out and the file goes
+wherever it is dropped. A click selects a card and copies it, ⌘-click selects
+several to drag together, a double-click opens the file, and the right-click menu
+has Show in Finder and Remove from Shelf. While the Clipboard tab and **Save
+Clipboard Screenshots** in Settings are on (both are by default), a screenshot copied to the clipboard is saved as a file into `~/Pictures/Cyclop`
+and lands here too; one copied on an iPhone arrives through Universal Clipboard
+(the same Apple ID, Handoff on, the devices nearby).
+
+### Clipboard
+
+<img src="docs/images/readme/clipboard.png" alt="The Clipboard tab listing recent copies: a PDF file, a link, a sentence, a git command and a colour code" width="644">
+
+The last 40 copies, text and files. A click puts an entry back on the clipboard
+and moves it to the top. Copies that password managers mark as concealed never
+enter the list, and the list lives in memory only: it is empty after a relaunch.
+
+### Snippets
+
+<img src="docs/images/readme/snippets.png" alt="The Snippets tab with a search field and four saved snippets: a signature, a meeting link, an office address and a reply" width="644">
+
+What you are tired of retyping: an address, a signature, a link. **+** adds one,
+a click copies it, a double-click edits it, the arrows on hover reorder. The list
+is `~/Library/Application Support/Cyclop/snippets.json` and can be edited there
+too.
+
+### Translate
+
+<img src="docs/images/readme/translate.png" alt="The Translate tab: a Russian sentence on the left and its English translation on the right" width="644">
+
+Type on the left and the translation appears on the right, offline, through the
+macOS Translation framework. Russian goes to English or Polish, and those go to
+Russian: the direction follows the script you type in, and a click on the column
+title switches between English and Polish. macOS does not preinstall language
+packs; the tab says so and opens the settings screen that downloads them.
+
+### Caffeine
+
+<img src="docs/images/readme/caffeine.png" alt="The Caffeine tab with a Stay Awake Indefinitely button, an hour and minute wheel set to 1 h 30 min, a Start button and a Stay Awake with the Lid Closed switch" width="644">
+
+Keeps the Mac from sleeping: indefinitely, or for the time on the wheel. Only
+the system stays awake; the screen still dims and locks on schedule. **Stay
+Awake with the Lid Closed** keeps it working with the lid shut, so agents run on
+while you are away. A session ends when you stop it, when the tab is switched
+off, or when Cyclop quits.
+
+### Currency
+
+<img src="docs/images/readme/currency.png" alt="The Currency tab converting 250 US dollars to 229.67 euros, with the date of the rates in the header" width="644">
+
+An amount on one side, the other currency on the other; type into either. Rates
+come from the public [exchange-api](https://github.com/fawazahmed0/exchange-api)
+table, refreshed every hour and whenever the tab opens, and only while the tab is
+on.
+
+### Teleprompter
+
+<img src="docs/images/readme/teleprompter.png" alt="The Teleprompter tab showing the first lines of a script in large type, with play, speed and text size controls" width="644">
+
+A script that scrolls under the camera at the speed you set, so your eyes stay
+by the lens while you read. While the text moves the panel holds itself open,
+because reading a script means not touching the trackpad.
+
+### Meetings
+
+<img src="docs/images/readme/meetings.png" alt="The Meetings tab with a Start Recording button, a Keep original tracks checkbox and a journal of four transcribed meetings with their dates and lengths" width="644">
+
+**Start Recording** records a call on two tracks, the microphone and everything
+the Mac plays. After **Stop** the meeting is transcribed on this Mac: your lines
+are *Me*, the other side is *Speaker*, lettered when several voices can be told
+apart, and the language is detected for each stretch of the other side's speech. The audio is then kept compressed as
+`audio.m4a` (**Keep original tracks** keeps the two raw tracks beside it), and
+**Export** puts the transcript and the audio into Downloads. The speech models
+are downloaded once, by a button.
+
+## Permissions
+
+Nothing is asked at launch; each request comes with the first press of the
+button that needs it.
+
+- **Microphone and system audio**: the first **Start Recording** in Meetings.
+- **Control of Terminal or iTerm**: the first **Open in Claude** on a terminal
+  session, or a plan handed off to a new terminal session, so the session's own
+  tab can be selected or a `claude` command typed. Refused, the terminal is only
+  brought forward.
+- **Downloads**: the first **Export** of a meeting.
+- **Files in protected folders**: a file put on the shelf from Downloads,
+  Documents or the Desktop may make macOS ask when the shelf opens. Refused, the
+  card stays without a preview.
+
+The pointer is read through `NSEvent.mouseLocation` and the clipboard through the
+public `NSPasteboard`; neither needs a permission. **Connect to Claude** adds one
+entry to Claude Code's settings file and keeps a copy of the file first;
+**Disconnect from Claude** removes it ([ADR 0004](docs/adr/0004-claude-requests-are-answered-through-a-hook.md)).
+
+## What stays on this Mac
+
+Cyclop opens two kinds of outgoing connection, both described in
+[SECURITY.md](SECURITY.md): the currency rates, and the speech models of Meetings,
+downloaded from Hugging Face when you press the button. Translation and
+transcription run on the Mac. The Claude tab reads Claude Code's session files and
+answers requests through a local socket; only when you approve a plan into a new
+session does Cyclop start `claude` itself, which spends your Claude tokens like
+any session.
+
+What Cyclop keeps is in `~/Library/Application Support/Cyclop/` (`config.json`,
+`snippets.json`, `teleprompter.txt`, the `Meetings/` folder, the last five copies
+of Claude's settings file in `claude-settings-backups/`), the speech models in
+`~/Library/Application Support/FluidAudio/`, in its
+`com.cyclop.app` preferences (the shelf's list, a few choices) and in
+`~/Pictures/Cyclop` (clipboard screenshots, never deleted automatically). The shelf
+references files rather than copying them.
+
+## Install
+
+**[Download the latest release](https://github.com/akalikbergenov/cyclop/releases/latest)**,
+open the `.dmg` and drag Cyclop into Applications. Releases are signed with a
+Developer ID and notarised. The link is upstream's: this fork has no releases of
+its own, so its own tabs come from a build from source.
+
+### Build from source
+
+You need macOS 15 or newer, a Swift 6 toolchain (Command Line Tools are enough)
+and CMake for the Meetings echo canceller (`brew install cmake`;
+`CYCLOP_SKIP_LOCALVQE=1` builds without it).
 
 ```bash
 git clone https://github.com/akalikbergenov/cyclop.git
 cd cyclop
-./Scripts/bundle.sh          # swift build + assemble the .app + ad-hoc sign
+./Scripts/bundle.sh          # swift build + assemble build/Cyclop.app + sign
 open build/Cyclop.app
 ```
 
-The icon is generated in code, with no graphics editor involved:
+A build from source is ad-hoc signed and not notarised, so on another Mac the
+first launch goes through **System Settings → Privacy & Security → Open Anyway**.
+`./Scripts/test.sh` runs the unit tests and `./Scripts/check-strings.py` checks
+that every on-screen string is translated.
 
-```bash
-swift Scripts/make-icon.swift "$PWD/Resources/AppIcon.icns"
-```
+### Images and releases
 
-## Installation
-
-Open `Cyclop-<version>.dmg` and drag the app into Applications. It opens on
-the first try: since 0.8.0 the image is signed with a Developer ID and
-notarised by Apple, so there is nothing to allow and nothing to type.
-
-Updating works the same way: open the new image and replace the app. The
-version is the first line of the menu bar menu.
-
-A build from source (`Scripts/bundle.sh`) is ad-hoc signed and is not
-notarised, so on any Mac but the one that built it the first launch goes
-through **System Settings → Privacy & Security → "Open Anyway"**. Releases do
-not have this step.
-
-Releases come often, and a star does not announce them — it is a bookmark, not a
-subscription. To hear about updates: the **Watch** button at the top right →
-**Custom** → tick **Releases**. Only releases will arrive, no issues or pushes.
-
-### Building the image yourself
-
-```bash
-./Scripts/dmg.sh
-```
-
-Puts `build/Cyclop-<version>.dmg` next to the app, with an `/Applications`
-shortcut inside. The version number comes from `Scripts/version`.
-
-### Cutting a release
-
-```bash
-./Scripts/release.sh
-```
-
-Builds the image, tags `v<version>` and creates a GitHub release with the `.dmg`
-attached. The notes are two parts: a few lines written by hand, kept in
-`docs/releases/<version>.md`, followed by the commit list GitHub assembles. The
-script refuses to run without the hand-written part — a list of commits answers
-"what changed in the code", while whoever arrives is asking "what does this give
-me", and no generator turns the first answer into the second.
-
-The number is written in **one place**, `Scripts/version`. From there it goes
-into the app's `Info.plist`, into the image name and into the tag, so they cannot
-drift apart. The script also refuses to run on a dirty tree, on unpushed commits,
-or when the tag already exists.
-
-Built images live on the [releases page](https://github.com/akalikbergenov/cyclop/releases) —
-that is the link to hand to people instead of a file.
-
-## Permissions
-
-**Nothing at launch, and nothing until you press the button that needs it.**
-That is the promise. Start Recording in the Meetings tab asks for the microphone and for
-system audio recording, on the first press. The other press that can ask is Open
-in Claude on a session that runs in Terminal or iTerm: macOS asks once whether
-Cyclop may control that terminal, so that the session's own tab is selected;
-only the tabs' device names are compared, no text is read, and if you refuse, the terminal is only
-brought forward. The pointer position is read through
-`NSEvent.mouseLocation`, the clipboard through the public `NSPasteboard`.
-
-The Claude tab asks macOS for nothing but that terminal permission, which a plan handed off to a new session in Terminal or iTerm also uses, to open a window or tab and type a `claude` command there. Its one button, Connect to Claude, adds an
-entry to Claude Code's settings file and listens on a local socket that only you
-can reach; both happen only after the press, and SECURITY.md says what they touch
-and what is left behind.
-
-A file put on the shelf from Downloads, Documents or the Desktop is the one thing
-macOS asks about separately, and it asks when the shelf is opened, not at launch.
-Refusing breaks nothing: the card stays, just without a preview.
+`./Scripts/dmg.sh` puts `build/Cyclop-<version>.dmg` next to the app.
+`./Scripts/release.sh` checks the tree, tags `v<version>` and pushes the tag; the
+release workflow then builds the signed image and publishes the GitHub release.
+The script refuses to run without `gh`, without hand-written notes in
+`docs/releases/<version>.md`, on a dirty tree, on unpushed commits, when the tag
+exists or when CI on the commit is not green. The version lives in one place, `Scripts/version`.
 
 ## How it works
 
-Why the window is shaped the way it is, why the pointer is polled on a
-timer, what sitting idle costs — nineteen notes on decisions the code does not show:
-**[docs/architecture.md](docs/architecture.md)**.
+Why the window is shaped the way it is, why the pointer is polled on a timer,
+what sitting idle costs: [docs/architecture.md](docs/architecture.md). The words
+used for the parts of the panel are in [CONTEXT.md](CONTEXT.md), and the
+decisions in [docs/adr/](docs/adr/).
 
-## Limitations
-
-- The shelf references files rather than copying them: move the original and the
-  card disappears on the next launch. The exception is clipboard screenshots,
-  which are saved into `~/Pictures/Cyclop` and are never deleted automatically,
-  even when the card leaves the shelf. Only the user clears that folder: the
-  “Clear Screenshots Folder” in Settings sends its contents to the Trash —
-  a hand too, not a schedule.
-- Entries typed `org.nspasteboard.ConcealedType` (password managers) never enter
-  the clipboard history.
-- A screenshot from the iPhone arrives through Universal Clipboard, so it needs
-  what that needs: one Apple ID, Bluetooth and Wi-Fi on, Handoff enabled and the
-  devices near each other. And it overwrites the clipboard on the Mac — what was
-  overwritten stays in the Clipboard tab one click away.
-- macOS does not preinstall translation languages — the first time, the pack has
-  to be downloaded through System Settings; the panel says so and opens the right
-  screen.
-
-## Layout
-
-```
-Sources/Cyclop
-├── main.swift                 entry point, .accessory
-├── App/
-│   ├── AppDelegate.swift      menu bar icon, launch at login
-│   └── Strings.swift          string lookup, current language
-├── Notch/
-│   ├── NotchGeometry.swift    notch size and every rect derived from it
-│   ├── NotchPanel.swift       the NSPanel above the menu bar
-│   ├── NotchRootView.swift    panel hit-testing + drag & drop destination
-│   ├── PointerWatcher.swift   pointer sampling: hover and click-through
-│   ├── PanelState.swift       one display's share: open, dragged onto, typing
-│   ├── NotchScreenPanel.swift the panel as it stands on one display
-│   └── NotchController.swift  one model, one panel per display
-├── Model/
-│   ├── NotchViewModel.swift
-│   └── PrivacyMode.swift      hiding contents: sections and reveals
-├── Services/
-│   ├── Claude/                sessions from Claude Code's files, requests over a local socket, the entry in Claude's settings
-│   ├── ShelfStore.swift
-│   ├── ClipboardStore.swift
-│   ├── ScreenshotVault.swift  clipboard screenshots onto disk
-│   ├── SnippetStore.swift     snippets: reading and writing snippets.json
-│   ├── ConfigStore.swift      settings: reading and writing config.json
-│   ├── Support.swift          ~/Library/Application Support/Cyclop
-│   ├── DebouncedWrite.swift   writes to disk no more often than needed
-│   ├── Translator.swift       Translation.framework, direction by script
-│   ├── CurrencyStore.swift    rates over the network (the models of Meetings are the other download)
-│   ├── CaffeineStore.swift    caffeine sessions and the sleep hold
-│   ├── Meetings/              recording, speech recognition, transcript assembly, export
-│   ├── TeleprompterStore.swift the script and where reading it has got to
-│   └── ScreenshotFolderWatcher.swift  screenshots saved to disk, onto the shelf
-└── UI/                        NotchShape, tab panes, theme
-```
+The pictures in this README come from a demo build with invented data
+(`./Scripts/bundle.sh demo`) and are re-taken by
+`.claude/skills/update-readme/shoot.sh`.
 
 ## Contributing
 
-The rules are short and live in [CONTRIBUTING.md](CONTRIBUTING.md): what gets
-taken, what does not, and what to check before sending. The main one is that
-the app keeps to the permissions and connections that SECURITY.md lists, and a
-change that adds one is a separate conversation.
-
-What the app reads, what it keeps and where, where it goes on the network —
-[SECURITY.md](SECURITY.md). The channel for vulnerabilities is there too:
-private, no issue needed.
+The rules live in [CONTRIBUTING.md](CONTRIBUTING.md). The main one: the app keeps
+to the permissions and connections [SECURITY.md](SECURITY.md) lists, and a change
+that adds one is a separate conversation. Vulnerabilities go through the private
+channel described in SECURITY.md.
 
 ## Thanks
 
-The app is free — no subscriptions, no ads, no data collection — and will stay
-that way. If it turned out useful and you feel like supporting it:
+Cyclop was created by [akalikbergenov](https://github.com/akalikbergenov) and is
+free: no subscriptions, no ads, no data collection. If it turned out useful and
+you feel like supporting it:
 
 **[☕ Buy Me a Coffee](https://buymeacoffee.com/akalikbergenov)**
 
@@ -234,4 +231,4 @@ better: [@DontTrustMexD](https://github.com/DontTrustMexD),
 
 ## Licence
 
-MIT
+[MIT](LICENSE)

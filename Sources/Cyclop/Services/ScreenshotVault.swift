@@ -10,6 +10,9 @@ enum ScreenshotVault {
     /// Desktop or Documents it is not behind a TCC prompt. Falls back to the
     /// app's own support folder, which always works.
     static let folder: URL = {
+        #if CYCLOP_DEMO
+        return Demo.pictures
+        #else
         let fm = FileManager.default
         let pictures = fm.homeDirectoryForCurrentUser
             .appendingPathComponent("Pictures", isDirectory: true)
@@ -18,6 +21,7 @@ enum ScreenshotVault {
             return pictures
         }
         return Support.directory("Screenshots")
+        #endif
     }()
 
     private static let stamp: DateFormatter = {

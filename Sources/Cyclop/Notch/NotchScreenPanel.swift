@@ -266,7 +266,17 @@ final class NotchScreenPanel {
     // MARK: - Open / close
 
     /// Whether this screen is the one a running script is pinning open.
-    private var holdsOpen: Bool { isPinned && vm.holdsOpen }
+    private var holdsOpen: Bool {
+        #if CYCLOP_DEMO
+        true  // the demo panel stays open for the camera, whatever the pointer does
+        #else
+        isPinned && vm.holdsOpen
+        #endif
+    }
+
+    #if CYCLOP_DEMO
+    var demoWindow: NSWindow? { panel }
+    #endif
 
     /// Hands the keyboard to the panel, or gives it back.
     private func setKeyboard(_ wants: Bool) {

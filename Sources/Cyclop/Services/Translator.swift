@@ -94,6 +94,9 @@ final class Translator: ObservableObject {
     func run(_ session: sending TranslationSession) async {
         let text = trimmed
         guard !text.isEmpty else { clear(); return }
+        #if CYCLOP_DEMO
+        output = Demo.translation(of: text)
+        #else
         guard let source = session.sourceLanguage, let target = session.targetLanguage else { return }
 
         // No language pack ships installed. `prepareTranslation()` is what asks
@@ -123,6 +126,7 @@ final class Translator: ObservableObject {
             needsDownload = false
             failure = error.localizedDescription
         }
+        #endif
     }
 
     func copyOutput() {

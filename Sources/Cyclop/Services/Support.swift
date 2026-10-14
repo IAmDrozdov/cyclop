@@ -13,8 +13,12 @@ enum Support {
     /// the folder already there.
     static let folder: URL = {
         let fm = FileManager.default
+        #if CYCLOP_DEMO
+        let url = Demo.support
+        #else
         let url = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Cyclop", isDirectory: true)
+        #endif
         try? fm.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }()

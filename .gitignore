@@ -20,3 +20,6 @@ build/
 # Личные настройки Claude Code; общие лежат в .claude/settings.json
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Картинки и отчёт /update-readme до того, как их разберут
+.local/
