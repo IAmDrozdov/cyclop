@@ -198,3 +198,5 @@
 "No claude executable found" = "No claude executable found";
 "It took too long" = "It took too long";
 "claude exited with status %d" = "claude exited with status %d";
+"Keep original tracks" = "Keep original tracks";
+"Saves mic.caf and system.caf next to audio.m4a, about 1 GB per hour" = "Saves mic.caf and system.caf next to audio.m4a, about 1 GB per hour";

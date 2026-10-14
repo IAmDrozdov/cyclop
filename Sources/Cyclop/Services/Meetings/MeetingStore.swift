@@ -16,6 +16,12 @@ final class MeetingStore: ObservableObject {
     @Published private(set) var microphoneDenied = false
     @Published private(set) var startFailed = false
     @Published private(set) var models: ModelsState = .missing
+    /// Off by default: the two tracks take about 1 GB per hour.
+    @Published var keepTracks: Bool {
+        didSet { defaults.set(keepTracks, forKey: Self.keepTracksKey) }
+    }
+
+    private static let keepTracksKey = "meetingsKeepTracks"
 
     enum ModelsState: Equatable {
         case missing
@@ -30,6 +36,7 @@ final class MeetingStore: ObservableObject {
     private let now: () -> Date
     private let engine: SpeechEngine
     private let reveal: ([URL]) -> Void
+    private let defaults: UserDefaults
     private var processingTask: Task<Void, Never>?
     private var downloadTask: Task<Void, Never>?
     private var isStarted = false
@@ -45,8 +52,11 @@ final class MeetingStore: ObservableObject {
         makeCapture: @escaping () -> MeetingCapturing = { MeetingRecorder() },
         engine: SpeechEngine = ParakeetEngine(),
         now: @escaping () -> Date = Date.init,
-        reveal: @escaping ([URL]) -> Void = { NSWorkspace.shared.activateFileViewerSelecting($0) }
+        reveal: @escaping ([URL]) -> Void = { NSWorkspace.shared.activateFileViewerSelecting($0) },
+        defaults: UserDefaults = .standard
     ) {
+        self.defaults = defaults
+        keepTracks = defaults.bool(forKey: Self.keepTracksKey)
         self.folder = folder
         self.downloads = downloads
         self.makeCapture = makeCapture
@@ -236,7 +246,7 @@ final class MeetingStore: ObservableObject {
                     for (folder, offsets) in leftovers { try? MeetingPipeline.compressAudio(in: folder, offsets: offsets) }
                 }.value
             }
-            if let next, !Task.isCancelled { await process(next, with: MeetingPipeline(engine: engine)) }
+            if let next, !Task.isCancelled { await process(next, with: MeetingPipeline(engine: engine, keepTracks: keepTracks)) }
             processingTask = nil
             reload()
             processPending()

@@ -47,11 +47,18 @@ struct MeetingsPane: View {
             }
             if store.recording != nil {
                 meters
-            } else if store.microphoneDenied {
+            } else {
+                Toggle("Keep original tracks", isOn: $store.keepTracks)
+                    .toggleStyle(.checkbox)
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.secondary)
+                    .help("Saves mic.caf and system.caf next to audio.m4a, about 1 GB per hour")
+            }
+            if store.recording == nil, store.microphoneDenied {
                 notice("Microphone access is off", action: "Open Settings") {
                     store.openMicrophoneSettings()
                 }
-            } else if store.startFailed {
+            } else if store.recording == nil, store.startFailed {
                 notice("Recording could not start", action: nil) {}
             }
             Spacer(minLength: 0)

@@ -197,3 +197,5 @@
 "No claude executable found" = "Не найден исполняемый файл claude";
 "It took too long" = "Заняло слишком много времени";
 "claude exited with status %d" = "claude завершился со статусом %d";
+"Keep original tracks" = "Хранить исходные дорожки";
+"Saves mic.caf and system.caf next to audio.m4a, about 1 GB per hour" = "Сохраняет mic.caf и system.caf рядом с audio.m4a, около 1 ГБ в час";

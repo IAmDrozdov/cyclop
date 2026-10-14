@@ -45,6 +45,18 @@ struct TrackCompressorTests {
         #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("audio.tmp.m4a").path))
     }
 
+    @Test func keepTracksLeavesTheOriginalsBesideTheCompressedFile() throws {
+        let dir = try Self.folder()
+        try Self.tone(dir.appendingPathComponent(MeetingFile.mic), seconds: 1, rate: 48_000, channels: 1, amplitude: 0.5)
+        try Self.tone(dir.appendingPathComponent(MeetingFile.system), seconds: 1, rate: 48_000, channels: 2, amplitude: 0.5)
+
+        try MeetingPipeline.compressAudio(in: dir, offsets: nil, keepTracks: true)
+
+        #expect(FileManager.default.fileExists(atPath: dir.appendingPathComponent(MeetingFile.audio).path))
+        #expect(FileManager.default.fileExists(atPath: dir.appendingPathComponent(MeetingFile.mic).path))
+        #expect(FileManager.default.fileExists(atPath: dir.appendingPathComponent(MeetingFile.system).path))
+    }
+
     @Test func aMissingTrackBecomesASilentChannel() throws {
         let dir = try Self.folder()
         try Self.tone(dir.appendingPathComponent(MeetingFile.mic), seconds: 1, rate: 48_000, channels: 1, amplitude: 0.5)

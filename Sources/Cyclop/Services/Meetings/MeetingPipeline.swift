@@ -5,6 +5,8 @@ struct MeetingPipeline: Sendable {
     let engine: SpeechEngine
     /// Tests point this at a built library instead of the app bundle.
     var cancellerFactory: @Sendable () throws -> EchoCanceller = { try EchoCanceller() }
+    /// Keeps `mic.caf` and `system.caf` beside `audio.m4a`, lossless, for replaying a meeting through the pipeline.
+    var keepTracks = false
 
     func process(folder: URL, meta: MeetingMeta, title: String, now: Date = Date()) async throws {
         let micURL = folder.appendingPathComponent(MeetingFile.mic)
@@ -67,7 +69,7 @@ struct MeetingPipeline: Sendable {
             to: folder.appendingPathComponent(MeetingFile.transcriptData), options: .atomic
         )
         // The transcript is already on disk: a failed compression costs neither text nor audio.
-        try? Self.compressAudio(in: folder, offsets: meta.startOffsetMs)
+        try? Self.compressAudio(in: folder, offsets: meta.startOffsetMs, keepTracks: keepTracks)
     }
 
     /// A track with no frames is a silent side and never reaches the recogniser.
@@ -78,14 +80,15 @@ struct MeetingPipeline: Sendable {
         return try await engine.words(in: url, splitAtPauses: splitAtPauses)
     }
 
-    /// Compresses the two tracks into `audio.m4a` and only then removes them. A failure keeps the originals.
-    static func compressAudio(in folder: URL, offsets: MeetingMeta.Offsets?) throws {
+    /// Compresses the two tracks into `audio.m4a` and only then removes them, unless `keepTracks`. A failure keeps the originals.
+    static func compressAudio(in folder: URL, offsets: MeetingMeta.Offsets?, keepTracks: Bool = false) throws {
         let mic = folder.appendingPathComponent(MeetingFile.mic)
         let system = folder.appendingPathComponent(MeetingFile.system)
         try TrackCompressor.compress(
             mic: mic, system: system, offsets: offsets,
             to: folder.appendingPathComponent(MeetingFile.audio)
         )
+        guard !keepTracks else { return }
         try? FileManager.default.removeItem(at: mic)
         try? FileManager.default.removeItem(at: system)
     }
