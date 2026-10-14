@@ -1,2 +1,3 @@
 "NSMicrophoneUsageDescription" = "Cyclop записывает микрофон во время встречи, чтобы составить её транскрипт.";
 "NSAudioCaptureUsageDescription" = "Cyclop записывает звук системы во время встречи, чтобы собеседники попали в транскрипт.";
+"NSAppleEventsUsageDescription" = "Cyclop просит Terminal или iTerm показать вкладку той сессии Claude, которую вы открываете.";

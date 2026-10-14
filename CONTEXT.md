@@ -179,7 +179,7 @@ What lets requests reach the panel: an entry Cyclop writes into Claude's setting
 _Avoid_: hook (how it is made), integration, «соединение» (a network request)
 
 **Open in Claude** «Открыть в Claude»:
-Going to a Claude session in the app it runs in.
+Going to a Claude session in the app it runs in; in a terminal, to the session's own tab when macOS allows Automation, else only the terminal is brought forward.
 _Avoid_: jump, focus
 
 **Settings** «Настройки»:

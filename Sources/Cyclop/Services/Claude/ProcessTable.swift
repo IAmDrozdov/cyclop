@@ -30,6 +30,15 @@ enum ProcessTable {
         return nil
     }
 
+    /// The process's controlling terminal as `/dev/ttysNNN`; nil without one or for any other device name.
+    static func tty(of pid: Int) -> String? {
+        guard let device = info(of: pid)?.kp_eproc.e_tdev, device != -1,
+            let name = devname(device, mode_t(S_IFCHR)).map({ String(cString: $0) }),
+            name.wholeMatch(of: /ttys[0-9]{1,6}/) != nil
+        else { return nil }
+        return "/dev/" + name
+    }
+
     private static func parent(of pid: Int) -> Int? {
         info(of: pid).map { Int($0.kp_eproc.e_ppid) }
     }

@@ -14,7 +14,7 @@ downwards; moving it away folds the panel back.
 - Licence: MIT, free, no paid tier, no subscription, no accounts
 - Bundle size: 3.1 MB. Memory: about 16 MB. 0.0% CPU at rest
 - Dependencies: one, FluidAudio (speech recognition for the Meetings tab), plus a native echo canceller built with CMake. Otherwise Swift, SwiftUI and AppKit only
-- Permissions: nothing at launch. Only Start Recording in Meetings asks, on the first press: microphone and system audio recording (Downloads on the first export). No Accessibility, no
+- Permissions: nothing at launch. Only Start Recording in Meetings asks, on the first press: microphone and system audio recording (Downloads on the first export); Open in Claude on a Terminal or iTerm session asks once to control that terminal, to select the session's tab. No Accessibility, no
   Screen Recording. A file placed on the shelf from Downloads,
   Documents or the Desktop is asked about separately, when the shelf is opened.
   The Claude tab asks macOS for nothing

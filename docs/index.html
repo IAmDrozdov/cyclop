@@ -286,7 +286,9 @@ cd cyclop &amp;&amp; ./Scripts/bundle.sh release</code></pre>
   <details><summary>What permissions does Cyclop need?</summary>
     <p>Nothing is asked at launch. Only Start Recording in the Meetings tab asks, the first time: for
     the microphone and for system audio recording. Cyclop requests no Accessibility and
-    no Screen Recording. The Claude tab asks macOS for nothing.</p>
+    no Screen Recording. The Claude tab asks only once more: when you press Open in Claude on a session
+    that runs in Terminal or iTerm, macOS asks whether Cyclop may control that terminal, to select the
+    session's tab. Only the tabs' device names are compared, no text is read, and a refusal only brings the terminal forward.</p>
     <p>*Besides that, a file placed on the shelf from Downloads, Documents or the Desktop is
     something macOS asks about separately, and only at the moment the shelf is opened.</p></details>
 

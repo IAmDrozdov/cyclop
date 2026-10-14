@@ -10,16 +10,23 @@ struct ClaudeStoreTests {
 
     private static let t0 = Date(timeIntervalSince1970: 1_791_900_000)
 
-    /// Подделка системы: запоминает, что её попросили открыть и вывести вперёд.
+    /// Подделка системы: запоминает, что её попросили открыть, вывести вперёд и показать вкладкой.
     @MainActor
     final class FakeOpener: ClaudeOpening {
         var hosts: [Int: ClaudeHostApp] = [:]
         private(set) var opened: [URL] = []
         private(set) var broughtForward: [ClaudeHostApp] = []
+        private(set) var focused: [Int] = []
+        /// Находит ли терминал вкладку процесса (в жизни: разрешена ли автоматизация).
+        var tabFound = false
 
         func hostApp(ofProcess pid: Int) -> ClaudeHostApp? { hosts[pid] }
         func open(_ url: URL) { opened.append(url) }
         func bringForward(_ app: ClaudeHostApp) { broughtForward.append(app) }
+        func focusTab(ofProcess pid: Int, in app: ClaudeHostApp) -> Bool {
+            focused.append(pid)
+            return tabFound
+        }
     }
 
     /// Подделка сокета: запоминает, запущен ли он, и приносит запросы, как принёс бы слушатель.
@@ -344,13 +351,27 @@ struct ClaudeStoreTests {
         #expect(rig.opener.broughtForward == [unknown])
     }
 
-    @Test func aTerminalSessionBringsItsTerminalForward() throws {
+    @Test func aTerminalSessionShowsItsTabAndDoesNotBringTheAppForwardToo() throws {
         let rig = try Rig()
         try rig.write(3, entrypoint: "cli")
         rig.opener.hosts[3] = Self.terminal
+        rig.opener.tabFound = true
         rig.store.reload()
         rig.store.openInClaude(try #require(rig.store.sessions.first))
         #expect(rig.opener.opened.isEmpty)
+        #expect(rig.opener.focused == [3])
+        #expect(rig.opener.broughtForward.isEmpty)
+    }
+
+    @Test func aTerminalSessionWhoseTabIsNotShownBringsItsTerminalForward() throws {
+        let rig = try Rig()
+        try rig.write(3, entrypoint: "cli")
+        rig.opener.hosts[3] = Self.terminal
+        rig.opener.tabFound = false
+        rig.store.reload()
+        rig.store.openInClaude(try #require(rig.store.sessions.first))
+        #expect(rig.opener.opened.isEmpty)
+        #expect(rig.opener.focused == [3])
         #expect(rig.opener.broughtForward == [Self.terminal])
     }
 
@@ -363,6 +384,7 @@ struct ClaudeStoreTests {
         for session in rig.store.sessions { rig.store.openInClaude(session) }
         #expect(rig.opener.opened.isEmpty)
         #expect(rig.opener.broughtForward.isEmpty)
+        #expect(rig.opener.focused.isEmpty)
     }
 
     @Test func aClaudeAppSessionWithoutTheAppsIdBringsTheAppForward() throws {

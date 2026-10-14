@@ -50,6 +50,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>NSSupportsSuddenTermination</key><false/>
     <key>NSMicrophoneUsageDescription</key><string>Cyclop records your microphone during a meeting to write its transcript.</string>
     <key>NSAudioCaptureUsageDescription</key><string>Cyclop records system audio during a meeting so the other side of the call is in the transcript.</string>
+    <key>NSAppleEventsUsageDescription</key><string>Cyclop asks Terminal or iTerm to show the tab of the Claude session you open.</string>
     <key>NSHumanReadableCopyright</key><string>MIT License</string>
 </dict>
 </plist>
@@ -122,7 +123,8 @@ if [ "$IDENTITY" = "-" ] || [ "$IDENTITY" = "$LOCAL_IDENTITY" ]; then
     codesign --force --sign "$IDENTITY" "$APP"
 else
     [ -f "$DYLIB" ] && codesign --force --timestamp --options runtime --sign "$IDENTITY" "$DYLIB"
-    # Под hardened runtime микрофон без этого права молчит, без запроса.
+    # Под hardened runtime микрофон без этого права молчит, без запроса; без права на
+    # Apple Events Terminal и iTerm не получают команд, и вкладка не выбирается.
     codesign --force --timestamp --options runtime \
         --entitlements "$ROOT/Resources/Cyclop.entitlements" --sign "$IDENTITY" "$APP"
 fi || {

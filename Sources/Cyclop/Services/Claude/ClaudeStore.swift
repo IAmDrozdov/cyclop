@@ -385,7 +385,8 @@ final class ClaudeStore: ObservableObject {
     // MARK: - Open in Claude
 
     /// Takes the owner to the session in the app it runs in; where the app
-    /// cannot be told apart or has no link, only brings it forward.
+    /// cannot be told apart or has no link, only brings it forward. In a terminal
+    /// the session's own tab is selected when macOS allows it.
     func openInClaude(_ session: ClaudeSession) {
         switch session.place {
         case .app:
@@ -406,7 +407,8 @@ final class ClaudeStore: ObservableObject {
                 opener.bringForward(app)
             }
         case .terminal:
-            if let app = opener.hostApp(ofProcess: session.pid) { opener.bringForward(app) }
+            guard let app = opener.hostApp(ofProcess: session.pid) else { return }
+            if !opener.focusTab(ofProcess: session.pid, in: app) { opener.bringForward(app) }
         }
     }
 
